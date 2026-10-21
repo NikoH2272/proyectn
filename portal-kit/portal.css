@@ -926,3 +926,28 @@ section.hero { overflow: hidden; }
     .pasarela-asc-cta { width: 100%; }
     .pasarela-asc-cta .btn-access { flex: 1; justify-content: center; }
 }
+
+/* ── Grid de portales de equipos (inicio Ascensos AZA) ── */
+.asc-equipos-portales { display: flex; flex-wrap: wrap; gap: 14px; }
+.asc-equipo-card {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 18px 14px; border-radius: 14px; text-decoration: none;
+    background: var(--surface); border: 2px solid var(--cat, var(--primary));
+    color: var(--text); transition: transform .15s, box-shadow .15s;
+    min-width: 110px; flex: 1 1 130px; max-width: 170px;
+}
+.asc-equipo-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+.asc-equipo-logo { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.asc-equipo-logo img { width: 100%; height: 100%; object-fit: contain; }
+.asc-equipo-logo i { font-size: 2rem; color: var(--cat, var(--primary)); }
+.asc-equipo-card span { font-size: .82rem; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Hero con color de categoría en equipo.html */
+.asc-equipo-hero { border-top: 4px solid var(--cat, var(--primary)); }
+.asc-equipo-hero .eyebrow-link { color: var(--muted); text-decoration: none; }
+.asc-equipo-hero .eyebrow-link:hover { color: var(--primary); }
+
+@media (max-width: 640px) {
+    .asc-equipo-card { min-width: 90px; max-width: 120px; padding: 14px 10px; }
+    .asc-equipo-logo { width: 50px; height: 50px; }
+}

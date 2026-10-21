@@ -158,6 +158,28 @@
 
     function pintarTodo() { pintarFiltro(); pintarStats(); pintarCalendario(); pintarJornadas(); pintarEquipos(); }
 
+    /* ---------------- Portales de equipos (inicio) ---------------- */
+    async function pintarPortalesEquipos() {
+        const cont = $('portalesEquipos');
+        if (!cont) return;
+        try {
+            const { data, error } = await P.db().rpc('asc_equipos_activos', { p_portal: PORTAL });
+            if (error || !data || !data.length) { cont.closest('section').hidden = true; return; }
+            const activos = Array.isArray(data) ? data : (typeof data === 'string' ? JSON.parse(data) : []);
+            if (!activos.length) { cont.closest('section').hidden = true; return; }
+            cont.innerHTML = activos.map(id => {
+                const c = CAT(id);
+                return `<a class="asc-equipo-card" href="equipo.html?cat=${encodeURIComponent(id)}" style="--cat:${c.color}">
+                    <div class="asc-equipo-logo">${c.logo ? `<img src="${esc(c.logo)}" alt="" onerror="this.hidden=true">` : `<i class="fa-solid fa-trophy"></i>`}</div>
+                    <span>${esc(c.nombre)}</span>
+                </a>`;
+            }).join('');
+        } catch (e) {
+            const sec = cont.closest('section');
+            if (sec) sec.hidden = true;
+        }
+    }
+
     async function cupos() {
         const n = $('ascCuposInfo');
         if (!n) return;
@@ -210,6 +232,7 @@
         const ref = jornadas[0] ? new Date(diaDe(jornadas[0].fecha) + 'T12:00:00') : new Date();
         mes = { anio: ref.getFullYear(), mes: ref.getMonth() };
         pintarTodo();
+        pintarPortalesEquipos();
         if (window.PumasBaneados) PumasBaneados.montarPublico('ascBaneados', PORTAL);
         cupos();
     }

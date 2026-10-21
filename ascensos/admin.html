@@ -57,6 +57,7 @@
             <button data-tab="panelCupos"><i class="fa-solid fa-ticket"></i> Cupos</button>
             <button data-tab="panelModeradores" hidden><i class="fa-solid fa-user-shield"></i> Moderadores</button>
             <button data-tab="panelPortales"    hidden><i class="fa-solid fa-sliders"></i> Portales</button>
+            <button data-tab="panelEquipos"     hidden><i class="fa-solid fa-shield-halved"></i> Equipos AZA</button>
         </div>
 
         <!-- RESULTADOS -->
@@ -152,6 +153,16 @@
         <div class="tool-container asc-panel" id="panelPortales" hidden>
             <p class="tool-desc">Activa el apartado de ascensos en cada portal del sitio. Cuando está activo, aparece una sección de pasarela (CTA) en ese portal con un enlace a los ascensos configurados.</p>
             <div id="portalesAscAdmin"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p></div>
+        </div>
+
+        <!-- EQUIPOS AZA: qué categorías aparecen en el inicio del portal público (solo superadmin) -->
+        <div class="tool-container asc-panel" id="panelEquipos" hidden>
+            <p class="tool-desc">Activa los equipos que aparecen en la sección "Equipos participantes" del portal público de Ascensos AZA. Cada equipo activado tendrá su propio mini portal con sus jornadas y ranking.</p>
+            <div id="equiposAscAdmin"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p></div>
+            <div style="margin-top:16px;text-align:right">
+                <button class="btn-access" id="btnGuardarEquipos" hidden><i class="fa-solid fa-floppy-disk"></i> Guardar equipos activos</button>
+            </div>
+            <p class="muted" style="margin-top:8px;font-size:.85rem;min-height:1.2em;text-align:right" role="status" id="equiposAscEstado"></p>
         </div>
 
         <!-- CUPOS -->
@@ -265,6 +276,93 @@
                 btn.disabled = false;
             }
         };
+    })();
+    </script>
+    <script>
+    /* ── Panel Equipos AZA: qué categorías aparecen en el inicio (solo superadmin) ── */
+    (function () {
+        const P = window.PumasPortal;
+        const esc = P.escaparHtml;
+        const PORTAL = P.portal;
+        function getToken() {
+            try { return JSON.parse(localStorage.getItem('pg_session') || '').token || ''; } catch (e) { return ''; }
+        }
+
+        window.addEventListener('pg:sesion', function (e) {
+            const ses = e.detail;
+            if (!P.tiene(ses, 'gestionar')) return;
+            const tab = document.querySelector('.asc-tabs [data-tab="panelEquipos"]');
+            if (!tab) return;
+            tab.hidden = false;
+            tab.addEventListener('click', cargarEquipos, { once: true });
+        }, { once: true });
+
+        let activos = [];
+
+        async function cargarEquipos() {
+            const cont = document.getElementById('equiposAscAdmin');
+            const btn  = document.getElementById('btnGuardarEquipos');
+            if (!cont) return;
+            try {
+                const { data, error } = await P.db().rpc('asc_equipos_activos', { p_portal: PORTAL });
+                if (error) throw error;
+                activos = Array.isArray(data) ? data : (typeof data === 'string' ? JSON.parse(data || '[]') : []);
+                const cats = window.ASC_CATEGORIAS.filter(c => c.tipo === 'evento');
+                if (!cats.length) { cont.innerHTML = '<p class="res-vacio">Sin categorías de evento definidas.</p>'; return; }
+                cont.innerHTML = `<div class="roles-grid">${cats.map(c => `
+                    <article class="card-box" style="border-left:4px solid ${esc(c.color)}">
+                        <label class="chk" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+                            <input type="checkbox" class="chk-eq" data-id="${esc(c.id)}"${activos.includes(c.id) ? ' checked' : ''}>
+                            ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:40px;height:40px;object-fit:contain;flex-shrink:0">` : ''}
+                            <div>
+                                <strong>${esc(c.nombre)}</strong>
+                                <br><small class="muted">${esc(c.id)}</small>
+                            </div>
+                        </label>
+                        <p style="margin:8px 0 0;font-size:.8rem;color:var(--muted)">
+                            ${activos.includes(c.id) ? '✔ Mini portal activo · <a href="equipo.html?cat=' + encodeURIComponent(c.id) + '" target="_blank">Ver</a>' : 'Inactivo · no aparece en el inicio'}
+                        </p>
+                    </article>`).join('')}</div>`;
+                btn.hidden = false;
+                btn.onclick = guardarEquipos;
+            } catch (e) {
+                cont.innerHTML = `<p class="res-vacio pg-error">${esc(e.message || 'Error al cargar')}</p>`;
+            }
+        }
+
+        async function guardarEquipos() {
+            const btn  = document.getElementById('btnGuardarEquipos');
+            const msg  = document.getElementById('equiposAscEstado');
+            const checked = [...document.querySelectorAll('.chk-eq:checked')].map(el => el.dataset.id);
+            btn.disabled = true;
+            msg.textContent = 'Guardando...';
+            msg.style.color = '';
+            try {
+                const { error } = await P.db().rpc('admin_asc_equipos_guardar', {
+                    p_token: getToken(),
+                    p_portal: PORTAL,
+                    p_activos: JSON.stringify(checked)
+                });
+                if (error) throw error;
+                activos = checked;
+                msg.textContent = `✔ Guardado · ${checked.length} equipo(s) activo(s)`;
+                msg.style.color = 'var(--primary)';
+                // Actualizar badges
+                document.querySelectorAll('.chk-eq').forEach(el => {
+                    const art = el.closest('article');
+                    const info = art.querySelector('p');
+                    const id = el.dataset.id;
+                    if (info) info.innerHTML = el.checked
+                        ? `✔ Mini portal activo · <a href="equipo.html?cat=${encodeURIComponent(id)}" target="_blank">Ver</a>`
+                        : 'Inactivo · no aparece en el inicio';
+                });
+            } catch (e) {
+                msg.textContent = e.message || 'Error al guardar';
+                msg.style.color = '#ff4d4d';
+            } finally {
+                btn.disabled = false;
+            }
+        }
     })();
     </script>
 </body>

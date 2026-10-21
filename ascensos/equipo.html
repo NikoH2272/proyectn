@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Portal de Equipo · Ascensos AZA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261021">
+    <link rel="stylesheet" href="style.css?v=20261021">
+    <link rel="icon" href="imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261021" data-portal="ascensosaza" data-modo="publico"></script>
+</head>
+<body data-tema="aza">
+
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="imagenes/aza.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">ASCENSOS</span> <span class="t-b">AZA</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./" onclick="closeMenu()"><i class="fa-solid fa-arrow-left"></i> Todos los equipos</a></li>
+                <li><a href="#jornadas" onclick="closeMenu()">Jornadas</a></li>
+                <li><a href="#equipos" onclick="closeMenu()">Ranking</a></li>
+                <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="/">PROYECTN</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero asc-equipo-hero" id="equipoHero" data-marca="AZA" style="--cat:#B6FF00">
+        <div class="hero-copy">
+            <div class="eyebrow"><a href="./" class="eyebrow-link"><i class="fa-solid fa-arrow-left"></i> Ascensos AZA</a></div>
+            <h1 id="equipoTitulo"><span class="t-a">Cargando...</span></h1>
+            <p id="equipoDesc">Resultados de jornadas y ranking de este equipo en Ascensos AZA.</p>
+            <div class="stat-row">
+                <div><b id="statJornadas">0</b><small>Jornadas</small></div>
+                <div><b id="statEquipos">0</b><small>Equipos</small></div>
+                <div><b id="statAscensos">0</b><small>Ascensos</small></div>
+            </div>
+            <div class="hero-actions">
+                <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Apartar cupo</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true" id="equipoMarca">
+                <img src="imagenes/aza.png" alt="" onerror="this.onerror=null;this.src='imagenes/proyectn.png'" id="equipoLogo">
+            </div>
+        </div>
+    </section>
+
+    <section id="jornadas">
+        <h2 class="section-title">Jornadas</h2>
+        <div class="asc-jornadas-layout">
+            <aside class="card-box asc-cal" id="calendario" aria-label="Calendario de ascensos">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-calendar-days"></i> Calendario</h3>
+                <div id="ascCalendario"><p class="res-vacio">Cargando...</p></div>
+            </aside>
+            <div class="asc-jornadas-col">
+                <div class="asc-dia" id="ascDia" hidden></div>
+                <div class="jornadas-grid" id="ascJornadas"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando jornadas...</p></div>
+                <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerMas" hidden>Ver más</button></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="equipos">
+        <h2 class="section-title">Ranking de equipos</h2>
+        <div class="card-box asc-eq-card">
+            <div class="asc-eq-top">
+                <p class="leyenda-tabla">Equipos que jugaron en este evento, con sus ascensos 👑 y total de puntos.</p>
+                <input type="search" id="ascBuscar" placeholder="Buscar equipo o tag" aria-label="Buscar equipo o tag" autocomplete="off">
+            </div>
+            <div class="asc-equipos" id="ascEquipos"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</p></div>
+            <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerEquipos" hidden>Ver más</button></p>
+        </div>
+    </section>
+
+    <section id="cupos">
+        <div class="card-box asc-cupos-cta">
+            <div>
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-ticket"></i> Cupos para la próxima jornada</h3>
+                <p id="ascCuposInfo">Revisa los cupos disponibles.</p>
+            </div>
+            <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Ver cupos</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>ASCENSOS AZA</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+    </script>
+    <script src="categorias.js?v=20261021"></script>
+    <script src="equipo.js?v=20261021"></script>
+</body>
+</html>
