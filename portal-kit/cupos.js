@@ -225,6 +225,7 @@
                             ${programado ? `<button class="btn-mini" data-acc="PUBLICAR" data-id="${g.id}">Publicar ya</button>` : ''}
                             ${g.estado === 'ABIERTO' ? `<button class="btn-mini" data-acc="CERRADO" data-id="${g.id}">Cerrar</button>` : `<button class="btn-mini" data-acc="ABIERTO" data-id="${g.id}">Abrir</button>`}
                             ${g.estado !== 'FINALIZADO' ? `<button class="btn-mini" data-acc="FINALIZADO" data-id="${g.id}">Finalizar</button>` : ''}
+                            <button class="btn-mini" data-wa="${g.id}" title="Copiar lista para WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
                             <button class="btn-mini btn-borrar" data-borrar="${g.id}"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
@@ -244,6 +245,25 @@
             caja.querySelectorAll('[data-quitar]').forEach(b => b.addEventListener('click', async () => {
                 if (!confirm('¿Quitar este equipo de los cupos?')) return;
                 try { await P.cupos.quitar(portal, Number(b.dataset.quitar)); lista(); } catch (e) { msg(e.message); }
+            }));
+            caja.querySelectorAll('[data-wa]').forEach(b => b.addEventListener('click', () => {
+                const g = filas.find(x => String(x.id) === b.dataset.wa);
+                if (!g) return;
+                const fmtDate = iso => new Date(iso).toLocaleString('es', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+                const staff = g.inscritos.filter(e => e.staff), publicos = g.inscritos.filter(e => !e.staff);
+                let texto = `📋 *${g.titulo}*\n📅 ${fmtDate(g.fecha)}\n👥 ${g.inscritos.length}/${g.cupos} inscritos\n`;
+                if (publicos.length) {
+                    texto += '\n*Equipos inscritos:*\n' + publicos.map((e, i) => `${i + 1}. ${e.equipo}`).join('\n');
+                }
+                if (staff.length) {
+                    texto += '\n\n*Asegurados por staff:*\n' + staff.map(e => `• ${e.equipo}`).join('\n');
+                }
+                const quedan = g.cupos - g.inscritos.length;
+                if (quedan > 0) texto += `\n\n_Quedan ${quedan} cupo(s) disponibles._`;
+                navigator.clipboard.writeText(texto).then(() => {
+                    b.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    setTimeout(() => { b.innerHTML = '<i class="fa-brands fa-whatsapp"></i>'; }, 2000);
+                }).catch(() => { alert(texto); });
             }));
         }
         lista();
