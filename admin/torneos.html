@@ -1,0 +1,896 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C79JND219Y');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Torneos Admin | PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" href="../imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../portal-kit/portal.js?v=20261015" data-sin-efecto></script>
+<style>
+:root {
+  --tz-gold: #ffc659; --tz-gold2: #ebe070;
+  --tz-blue: #003772; --tz-teal: #008485; --tz-green: #24d6a5;
+  --tz-bg:   #011a3a; --tz-bg2:  #002255; --tz-bg3: #002a60;
+  --tz-line: rgba(0,132,133,.4);
+  --tz-text: #d6eaff; --tz-gray: #5a84ad;
+}
+*{box-sizing:border-box}
+body{background:var(--tz-bg);color:var(--tz-text);font-family:'Segoe UI',sans-serif;font-size:.9rem;margin:0;visibility:visible!important}
+
+.tz-wrap{max-width:1200px;margin:0 auto;padding:0 1rem 3rem}
+.tz-header{display:flex;align-items:center;gap:12px;padding:1rem 0 1.4rem;border-bottom:1px solid var(--tz-line);margin-bottom:1.4rem}
+.tz-header h1{font-family:'Michroma',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--tz-gold);margin:0;text-transform:uppercase;flex:1}
+
+.tz-grid{display:grid;grid-template-columns:280px 1fr;gap:1.2rem;align-items:start}
+@media(max-width:760px){.tz-grid{grid-template-columns:1fr}}
+
+.tz-panel{background:var(--tz-bg2);border:1px solid var(--tz-line);border-radius:10px;overflow:hidden}
+.tz-panel-head{display:flex;align-items:center;gap:8px;padding:12px 14px;background:rgba(0,132,133,.12);border-bottom:1px solid var(--tz-line)}
+.tz-panel-head h3{flex:1;margin:0;font-family:'Michroma',sans-serif;font-size:.78rem;letter-spacing:.1em;color:var(--tz-teal);text-transform:uppercase}
+.tz-lista{list-style:none;margin:0;padding:0;max-height:60vh;overflow-y:auto}
+.tz-lista li{padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(0,132,133,.15);display:flex;align-items:center;gap:8px;transition:background .12s}
+.tz-lista li:hover{background:rgba(0,55,114,.35)}
+.tz-lista li.activo{background:rgba(255,198,89,.1);border-left:3px solid var(--tz-gold)}
+.tz-lista li .tz-li-nombre{flex:1;font-weight:600;font-size:.85rem;color:var(--tz-text)}
+.tz-lista li .tz-li-estado{font-size:.65rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.15rem .45rem;border-radius:20px}
+.tz-empty{padding:1.2rem;text-align:center;color:var(--tz-gray);font-size:.82rem}
+
+.tz-editor{background:var(--tz-bg2);border:1px solid var(--tz-line);border-radius:10px;overflow:hidden}
+.tz-editor-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(0,132,133,.12);border-bottom:1px solid var(--tz-line)}
+.tz-editor-head h2{flex:1;margin:0;font-family:'Michroma',sans-serif;font-size:.82rem;letter-spacing:.1em;color:var(--tz-gold);text-transform:uppercase}
+
+.tz-tabs{display:flex;border-bottom:1px solid var(--tz-line);background:var(--tz-bg2)}
+.tz-tab{padding:.75rem 1rem;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--tz-gray);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;white-space:nowrap}
+.tz-tab:hover{color:var(--tz-text)}
+.tz-tab.activo{color:var(--tz-gold);border-bottom-color:var(--tz-gold)}
+.tz-tab-panel{display:none;padding:1.2rem 1.4rem}
+.tz-tab-panel.activo{display:block}
+
+.tz-form{display:flex;flex-direction:column;gap:10px}
+.tz-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.tz-form-row{grid-template-columns:1fr}}
+.tz-label{font-size:.72rem;color:var(--tz-gray);font-family:'Michroma',sans-serif;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+.tz-input,.tz-select2,.tz-textarea{background:rgba(0,42,96,.6);border:1px solid var(--tz-line);color:var(--tz-text);border-radius:6px;padding:8px 10px;font:inherit;font-size:.88rem;outline:none;width:100%}
+.tz-input:focus,.tz-select2:focus,.tz-textarea:focus{border-color:var(--tz-gold)}
+.tz-textarea{resize:vertical;min-height:70px}
+.tz-color-row{display:flex;gap:8px;align-items:center}
+.tz-color-row input[type=color]{width:36px;height:32px;padding:2px;border-radius:5px;border:1px solid var(--tz-line);background:var(--tz-bg3);cursor:pointer}
+.tz-color-row .tz-input{flex:1}
+.tz-toggle-wrap{display:flex;align-items:center;gap:10px}
+.tz-toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.tz-toggle input{opacity:0;width:0;height:0}
+.tz-toggle-track{position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,.12);cursor:pointer;transition:background .2s}
+.tz-toggle input:checked~.tz-toggle-track{background:var(--tz-green)}
+.tz-toggle-track::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;top:3px;left:3px;background:#fff;transition:transform .2s}
+.tz-toggle input:checked~.tz-toggle-track::after{transform:translateX(20px)}
+
+.tz-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:7px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .15s;border:1.5px solid transparent;text-decoration:none}
+.tz-btn-pri{background:linear-gradient(135deg,#008485,#24d6a5);color:#011a3a;border-color:#24d6a5;font-weight:700}
+.tz-btn-pri:hover{filter:brightness(1.1)}
+.tz-btn-sec{background:rgba(0,132,133,.15);color:var(--tz-teal);border-color:var(--tz-teal)}
+.tz-btn-sec:hover{background:rgba(0,132,133,.3)}
+.tz-btn-red{background:rgba(255,77,77,.12);color:#ff7070;border-color:rgba(255,77,77,.35)}
+.tz-btn-red:hover{background:rgba(255,77,77,.25)}
+.tz-btn-sm{padding:.3rem .75rem;font-size:.76rem}
+.tz-btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+
+.tz-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.tz-table th{color:var(--tz-teal);font-family:'Michroma',sans-serif;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:7px 8px;border-bottom:1px solid var(--tz-line);text-align:left}
+.tz-table td{padding:7px 8px;border-bottom:1px solid rgba(0,132,133,.15);vertical-align:middle}
+.tz-table tr:hover td{background:rgba(0,55,114,.3)}
+.tz-table-wrap{border:1px solid var(--tz-line);border-radius:8px;overflow:hidden;margin-top:.6rem}
+.tz-del-btn{background:none;border:none;color:#ff7070;cursor:pointer;padding:3px 7px;border-radius:4px;font-size:.82rem;opacity:.7;transition:all .15s}
+.tz-del-btn:hover{opacity:1;background:rgba(255,77,77,.15)}
+
+.tz-estado{font-size:.65rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.15rem .5rem;border-radius:20px}
+.est-en_curso     {background:rgba(36,214,165,.15);color:#24d6a5;border:1px solid rgba(36,214,165,.4)}
+.est-inscripciones{background:rgba(255,198,89,.15);color:#ffc659;border:1px solid rgba(255,198,89,.4)}
+.est-finalizado   {background:rgba(0,132,133,.15); color:#008485;border:1px solid rgba(0,132,133,.4)}
+.est-borrador     {background:rgba(0,42,96,.5);    color:var(--tz-gray);border:1px solid rgba(0,132,133,.2)}
+.est-pendiente    {background:rgba(0,42,96,.5);    color:var(--tz-gray);border:1px solid rgba(0,132,133,.2)}
+
+.tz-status{font-size:.78rem;padding:.4rem .7rem;border-radius:5px;margin-top:.5rem;display:none}
+.tz-status.ok {background:rgba(36,214,165,.15);color:#24d6a5;border:1px solid rgba(36,214,165,.35);display:block}
+.tz-status.err{background:rgba(255,77,77,.12);  color:#ff7070;border:1px solid rgba(255,77,77,.3); display:block}
+
+.tz-log-drop{border:2px dashed var(--tz-line);border-radius:8px;padding:1.5rem;text-align:center;color:var(--tz-gray);font-size:.83rem;cursor:pointer;transition:border-color .15s,background .15s}
+.tz-log-drop:hover,.tz-log-drop.drag-over{border-color:var(--tz-gold);background:rgba(255,198,89,.06);color:var(--tz-text)}
+.tz-log-drop i{font-size:1.8rem;display:block;margin-bottom:.4rem;color:var(--tz-teal)}
+
+.tz-spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Login */
+#tz-login{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:1.5rem;background:var(--tz-bg)}
+.tz-login-box{background:var(--tz-bg2);border:1px solid var(--tz-line);border-radius:12px;padding:2rem 1.8rem;max-width:360px;width:100%}
+.tz-login-box h2{font-family:'Michroma',sans-serif;color:var(--tz-gold);font-size:.95rem;letter-spacing:.1em;text-transform:uppercase;margin:0 0 1.4rem;text-align:center}
+#tz-app{display:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="tz-login">
+  <div class="tz-login-box">
+    <h2><i class="fa-solid fa-trophy" style="margin-right:.4rem"></i>Torneos Admin</h2>
+    <div class="tz-form">
+      <div>
+        <label class="tz-label">Usuario</label>
+        <input class="tz-input" type="text" id="login-user" placeholder="Sin @" autocomplete="username">
+      </div>
+      <div>
+        <label class="tz-label">Contraseña</label>
+        <input class="tz-input" type="password" id="login-pass" autocomplete="current-password">
+      </div>
+      <button class="tz-btn tz-btn-pri" id="btn-login" style="margin-top:.3rem">
+        <i class="fa-solid fa-right-to-bracket"></i> Entrar
+      </button>
+      <div class="tz-status" id="login-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="tz-app">
+<div class="tz-wrap">
+  <div class="tz-header">
+    <i class="fa-solid fa-trophy" style="color:var(--tz-gold);font-size:1.1rem"></i>
+    <h1>Torneos</h1>
+    <a href="/torneos/" target="_blank" class="tz-btn tz-btn-sec tz-btn-sm">
+      <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Corp
+    </a>
+    <button class="tz-btn tz-btn-sec tz-btn-sm" onclick="P.logout()" title="Cerrar sesión">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </div>
+
+  <div class="tz-grid">
+    <!-- Lista de torneos -->
+    <div>
+      <div class="tz-panel">
+        <div class="tz-panel-head">
+          <h3><i class="fa-solid fa-list" style="margin-right:.4rem"></i>Torneos</h3>
+          <button class="tz-btn tz-btn-sec tz-btn-sm" onclick="nuevoTorneo()"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <ul class="tz-lista" id="lista-torneos">
+          <li class="tz-empty">Cargando…</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="tz-editor" id="tz-editor">
+      <div class="tz-editor-head">
+        <h2 id="editor-titulo">Selecciona un torneo</h2>
+        <button class="tz-btn tz-btn-red tz-btn-sm" id="btn-borrar-torneo" style="display:none" onclick="borrarTorneo()">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+
+      <div id="editor-vacio" style="padding:2rem;text-align:center;color:var(--tz-gray);font-size:.85rem">
+        <i class="fa-solid fa-trophy" style="font-size:2rem;opacity:.2;display:block;margin-bottom:.6rem"></i>
+        Selecciona un torneo o crea uno nuevo
+      </div>
+
+      <div id="editor-contenido" style="display:none">
+        <div class="tz-tabs">
+          <div class="tz-tab activo" data-tab="info"     onclick="abrirTab(this)"><i class="fa-solid fa-circle-info"></i> Info</div>
+          <div class="tz-tab"        data-tab="equipos"  onclick="abrirTab(this)"><i class="fa-solid fa-users"></i> Equipos</div>
+          <div class="tz-tab"        data-tab="partidas" onclick="abrirTab(this)"><i class="fa-solid fa-list-ol"></i> Partidas</div>
+          <div class="tz-tab"        data-tab="logs"     onclick="abrirTab(this)"><i class="fa-solid fa-file-lines"></i> Logs</div>
+        </div>
+
+        <!-- TAB: INFO -->
+        <div class="tz-tab-panel activo" id="tab-info">
+          <form class="tz-form" onsubmit="guardarTorneo(event)">
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Nombre *</label>
+                <input class="tz-input" id="trn-nombre" placeholder="Nombre del torneo" required>
+              </div>
+              <div>
+                <label class="tz-label">Juego</label>
+                <select class="tz-select2" id="trn-juego">
+                  <option value="free_fire">Free Fire</option>
+                  <option value="cod">Call of Duty</option>
+                  <option value="valorant">Valorant</option>
+                  <option value="fortnite">Fortnite</option>
+                  <option value="minecraft">Minecraft</option>
+                </select>
+              </div>
+            </div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Fecha inicio</label>
+                <input class="tz-input" type="datetime-local" id="trn-fecha-inicio">
+              </div>
+              <div>
+                <label class="tz-label">Fecha fin</label>
+                <input class="tz-input" type="datetime-local" id="trn-fecha-fin">
+              </div>
+            </div>
+            <div>
+              <label class="tz-label">Estado</label>
+              <select class="tz-select2" id="trn-estado">
+                <option value="borrador">Borrador</option>
+                <option value="inscripciones">Inscripciones abiertas</option>
+                <option value="en_curso">En curso</option>
+                <option value="finalizado">Finalizado</option>
+              </select>
+            </div>
+            <div>
+              <label class="tz-label">Descripción</label>
+              <textarea class="tz-textarea" id="trn-descripcion" placeholder="Descripción pública del torneo…"></textarea>
+            </div>
+
+            <!-- Colores -->
+            <div style="font-family:'Michroma',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tz-teal);margin-top:.3rem">Colores del portal</div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Color primario</label>
+                <div class="tz-color-row">
+                  <input type="color" id="trn-color-primary" value="#ffc659">
+                  <input class="tz-input" id="trn-color-primary-hex" value="#ffc659" placeholder="#ffc659" maxlength="7">
+                </div>
+              </div>
+              <div>
+                <label class="tz-label">Acento</label>
+                <div class="tz-color-row">
+                  <input type="color" id="trn-color-accent" value="#24d6a5">
+                  <input class="tz-input" id="trn-color-accent-hex" value="#24d6a5" placeholder="#24d6a5" maxlength="7">
+                </div>
+              </div>
+            </div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Fondo sección</label>
+                <div class="tz-color-row">
+                  <input type="color" id="trn-color-bg" value="#003772">
+                  <input class="tz-input" id="trn-color-bg-hex" value="#003772" placeholder="#003772" maxlength="7">
+                </div>
+              </div>
+              <div>
+                <label class="tz-label">Cupos máx.</label>
+                <input class="tz-input" type="number" id="trn-cupos" placeholder="Sin límite" min="1">
+              </div>
+            </div>
+
+            <!-- URLs -->
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">URL Logo</label>
+                <input class="tz-input" id="trn-logo-url" placeholder="https://…">
+              </div>
+              <div>
+                <label class="tz-label">URL Banner</label>
+                <input class="tz-input" id="trn-banner-url" placeholder="https://…">
+              </div>
+            </div>
+
+            <!-- Público -->
+            <div class="tz-toggle-wrap">
+              <label class="tz-toggle">
+                <input type="checkbox" id="trn-publico">
+                <span class="tz-toggle-track"></span>
+              </label>
+              <span style="font-size:.85rem">Visible al público</span>
+            </div>
+
+            <!-- Preview en vivo -->
+            <div style="margin-top:.6rem">
+              <div style="font-family:'Michroma',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tz-teal);margin-bottom:.6rem">
+                <i class="fa-solid fa-eye" style="margin-right:.3rem"></i>Vista previa de la card
+              </div>
+              <div id="card-preview" style="max-width:300px;border-radius:12px;overflow:hidden;border:1.5px solid var(--tz-line)">
+                <div id="prev-banner" style="height:90px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#003772,#008485)">
+                  <i class="fa-solid fa-trophy" style="font-size:2rem;color:#ffc659;opacity:.5"></i>
+                </div>
+                <div id="prev-body" style="padding:12px;background:#002a60">
+                  <div id="prev-nombre" style="font-weight:700;font-size:.92rem;color:#d6eaff;margin-bottom:4px">Nombre del torneo</div>
+                  <div style="font-size:.72rem;color:#5a84ad;margin-bottom:8px" id="prev-meta">Free Fire</div>
+                  <span id="prev-estado" style="font-size:.65rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.15rem .5rem;border-radius:20px;background:rgba(0,42,96,.5);color:#5a84ad;border:1px solid rgba(0,132,133,.2)">Borrador</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tz-btn-row">
+              <button type="submit" class="tz-btn tz-btn-pri"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+              <a id="trn-link-publico" href="#" target="_blank" class="tz-btn tz-btn-sec" style="display:none"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver en la página pública</a>
+            </div>
+            <div class="tz-status" id="status-info"></div>
+          </form>
+        </div>
+
+        <!-- TAB: EQUIPOS -->
+        <div class="tz-tab-panel" id="tab-equipos">
+          <form class="tz-form" onsubmit="guardarEquipo(event)" style="border:1px solid var(--tz-line);border-radius:8px;padding:1rem;margin-bottom:1rem">
+            <div style="font-family:'Michroma',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tz-teal);margin-bottom:.3rem">
+              <span id="eq-form-titulo">Agregar equipo</span>
+            </div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Nombre *</label>
+                <input class="tz-input" id="eq-nombre" placeholder="Nombre del equipo" required>
+              </div>
+              <div>
+                <label class="tz-label">WhatsApp</label>
+                <input class="tz-input" id="eq-contacto" placeholder="+57…">
+              </div>
+            </div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Instagram</label>
+                <input class="tz-input" id="eq-ig" placeholder="Sin @">
+              </div>
+              <div>
+                <label class="tz-label">Grupo</label>
+                <input class="tz-input" id="eq-grupo" placeholder="A, B, C…">
+              </div>
+            </div>
+            <input type="hidden" id="eq-id">
+            <div class="tz-btn-row">
+              <button type="submit" class="tz-btn tz-btn-sec tz-btn-sm"><i class="fa-solid fa-floppy-disk"></i> Guardar equipo</button>
+              <button type="button" class="tz-btn tz-btn-sm" onclick="resetEquipoForm()" style="background:rgba(0,42,96,.5);color:var(--tz-gray);border-color:var(--tz-line)">Cancelar</button>
+            </div>
+            <div class="tz-status" id="status-eq"></div>
+          </form>
+
+          <div class="tz-table-wrap">
+            <table class="tz-table">
+              <thead><tr><th>#</th><th>Nombre</th><th>Grupo</th><th>Contacto</th><th></th></tr></thead>
+              <tbody id="tbody-equipos"><tr><td colspan="5" style="text-align:center;color:var(--tz-gray);padding:1rem">Cargando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: PARTIDAS -->
+        <div class="tz-tab-panel" id="tab-partidas">
+          <form class="tz-form" onsubmit="guardarPartida(event)" style="border:1px solid var(--tz-line);border-radius:8px;padding:1rem;margin-bottom:1rem">
+            <div style="font-family:'Michroma',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tz-teal);margin-bottom:.3rem">
+              <span id="pt-form-titulo">Nueva partida</span>
+            </div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Fase</label>
+                <select class="tz-select2" id="pt-fase">
+                  <option value="grupos">Grupos</option>
+                  <option value="cuartos">Cuartos de final</option>
+                  <option value="semis">Semifinal</option>
+                  <option value="final">Final</option>
+                  <option value="gran_final">Gran Final</option>
+                </select>
+              </div>
+              <div>
+                <label class="tz-label">Ronda</label>
+                <input class="tz-input" type="number" id="pt-ronda" value="1" min="1">
+              </div>
+            </div>
+            <div class="tz-form-row">
+              <div>
+                <label class="tz-label">Sala #</label>
+                <input class="tz-input" type="number" id="pt-sala" min="1" placeholder="Opcional">
+              </div>
+              <div>
+                <label class="tz-label">Estado</label>
+                <select class="tz-select2" id="pt-estado">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en_curso">En curso</option>
+                  <option value="finalizado">Finalizado</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="tz-label">Notas</label>
+              <input class="tz-input" id="pt-notas" placeholder="Notas opcionales…">
+            </div>
+            <input type="hidden" id="pt-id">
+            <div class="tz-btn-row">
+              <button type="submit" class="tz-btn tz-btn-sec tz-btn-sm"><i class="fa-solid fa-floppy-disk"></i> Guardar partida</button>
+              <button type="button" class="tz-btn tz-btn-sm" onclick="resetPartidaForm()" style="background:rgba(0,42,96,.5);color:var(--tz-gray);border-color:var(--tz-line)">Cancelar</button>
+            </div>
+            <div class="tz-status" id="status-pt"></div>
+          </form>
+
+          <div class="tz-table-wrap">
+            <table class="tz-table">
+              <thead><tr><th>Fase</th><th>Ronda</th><th>Sala</th><th>Estado</th><th>Resultados</th><th></th></tr></thead>
+              <tbody id="tbody-partidas"><tr><td colspan="6" style="text-align:center;color:var(--tz-gray);padding:1rem">Cargando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: LOGS -->
+        <div class="tz-tab-panel" id="tab-logs">
+          <div style="margin-bottom:1rem">
+            <label class="tz-label">Partida destino (opcional)</label>
+            <select class="tz-select2" id="log-partida-sel" style="max-width:280px">
+              <option value="">— Sin partida asociada —</option>
+            </select>
+          </div>
+          <div class="tz-log-drop" id="log-drop" onclick="document.getElementById('log-file').click()">
+            <i class="fa-solid fa-file-arrow-up"></i>
+            Arrastra un archivo .log aquí o haz clic para seleccionar
+          </div>
+          <input type="file" id="log-file" accept=".log,.txt" style="display:none" onchange="subirLog(this.files)">
+          <div class="tz-status" id="status-log"></div>
+
+          <div class="tz-table-wrap" style="margin-top:1rem">
+            <table class="tz-table">
+              <thead><tr><th>Archivo</th><th>Partida</th><th>Subido</th><th>Estado</th></tr></thead>
+              <tbody id="tbody-logs"><tr><td colspan="4" style="text-align:center;color:var(--tz-gray);padding:1rem">Sin logs aún</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /editor-contenido -->
+    </div><!-- /tz-editor -->
+  </div><!-- /tz-grid -->
+</div><!-- /tz-wrap -->
+</div><!-- /tz-app -->
+
+<script>
+const P = window.PumasPortal;
+const PORTAL = 'torneos';
+
+let torneoActual = null;
+let listaTorneos = [];
+let listaPartidas = [];
+
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ─── Login ─────────────────────────────────────────────── */
+function tieneAcceso(ses) {
+  if (!ses) return false;
+  return P.tiene(ses, 'super') || P.puede(ses, 'portal:' + PORTAL);
+}
+
+async function tryAutoLogin() {
+  try {
+    const ses = P.sesion();
+    if (ses && tieneAcceso(ses)) mostrarApp();
+  } catch(e) {}
+}
+
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const st   = document.getElementById('login-status');
+  if (!user || !pass) { mostrarStatus(st,'err','Completa los campos'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch tz-spin"></i> Entrando…';
+  try {
+    const ok = await P.login(user, pass);
+    if (!ok) throw new Error('credenciales');
+    const ses = P.sesion();
+    if (!tieneAcceso(ses)) throw new Error('sin_acceso');
+    mostrarApp();
+  } catch(e) {
+    const msg = e.message === 'sin_acceso'
+      ? 'No tienes acceso a este módulo'
+      : 'Usuario o contraseña incorrectos';
+    mostrarStatus(st,'err', msg);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+  }
+});
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btn-login').click();
+});
+
+function mostrarApp() {
+  document.getElementById('tz-login').style.display = 'none';
+  document.getElementById('tz-app').style.display   = '';
+  cargarTorneos();
+}
+
+/* ─── Lista torneos ──────────────────────────────────────── */
+async function cargarTorneos() {
+  const ul = document.getElementById('lista-torneos');
+  ul.innerHTML = '<li class="tz-empty"><i class="fa-solid fa-circle-notch tz-spin"></i> Cargando…</li>';
+  try {
+    listaTorneos = await P.torneos.adminListar(PORTAL);
+    renderLista();
+  } catch(e) {
+    ul.innerHTML = '<li class="tz-empty" style="color:#ff7070">Error al cargar torneos</li>';
+  }
+}
+
+function renderLista() {
+  const ul = document.getElementById('lista-torneos');
+  if (!listaTorneos.length) {
+    ul.innerHTML = '<li class="tz-empty">Sin torneos aún. Crea uno →</li>';
+    return;
+  }
+  const ESTADO_CLS = { en_curso:'est-en_curso', inscripciones:'est-inscripciones', finalizado:'est-finalizado', borrador:'est-borrador' };
+  const ESTADO_L   = { en_curso:'En curso', inscripciones:'Inscr.', finalizado:'Final.', borrador:'Borrador' };
+  ul.innerHTML = listaTorneos.map(t => `
+    <li onclick="seleccionarTorneo(${t.id})" class="${torneoActual&&torneoActual.id===t.id?'activo':''}">
+      <span class="tz-li-nombre">${esc(t.nombre)}</span>
+      <span class="tz-estado ${ESTADO_CLS[t.estado]||'est-borrador'}">${ESTADO_L[t.estado]||t.estado}</span>
+    </li>`).join('');
+}
+
+/* ─── Seleccionar torneo ─────────────────────────────────── */
+window.seleccionarTorneo = async function(id) {
+  torneoActual = listaTorneos.find(t => t.id === id);
+  if (!torneoActual) return;
+  renderLista();
+  cargarEditorInfo();
+  document.getElementById('editor-vacio').style.display    = 'none';
+  document.getElementById('editor-contenido').style.display = '';
+  document.getElementById('btn-borrar-torneo').style.display = '';
+  document.getElementById('editor-titulo').textContent      = torneoActual.nombre;
+  abrirTabById('info');
+};
+
+function cargarEditorInfo() {
+  const t = torneoActual;
+  const toLocal = iso => iso ? new Date(new Date(iso).getTime() - new Date(iso).getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
+  document.getElementById('trn-nombre').value          = t.nombre || '';
+  document.getElementById('trn-juego').value           = t.juego || 'free_fire';
+  document.getElementById('trn-fecha-inicio').value    = toLocal(t.fecha_inicio);
+  document.getElementById('trn-fecha-fin').value       = toLocal(t.fecha_fin);
+  document.getElementById('trn-estado').value          = t.estado || 'borrador';
+  document.getElementById('trn-descripcion').value     = t.descripcion || '';
+  document.getElementById('trn-logo-url').value        = t.logo_url || '';
+  document.getElementById('trn-banner-url').value      = t.banner_url || '';
+  document.getElementById('trn-publico').checked       = !!t.publico;
+  document.getElementById('trn-cupos').value           = t.config?.max_equipos || '';
+  const c = t.colores || {};
+  setColor('primary', c.primary || '#ffc659');
+  setColor('accent',  c.accent  || '#24d6a5');
+  setColor('bg',      c.bg      || '#003772');
+  const link = document.getElementById('trn-link-publico');
+  link.href = `/torneos/ver.html?id=${t.id}`;
+  link.style.display = '';
+  document.getElementById('status-info').className = 'tz-status';
+  actualizarPreview();
+}
+
+function setColor(key, val) {
+  document.getElementById(`trn-color-${key}`).value = val;
+  document.getElementById(`trn-color-${key}-hex`).value = val;
+  actualizarPreview();
+}
+
+['primary','accent','bg'].forEach(k => {
+  document.getElementById(`trn-color-${k}`).addEventListener('input', e => {
+    document.getElementById(`trn-color-${k}-hex`).value = e.target.value;
+    actualizarPreview();
+  });
+  document.getElementById(`trn-color-${k}-hex`).addEventListener('input', e => {
+    if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
+      document.getElementById(`trn-color-${k}`).value = e.target.value;
+      actualizarPreview();
+    }
+  });
+});
+
+['trn-nombre','trn-juego','trn-estado'].forEach(id => {
+  document.getElementById(id).addEventListener('input', actualizarPreview);
+  document.getElementById(id).addEventListener('change', actualizarPreview);
+});
+
+function actualizarPreview() {
+  const primary = document.getElementById('trn-color-primary-hex').value || '#ffc659';
+  const bg      = document.getElementById('trn-color-bg-hex').value      || '#003772';
+  const nombre  = document.getElementById('trn-nombre').value            || 'Nombre del torneo';
+  const juego   = document.getElementById('trn-juego').value             || 'free_fire';
+  const estado  = document.getElementById('trn-estado').value            || 'borrador';
+  const JUEGOS  = { free_fire:'Free Fire', cod:'Call of Duty', valorant:'Valorant', fortnite:'Fortnite', minecraft:'Minecraft' };
+  const ESTADO_CSS = {
+    en_curso:      'background:rgba(36,214,165,.18);color:#24d6a5;border:1px solid rgba(36,214,165,.4)',
+    inscripciones: 'background:rgba(255,198,89,.18);color:#ffc659;border:1px solid rgba(255,198,89,.4)',
+    finalizado:    'background:rgba(0,132,133,.15);color:#008485;border:1px solid rgba(0,132,133,.4)',
+    borrador:      'background:rgba(0,42,96,.5);color:#5a84ad;border:1px solid rgba(0,132,133,.2)'
+  };
+  const ESTADO_L = { en_curso:'En curso', inscripciones:'Inscripciones', finalizado:'Finalizado', borrador:'Borrador' };
+  const banner   = document.getElementById('trn-banner-url').value;
+  const prevBan  = document.getElementById('prev-banner');
+  if (banner) {
+    prevBan.style.backgroundImage = `url(${banner})`;
+    prevBan.style.backgroundSize  = 'cover';
+    prevBan.style.backgroundPosition = 'center';
+    prevBan.innerHTML = '';
+  } else {
+    prevBan.style.backgroundImage = '';
+    prevBan.style.background = `linear-gradient(135deg, ${bg}, #008485)`;
+    prevBan.innerHTML = `<i class="fa-solid fa-trophy" style="font-size:2rem;color:${primary};opacity:.6"></i>`;
+  }
+  document.getElementById('prev-body').style.background   = bg;
+  document.getElementById('prev-nombre').style.color      = primary;
+  document.getElementById('prev-nombre').textContent      = nombre;
+  document.getElementById('prev-meta').textContent        = JUEGOS[juego] || juego;
+  const chip = document.getElementById('prev-estado');
+  chip.textContent = ESTADO_L[estado] || estado;
+  chip.style.cssText = `font-size:.65rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.15rem .5rem;border-radius:20px;${ESTADO_CSS[estado]||ESTADO_CSS.borrador}`;
+}
+
+document.getElementById('trn-banner-url').addEventListener('input', actualizarPreview);
+
+/* ─── Guardar torneo ─────────────────────────────────────── */
+window.guardarTorneo = async function(e) {
+  e.preventDefault();
+  const st = document.getElementById('status-info');
+  mostrarStatus(st,'','<i class="fa-solid fa-circle-notch tz-spin"></i> Guardando…');
+  try {
+    const cupos = document.getElementById('trn-cupos').value;
+    const d = {
+      id:          torneoActual?.id ?? null,
+      nombre:      document.getElementById('trn-nombre').value.trim(),
+      juego:       document.getElementById('trn-juego').value,
+      fechaInicio: document.getElementById('trn-fecha-inicio').value ? new Date(document.getElementById('trn-fecha-inicio').value).toISOString() : null,
+      fechaFin:    document.getElementById('trn-fecha-fin').value    ? new Date(document.getElementById('trn-fecha-fin').value).toISOString()    : null,
+      estado:      document.getElementById('trn-estado').value,
+      descripcion: document.getElementById('trn-descripcion').value.trim() || null,
+      logoUrl:     document.getElementById('trn-logo-url').value.trim() || null,
+      bannerUrl:   document.getElementById('trn-banner-url').value.trim() || null,
+      publico:     document.getElementById('trn-publico').checked,
+      config:      { max_equipos: cupos ? parseInt(cupos) : null },
+      colores: {
+        primary: document.getElementById('trn-color-primary-hex').value,
+        accent:  document.getElementById('trn-color-accent-hex').value,
+        bg:      document.getElementById('trn-color-bg-hex').value
+      }
+    };
+    const res = await P.torneos.adminGuardar(PORTAL, d);
+    await cargarTorneos();
+    torneoActual = listaTorneos.find(t => t.id === (res?.id || torneoActual?.id));
+    document.getElementById('editor-titulo').textContent = torneoActual?.nombre || '';
+    mostrarStatus(st,'ok','Guardado correctamente');
+  } catch(err) {
+    mostrarStatus(st,'err', err.message || 'Error al guardar');
+  }
+};
+
+/* ─── Borrar torneo ──────────────────────────────────────── */
+window.borrarTorneo = async function() {
+  if (!torneoActual) return;
+  if (!confirm(`¿Borrar "${torneoActual.nombre}" y todos sus datos? Esto no se puede deshacer.`)) return;
+  try {
+    await P.torneos.adminBorrar(PORTAL, torneoActual.id);
+    torneoActual = null;
+    document.getElementById('editor-vacio').style.display    = '';
+    document.getElementById('editor-contenido').style.display = 'none';
+    document.getElementById('btn-borrar-torneo').style.display = 'none';
+    document.getElementById('editor-titulo').textContent = 'Selecciona un torneo';
+    await cargarTorneos();
+  } catch(e) { alert('Error al borrar: ' + (e.message||'')); }
+};
+
+/* ─── Nuevo torneo ───────────────────────────────────────── */
+window.nuevoTorneo = function() {
+  torneoActual = null;
+  renderLista();
+  document.getElementById('editor-vacio').style.display    = 'none';
+  document.getElementById('editor-contenido').style.display = '';
+  document.getElementById('btn-borrar-torneo').style.display = 'none';
+  document.getElementById('editor-titulo').textContent = 'Nuevo torneo';
+  abrirTabById('info');
+  document.getElementById('trn-nombre').value       = '';
+  document.getElementById('trn-juego').value        = 'free_fire';
+  document.getElementById('trn-fecha-inicio').value = '';
+  document.getElementById('trn-fecha-fin').value    = '';
+  document.getElementById('trn-estado').value       = 'borrador';
+  document.getElementById('trn-descripcion').value  = '';
+  document.getElementById('trn-logo-url').value     = '';
+  document.getElementById('trn-banner-url').value   = '';
+  document.getElementById('trn-publico').checked    = false;
+  document.getElementById('trn-cupos').value        = '';
+  setColor('primary','#ffc659'); setColor('accent','#24d6a5'); setColor('bg','#003772');
+  document.getElementById('trn-link-publico').style.display = 'none';
+  document.getElementById('status-info').className = 'tz-status';
+  actualizarPreview();
+};
+
+/* ─── Equipos ────────────────────────────────────────────── */
+async function cargarEquipos() {
+  document.getElementById('tbody-equipos').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--tz-gray);padding:1rem"><i class="fa-solid fa-circle-notch tz-spin"></i></td></tr>';
+  try {
+    const equipos = await P.torneos.adminEquipos(PORTAL, torneoActual.id);
+    if (!equipos.length) {
+      document.getElementById('tbody-equipos').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--tz-gray);padding:1rem">Sin equipos aún</td></tr>';
+      return;
+    }
+    document.getElementById('tbody-equipos').innerHTML = equipos.map(eq => `<tr>
+      <td style="color:var(--tz-teal);font-size:.78rem">${eq.seed||'—'}</td>
+      <td><strong>${esc(eq.nombre)}</strong>${eq.grupo?` <span style="font-size:.72rem;color:var(--tz-gray)">[${esc(eq.grupo)}]</span>`:''}</td>
+      <td style="color:var(--tz-gray)">${esc(eq.grupo||'—')}</td>
+      <td style="font-size:.78rem;color:var(--tz-gray)">${esc(eq.contacto||'—')}</td>
+      <td style="text-align:right">
+        <button class="tz-del-btn" onclick="editarEquipo(${eq.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button class="tz-del-btn" onclick="borrarEquipo(${eq.id},'${esc(eq.nombre)}')" title="Borrar"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+    window._equiposCache = equipos;
+  } catch(e) {
+    document.getElementById('tbody-equipos').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ff7070;padding:1rem">Error al cargar</td></tr>';
+  }
+}
+
+window.editarEquipo = function(id) {
+  const eq = (window._equiposCache||[]).find(e => e.id === id);
+  if (!eq) return;
+  document.getElementById('eq-id').value      = eq.id;
+  document.getElementById('eq-nombre').value  = eq.nombre || '';
+  document.getElementById('eq-contacto').value= eq.contacto || '';
+  document.getElementById('eq-ig').value      = eq.ig || '';
+  document.getElementById('eq-grupo').value   = eq.grupo || '';
+  document.getElementById('eq-form-titulo').textContent = 'Editar equipo';
+};
+window.resetEquipoForm = function() {
+  ['eq-id','eq-nombre','eq-contacto','eq-ig','eq-grupo'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('eq-form-titulo').textContent = 'Agregar equipo';
+  document.getElementById('status-eq').className = 'tz-status';
+};
+window.guardarEquipo = async function(e) {
+  e.preventDefault();
+  const st = document.getElementById('status-eq');
+  mostrarStatus(st,'','<i class="fa-solid fa-circle-notch tz-spin"></i>');
+  try {
+    const id = document.getElementById('eq-id').value;
+    await P.torneos.adminEquipoGuardar(PORTAL, torneoActual.id, {
+      id:       id ? Number(id) : null,
+      nombre:   document.getElementById('eq-nombre').value.trim(),
+      contacto: document.getElementById('eq-contacto').value.trim() || null,
+      ig:       document.getElementById('eq-ig').value.trim() || null,
+      grupo:    document.getElementById('eq-grupo').value.trim() || null
+    });
+    resetEquipoForm();
+    mostrarStatus(st,'ok','Guardado');
+    cargarEquipos();
+  } catch(err) { mostrarStatus(st,'err',err.message||'Error'); }
+};
+window.borrarEquipo = async function(id, nombre) {
+  if (!confirm(`¿Borrar equipo "${nombre}"?`)) return;
+  try { await P.torneos.adminEquipoBorrar(PORTAL, id); cargarEquipos(); }
+  catch(e) { alert('Error: ' + (e.message||'')); }
+};
+
+/* ─── Partidas ───────────────────────────────────────────── */
+async function cargarPartidas() {
+  document.getElementById('tbody-partidas').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tz-gray);padding:1rem"><i class="fa-solid fa-circle-notch tz-spin"></i></td></tr>';
+  try {
+    listaPartidas = await P.torneos.adminPartidas(PORTAL, torneoActual.id);
+    const FASE_L = { grupos:'Grupos', cuartos:'Cuartos', semis:'Semis', final:'Final', gran_final:'Gran Final' };
+    if (!listaPartidas.length) {
+      document.getElementById('tbody-partidas').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tz-gray);padding:1rem">Sin partidas aún</td></tr>';
+    } else {
+      document.getElementById('tbody-partidas').innerHTML = listaPartidas.map(p => `<tr>
+        <td>${FASE_L[p.fase]||p.fase}</td>
+        <td style="text-align:center">${p.ronda}</td>
+        <td style="text-align:center">${p.sala||'—'}</td>
+        <td><span class="tz-estado est-${p.estado}">${p.estado}</span></td>
+        <td style="text-align:center;font-size:.78rem;color:var(--tz-teal)">${p.n_resultados||0}</td>
+        <td style="text-align:right">
+          <button class="tz-del-btn" onclick="editarPartida(${p.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+          <button class="tz-del-btn" onclick="borrarPartida(${p.id})" title="Borrar"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join('');
+    }
+    const sel  = document.getElementById('log-partida-sel');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Sin partida asociada —</option>' +
+      listaPartidas.map(p => `<option value="${p.id}">Ronda ${p.ronda} Sala ${p.sala||'?'} (${p.fase})</option>`).join('');
+    if (prev) sel.value = prev;
+  } catch(e) {
+    document.getElementById('tbody-partidas').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff7070;padding:1rem">Error al cargar</td></tr>';
+  }
+}
+
+window.editarPartida = function(id) {
+  const p = listaPartidas.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pt-id').value    = p.id;
+  document.getElementById('pt-fase').value  = p.fase || 'grupos';
+  document.getElementById('pt-ronda').value = p.ronda || 1;
+  document.getElementById('pt-sala').value  = p.sala || '';
+  document.getElementById('pt-estado').value= p.estado || 'pendiente';
+  document.getElementById('pt-notas').value = p.notas || '';
+  document.getElementById('pt-form-titulo').textContent = 'Editar partida';
+};
+window.resetPartidaForm = function() {
+  document.getElementById('pt-id').value    = '';
+  document.getElementById('pt-ronda').value = '1';
+  document.getElementById('pt-sala').value  = '';
+  document.getElementById('pt-notas').value = '';
+  document.getElementById('pt-estado').value= 'pendiente';
+  document.getElementById('pt-form-titulo').textContent = 'Nueva partida';
+  document.getElementById('status-pt').className = 'tz-status';
+};
+window.guardarPartida = async function(e) {
+  e.preventDefault();
+  const st = document.getElementById('status-pt');
+  mostrarStatus(st,'','<i class="fa-solid fa-circle-notch tz-spin"></i>');
+  try {
+    const id = document.getElementById('pt-id').value;
+    await P.torneos.adminPartidaGuardar(PORTAL, torneoActual.id, {
+      id:     id ? Number(id) : null,
+      fase:   document.getElementById('pt-fase').value,
+      ronda:  parseInt(document.getElementById('pt-ronda').value) || 1,
+      sala:   document.getElementById('pt-sala').value ? parseInt(document.getElementById('pt-sala').value) : null,
+      estado: document.getElementById('pt-estado').value,
+      notas:  document.getElementById('pt-notas').value.trim() || null
+    });
+    resetPartidaForm();
+    mostrarStatus(st,'ok','Guardado');
+    cargarPartidas();
+  } catch(err) { mostrarStatus(st,'err',err.message||'Error'); }
+};
+window.borrarPartida = async function(id) {
+  if (!confirm('¿Borrar esta partida y sus resultados?')) return;
+  try { await P.torneos.adminPartidaBorrar(PORTAL, id); cargarPartidas(); }
+  catch(e) { alert('Error: ' + (e.message||'')); }
+};
+
+/* ─── Logs ───────────────────────────────────────────────── */
+document.getElementById('log-drop').addEventListener('dragover',  e => { e.preventDefault(); document.getElementById('log-drop').classList.add('drag-over'); });
+document.getElementById('log-drop').addEventListener('dragleave', () => document.getElementById('log-drop').classList.remove('drag-over'));
+document.getElementById('log-drop').addEventListener('drop', e => { e.preventDefault(); document.getElementById('log-drop').classList.remove('drag-over'); subirLog(e.dataTransfer.files); });
+
+window.subirLog = async function(files) {
+  if (!torneoActual || !files.length) return;
+  const file = files[0];
+  const st   = document.getElementById('status-log');
+  mostrarStatus(st,'','<i class="fa-solid fa-circle-notch tz-spin"></i> Subiendo…');
+  try {
+    const contenido = await file.text();
+    const partidaId = document.getElementById('log-partida-sel').value || null;
+    await P.torneos.adminLog(PORTAL, torneoActual.id, {
+      partidaId: partidaId ? Number(partidaId) : null,
+      nombre:    file.name,
+      contenido
+    });
+    mostrarStatus(st,'ok',`Log "${file.name}" subido correctamente`);
+    document.getElementById('log-file').value = '';
+    cargarLogs();
+  } catch(err) { mostrarStatus(st,'err',err.message||'Error al subir'); }
+};
+
+async function cargarLogs() {
+  document.getElementById('tbody-logs').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tz-gray);padding:1rem"><i class="fa-solid fa-circle-notch tz-spin"></i></td></tr>';
+  try {
+    const logs = await P.torneos.adminLogs(PORTAL, torneoActual.id);
+    if (!logs.length) {
+      document.getElementById('tbody-logs').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tz-gray);padding:1rem">Sin logs aún</td></tr>';
+      return;
+    }
+    document.getElementById('tbody-logs').innerHTML = logs.map(l => `<tr>
+      <td>${esc(l.nombre_archivo||'sin nombre')}</td>
+      <td style="color:var(--tz-gray);font-size:.78rem">${l.partida_id ? `Partida ${l.partida_id}` : '—'}</td>
+      <td style="color:var(--tz-gray);font-size:.78rem">${new Date(l.creado).toLocaleString('es',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${l.procesado ? '<span class="tz-estado est-finalizado">Procesado</span>' : l.error_proceso ? `<span class="tz-estado" style="background:rgba(255,77,77,.12);color:#ff7070;border:1px solid rgba(255,77,77,.3)">Error</span>` : '<span class="tz-estado est-pendiente">Pendiente</span>'}</td>
+    </tr>`).join('');
+  } catch(e) {
+    document.getElementById('tbody-logs').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ff7070;padding:1rem">Error al cargar</td></tr>';
+  }
+}
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+window.abrirTab = function(el) { abrirTabById(el.dataset.tab); };
+function abrirTabById(nombre) {
+  document.querySelectorAll('.tz-tab').forEach(t => t.classList.toggle('activo', t.dataset.tab === nombre));
+  document.querySelectorAll('.tz-tab-panel').forEach(p => p.classList.toggle('activo', p.id === 'tab-' + nombre));
+  if (nombre === 'equipos' && torneoActual)  cargarEquipos();
+  if (nombre === 'partidas' && torneoActual) cargarPartidas();
+  if (nombre === 'logs' && torneoActual)     { cargarLogs(); cargarPartidas(); }
+}
+
+/* ─── Utilidades ─────────────────────────────────────────── */
+function mostrarStatus(el, tipo, msg) {
+  el.innerHTML = msg;
+  el.className = 'tz-status' + (tipo ? ' ' + tipo : '');
+  if (tipo === 'ok') setTimeout(() => { if(el.className.includes('ok')) el.className='tz-status'; }, 3000);
+}
+
+/* ─── Init ───────────────────────────────────────────────── */
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryAutoLogin);
+else tryAutoLogin();
+</script>
+</body>
+</html>

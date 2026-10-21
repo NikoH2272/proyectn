@@ -1,0 +1,245 @@
+:root {
+    --primary: #00ffcc;
+    --secondary: #ff0055;
+    --dark: #0a0b10;
+    --dark-card: #121520;
+    --light: #ffffff;
+    --gray: #8892b0;
+    --accent-yellow: #ffcc00;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background-color: var(--dark); color: var(--light); overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+h1, h2, h3, .logo, .btn-access, .tool-container button { font-family: 'Orbitron', sans-serif; }
+
+header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 15px; background: rgba(10, 11, 16, 0.95);
+    border-bottom: 2px solid rgba(0, 255, 204, 0.2);
+    position: sticky; top: 0; z-index: 1000;
+}
+.logo-container { display: flex; align-items: center; gap: 8px; }
+.logo-img { width: 35px; height: 35px; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary); }
+.logo { font-size: 1.2rem; font-weight: 900; color: var(--primary); }
+nav ul { display: flex; list-style: none; gap: 15px; }
+nav a { color: var(--light); text-decoration: none; font-weight: 700; font-size: 0.9rem; }
+nav a:hover { color: var(--primary); }
+
+.hero { height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 5px; }
+.hero h1 { font-size: 2.2rem; margin-bottom: 10px; color: var(--light); text-transform: uppercase; }
+.hero h1 span { color: var(--secondary); }
+.hero p { font-size: 1rem; color: var(--gray); max-width: 600px; margin-bottom: 20px; }
+
+.btn-access {
+    background: linear-gradient(45deg, var(--primary), #00bfff); color: var(--dark);
+    padding: 14px 25px; font-size: 1.1rem; font-weight: 900; text-decoration: none;
+    border-radius: 50px; cursor: pointer; border: none; text-transform: uppercase; display: inline-block;
+}
+
+section { padding: 25px 20px; }
+.section-title { text-align: center; font-size: 1.8rem; margin-bottom: 20px; color: var(--primary); text-transform: uppercase; }
+
+.tool-section { background: #07080b; border-top: 2px solid var(--primary); }
+.tool-container { background: var(--dark-card); padding: 12px 10px; border-radius: 8px; width: 100%; }
+.tool-desc { color: var(--gray); margin-bottom: 15px; font-size: 0.9rem; padding: 0 4px; }
+
+.dropdown-select {
+    width: 100%; padding: 10px; background: #07080b; border: 1px solid rgba(255, 204, 0, 0.4);
+    color: var(--light); border-radius: 6px; font-size: 16px;
+    font-weight: 700; cursor: pointer; -webkit-appearance: none; appearance: none;
+}
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.form-group label { font-weight: 700; color: var(--accent-yellow); display: block; margin-bottom: 4px; font-size: 0.75rem; }
+.form-group input {
+    width: 100%; padding: 10px; background: #07080b; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--light); border-radius: 6px; font-size: 16px;
+}
+
+/* ELIMINAR FLECHITAS DE LOS INPUTS NUMÉRICOS */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.table-input-container {
+    width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    background: rgba(10, 11, 16, 0.95); border: 1px solid rgba(255, 0, 85, 0.4);
+    border-radius: 6px; padding: 6px; margin-bottom: 12px;
+}
+.table-input-container table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.table-input-container th, .table-input-container td { border: 1px solid rgba(255, 255, 255, 0.15); padding: 5px 6px; text-align: center; color: var(--light); font-size: 0.8rem; }
+.table-input-container th { background: var(--secondary); color: #ffffff; font-family: 'Orbitron'; font-size: 0.75rem; }
+.input-cell-box { width: 45px; padding: 5px; background: #07080b; border: 1px solid rgba(255,255,255,0.2); color: var(--light); border-radius: 4px; text-align: center; font-size: 16px !important; }
+
+.side-by-side-wrapper { display: flex; gap: 8px; flex-wrap: nowrap; background: rgba(15, 17, 26, 0.95); padding: 8px; border-radius: 8px; align-items: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+.column-table-general { flex: 0 0 72%; max-width: 72%; min-width: 260px; }
+.column-table-right { flex: 0 0 28%; max-width: 28%; min-width: 180px; }
+
+/* ESTILOS EXCLUSIVOS PARA LA INTERFAZ DE CONFIRMACIÓN (UI WEB) */
+.table-general-box-ui, .table-right-box-ui { background-size: cover; background-position: center; border-radius: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; background: #121520; }
+.table-general-overlay-ui, .table-right-overlay-ui { background: rgba(18, 21, 32, 0.95); padding: 6px; }
+
+.tabla-ui-confirmacion { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 4px; background: rgba(10, 11, 16, 0.9); }
+.tabla-ui-confirmacion th, .tabla-ui-confirmacion td {
+    padding: 4px 3px !important;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 0.7rem !important;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tabla-ui-confirmacion th { background: rgba(255, 204, 0, 0.15); color: var(--accent-yellow); font-family: 'Orbitron'; font-size: 0.65rem !important; }
+
+.horarios-badge-ui {
+    font-size: 0.75rem !important;
+    background: rgba(0, 0, 0, 0.6);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 4px;
+}
+
+.moderador-reducido-ui {
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    text-align: center;
+    margin-bottom: 4px !important;
+}
+
+/* =========================================================
+   RESULTADOS REDUCIDOS Y ESCALADOS (IMAGEN FINAL 2000x2000)
+   ========================================================= */
+
+#outputTablaReducida {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    margin: 10px 0 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-reduced-wrapper {
+    width: 2000px !important;
+    height: 2000px !important;
+    min-width: 2000px !important;
+    min-height: 2000px !important;
+    margin: 0 auto;
+    padding: 50px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95);
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(0.42);
+    transform-origin: top center;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .table-reduced-wrapper {
+        transform: scale(0.20);
+        transform-origin: top left;
+        margin-left: -10px;
+    }
+}
+
+/* MARCO GUÍA: 290px ARRIBA Y 250px ABAJO */
+.tabla-marco-guia {
+    border: none;
+    width: calc(100% - 40px) !important;
+    height: calc(100% - 540px) !important;
+    margin: 400px auto 250px auto !important;
+    padding: 10px 20px;
+    border-radius: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex: 0 0 auto;
+}
+
+/* CONTENEDOR INTERNO */
+.table-reduced-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.reduced-general { width: 100%; min-width: 0; flex: 0 0 auto; }
+.reduced-right-horizontal { width: 100%; min-width: 0; border-radius: 12px; padding: 25px 30px; overflow: hidden; flex: 0 0 auto; }
+
+.horarios-badge-grande-img {
+    font-size: 2.2rem !important;
+    background: rgba(0, 0, 0, 0.6);
+    display: inline-block;
+    padding: 14px 35px;
+    border-radius: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.moderador-reducido {
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 2.6rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    text-align: center;
+    margin: 10px 0 !important;
+}
+
+.moderador-reducido strong {
+    font-size: 2.6rem !important;
+    font-weight: 900 !important;
+}
+
+/* TEMAS PARA LA IMAGEN */
+.tema-alca { --tema-table-bg: rgba(74,21,75,.90); --tema-cell-bg: rgba(74,21,75,.90); --tema-header-bg: rgba(255,255,255,.30); --tema-text:#fff; --tema-header-text:#fff; --tema-border:rgba(255,255,255,.25); background-image:url('../imagenes/ALCA.png'); }
+.tema-alca .reduced-right-horizontal { background:var(--tema-table-bg); }
+.tema-levxtatsu { --tema-table-bg:rgba(204,224,255,.90); --tema-cell-bg:rgba(204,224,255,.90); --tema-header-bg:rgba(0,64,128,.20); --tema-text:#002b5c; --tema-header-text:#002b5c; --tema-border:rgba(0,43,92,.20); background-image:url('../imagenes/LEVXTATSU.png'); }
+.tema-levxtatsu .reduced-right-horizontal { background:var(--tema-table-bg); }
+.tema-cacm { --tema-table-bg:rgba(255,204,204,.90); --tema-cell-bg:rgba(255,204,204,.90); --tema-header-bg:rgba(204,0,0,.20); --tema-text:#660000; --tema-header-text:#990000; --tema-border:rgba(153,0,0,.22); background-image:url('../imagenes/CACM.png'); }
+.tema-cacm .reduced-right-horizontal { background:var(--tema-table-bg); }
+.tema-leviatan { --tema-table-bg:rgba(13,27,42,.90); --tema-cell-bg:rgba(13,27,42,.90); --tema-header-bg:rgba(0,180,216,.30); --tema-text:#fff; --tema-header-text:#90e0ef; --tema-border:rgba(144,224,239,.25); background-image:url('../imagenes/LEVIATAN.png'); }
+.tema-leviatan .reduced-right-horizontal { background:var(--tema-table-bg); }
+.tema-lyon { --tema-table-bg:rgba(230,215,204,.90); --tema-cell-bg:rgba(230,215,204,.90); --tema-header-bg:rgba(92,64,51,.25); --tema-text:#3d261d; --tema-header-text:#3d261d; --tema-border:rgba(61,38,29,.22); background-image:url('../imagenes/LYON.png'); }
+.tema-lyon .reduced-right-horizontal { background:var(--tema-table-bg); }
+.tema-pumasgg { --tema-table-bg:rgba(18,21,32,.95); --tema-cell-bg:rgba(18,21,32,.95); --tema-header-bg:rgba(255,204,0,.25); --tema-text:#fff; --tema-header-text:#ffcc00; --tema-border:rgba(255,204,0,.20); background-image:url('../imagenes/PUMAS GG.png'); }
+.tema-pumasgg .reduced-right-horizontal { background:var(--tema-table-bg); }
+
+/* Calavera reducida a la mitad (aprox 1rem) */
+.sala-sin-registro { text-align: center !important; vertical-align: middle !important; }
+.sala-sin-registro i { color: #ff2020 !important; font-size: 1rem !important; }
+
+@media(max-width: 900px) {
+    .side-by-side-wrapper { flex-wrap: wrap; }
+    .column-table-general, .column-table-right { flex: 0 0 100%; max-width: 100%; }
+    nav { display: none; }
+}
+
+footer { text-align: center; padding: 15px; background: #050608; color: var(--gray); border-top: 1px solid rgba(255,255,255,0.05); }

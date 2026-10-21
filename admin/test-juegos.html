@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Test Juegos | PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+<link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+<style>
+body{background:#0a0a0a;color:#F4EEDC;font-family:inherit;min-height:100vh}
+.tst-wrap{max-width:900px;margin:0 auto;padding:28px 18px}
+
+/* Banner de advertencia */
+.tst-banner{display:flex;align-items:center;gap:12px;padding:12px 18px;
+  background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.45);
+  border-radius:8px;margin-bottom:24px;font-size:.88rem;color:#ffaa80}
+.tst-banner b{color:#FF6B35;font-family:'Michroma',sans-serif;font-size:.8rem;letter-spacing:.05em}
+
+/* Header */
+.tst-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.tst-title{font:900 1.3rem 'Michroma',sans-serif;letter-spacing:.08em;color:#D8C395;text-transform:uppercase;margin:0}
+.tst-badge{padding:4px 12px;border-radius:20px;background:rgba(255,107,53,.2);border:1px solid rgba(255,107,53,.5);
+  color:#FF6B35;font:700 .72rem 'Michroma',sans-serif;letter-spacing:.08em}
+
+/* Tabs de juegos */
+.tst-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tst-tab{padding:8px 18px;border:1px solid rgba(216,195,149,.25);border-radius:6px;
+  background:rgba(255,255,255,.04);color:#B9B2A4;font:700 .78rem 'Michroma',sans-serif;
+  letter-spacing:.05em;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tst-tab:hover{border-color:rgba(216,195,149,.5);color:#D8C395}
+.tst-tab.activo{background:rgba(216,195,149,.15);border-color:rgba(216,195,149,.6);color:#D8C395}
+
+/* Área del juego */
+#tstJuego{min-height:200px}
+
+/* Panel de scores de prueba */
+.tst-scores{margin-top:20px;padding:16px 18px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(216,195,149,.2);border-radius:8px}
+.tst-scores h3{font:700 .78rem 'Michroma',sans-serif;letter-spacing:.1em;color:#D8C395;
+  text-transform:uppercase;margin:0 0 12px}
+.tst-scores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.tst-score-col h4{font:700 .7rem 'Michroma',sans-serif;letter-spacing:.08em;
+  color:#FF6B35;text-transform:uppercase;margin:0 0 8px}
+.tst-score-row{display:flex;justify-content:space-between;padding:5px 8px;
+  border-radius:4px;background:rgba(255,255,255,.03);font-size:.82rem;margin-bottom:3px}
+.tst-score-row .pts{color:#FFD54A;font-weight:700;font-family:'Michroma',sans-serif}
+.tst-empty{color:#555;font-size:.82rem;font-style:italic}
+
+/* Botones de acción */
+.tst-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.tst-btn{padding:9px 18px;border-radius:6px;font:700 .75rem 'Michroma',sans-serif;
+  letter-spacing:.06em;cursor:pointer;transition:all .2s;border:1px solid}
+.tst-btn-refresh{background:rgba(77,255,145,.1);border-color:rgba(77,255,145,.4);color:#4dff91}
+.tst-btn-refresh:hover{background:rgba(77,255,145,.2)}
+.tst-btn-clear{background:rgba(229,72,77,.1);border-color:rgba(229,72,77,.4);color:#ff6b6b}
+.tst-btn-clear:hover{background:rgba(229,72,77,.2)}
+.tst-msg{font-size:.82rem;margin-top:8px;min-height:1.2em;color:#4dff91}
+.tst-msg.err{color:#ff6b6b}
+
+/* Selector de portal override */
+.tst-portal-sel{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:.82rem;color:#888}
+.tst-portal-sel select{background:#0c0c0c;border:1px solid rgba(216,195,149,.3);color:#F4EEDC;
+  border-radius:5px;padding:5px 10px;font:inherit;outline:none}
+</style>
+</head>
+<body>
+<div class="tst-wrap">
+
+    <div class="tst-header">
+        <h1 class="tst-title">🧪 Test de Juegos</h1>
+        <span class="tst-badge">PORTAL: TESTDEV</span>
+    </div>
+
+    <div class="tst-banner">
+        <i class="fa-solid fa-flask" style="font-size:1.2rem;color:#FF6B35"></i>
+        <div>
+            <b>ENTORNO DE PRUEBAS</b> — Todos los scores van a <code style="color:#FF6B35">portal = testdev</code>.
+            La producción no se toca. Limpiar scores no borra nada real.
+        </div>
+    </div>
+
+    <!-- Selector de juego -->
+    <div class="tst-tabs" id="tstTabs">
+        <button class="tst-tab activo" data-tipo="juego_tetris">🟦 Tetris</button>
+        <button class="tst-tab" data-tipo="juego">🐍 Snake</button>
+        <button class="tst-tab" data-tipo="juego_3lineas">✕○ 3 en Línea</button>
+    </div>
+
+    <!-- Contenedor del juego -->
+    <div id="tstJuego"></div>
+
+    <!-- Scores de prueba -->
+    <div class="tst-scores">
+        <h3>Scores guardados en testdev</h3>
+        <div class="tst-scores-grid" id="tstScoresGrid">
+            <div class="tst-empty">Cargando…</div>
+        </div>
+        <div class="tst-actions">
+            <button class="tst-btn tst-btn-refresh" id="tstBtnRefresh">
+                <i class="fa-solid fa-arrows-rotate"></i> Actualizar scores
+            </button>
+            <button class="tst-btn tst-btn-clear" id="tstBtnClear">
+                <i class="fa-solid fa-trash"></i> Limpiar scores de prueba
+            </button>
+        </div>
+        <p class="tst-msg" id="tstMsg"></p>
+    </div>
+
+</div>
+
+<script src="../portal-kit/juegos.js?v=20261017a"></script>
+<script>
+(function () {
+    const PORTAL = 'testdev';
+    const P = window.PumasPortal;
+    const TIPOS = [
+        { tipo: 'juego',         label: '🐍 Snake'       },
+        { tipo: 'juego_tetris',  label: '🟦 Tetris'      },
+        { tipo: 'juego_3lineas', label: '✕○ 3 en Línea' },
+    ];
+    let tipoActual = 'juego_tetris';
+
+    /* ── Cargar juego activo ── */
+    function cargarJuego(tipo) {
+        tipoActual = tipo;
+        const cont = document.getElementById('tstJuego');
+        cont.innerHTML = '';
+        P.juegos.montar(PORTAL, 'tstJuego', tipo);
+    }
+
+    /* ── Tabs ── */
+    document.getElementById('tstTabs').addEventListener('click', e => {
+        const tab = e.target.closest('[data-tipo]');
+        if (!tab) return;
+        document.querySelectorAll('.tst-tab').forEach(t => t.classList.remove('activo'));
+        tab.classList.add('activo');
+        cargarJuego(tab.dataset.tipo);
+    });
+
+    /* ── Scores de prueba ── */
+    async function cargarScores() {
+        const grid = document.getElementById('tstScoresGrid');
+        grid.innerHTML = '<div class="tst-empty">Cargando…</div>';
+        try {
+            const resultados = await Promise.all(
+                TIPOS.map(async ({ tipo, label }) => {
+                    try {
+                        const cfg = await P.dinamica.publico(PORTAL, tipo);
+                        return { label, entradas: cfg?.entradas || [], activo: cfg?.activo };
+                    } catch (_) {
+                        return { label, entradas: [], activo: false };
+                    }
+                })
+            );
+            grid.innerHTML = resultados.map(({ label, entradas, activo }) => `
+                <div class="tst-score-col">
+                    <h4>${label} ${activo ? '✓' : '<small style="color:#555">inactivo</small>'}</h4>
+                    ${entradas.length
+                        ? entradas.slice(0, 10).map((e, i) =>
+                            `<div class="tst-score-row">
+                                <span>${i + 1}. ${e.nombre}</span>
+                                <span class="pts">${e.puntos}</span>
+                            </div>`).join('')
+                        : '<div class="tst-empty">Sin scores</div>'
+                    }
+                </div>
+            `).join('');
+        } catch (e) {
+            grid.innerHTML = `<div class="tst-empty" style="color:#ff6b6b">Error: ${e.message}</div>`;
+        }
+    }
+
+    /* ── Limpiar scores ── */
+    document.getElementById('tstBtnClear').addEventListener('click', async () => {
+        const msg = document.getElementById('tstMsg');
+        if (!confirm('¿Limpiar todos los scores de prueba (testdev)? Esto no afecta producción.')) return;
+        msg.textContent = 'Limpiando…';
+        msg.className = 'tst-msg';
+        try {
+            await Promise.all(TIPOS.map(({ tipo }) => P.dinamica.vaciar(PORTAL, tipo)));
+            msg.textContent = '✓ Scores de prueba eliminados.';
+            await cargarScores();
+        } catch (e) {
+            msg.textContent = 'Error: ' + (e.message || e);
+            msg.className = 'tst-msg err';
+        }
+    });
+
+    /* ── Refresh ── */
+    document.getElementById('tstBtnRefresh').addEventListener('click', () => cargarScores());
+
+    /* ── Init ── */
+    function init() {
+        if (!window.PumasPortal?.juegos) { setTimeout(init, 200); return; }
+        cargarJuego(tipoActual);
+        cargarScores();
+    }
+    init();
+})();
+</script>
+</body>
+</html>

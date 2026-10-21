@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sorteos | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+    <script src="../portal-kit/sorteo.js?v=20261013e"></script>
+    <style>
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .site-header, .admin-grid, footer, .bloque-titulo span, td:last-child, th:last-child { display: none !important; }
+            .card-box { border: 0 !important; box-shadow: none !important; background: #fff !important; }
+            .pg-tabla th, .pg-tabla td { color: #000 !important; border-color: #000 !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo"><span class="t-a">PUMAS</span> SORTEOS</div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="sorteo.html"><i class="fa-solid fa-dice"></i> Todos los sorteos</a></li>
+                <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" id="btnSalir"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section>
+        <h2 class="section-title" id="titulo">Sorteos</h2>
+        <p class="tool-desc" id="desc">Cada portal puede tener su sorteo. El superadmin los activa; quien tiene acceso al portal ve los equipos anotados y hace el sorteo.</p>
+        <main id="raiz"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
+    </section>
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Sorteos</p></footer>
+
+    <script>
+    (async function () {
+        const P = PumasPortal, esc = P.escaparHtml;
+        const portal = (new URLSearchParams(location.search).get('p') || '').replace(/[^a-z0-9_]/g, '');
+        const s = await P.validar();
+        const volver = 'login.html?next=' + encodeURIComponent(location.pathname + location.search);
+        if (!s) { location.replace(volver); return; }
+        await P.cargarModulos();
+        if (portal && !P.puede(s, portal)) { location.replace(volver + '&denegado=1'); return; }
+        document.documentElement.classList.remove('pg-verificando');
+        document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+        document.getElementById('btnSalir').addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); });
+        const raiz = document.getElementById('raiz');
+        const jefe = P.tiene(s, 'gestionar');
+
+        if (portal) {
+            const datos = await P.datosPortal(portal);
+            document.getElementById('titulo').textContent = 'Sorteo · ' + ((datos && datos.nombre) || (P.PORTALES[portal] || {}).nombre || portal);
+            document.getElementById('desc').hidden = true;
+            if (datos) P.aplicarColores(document.body, datos.color_tema || datos.color, datos.color2);
+            await PumasSorteo.montarAdmin(raiz, portal, s);
+            return;
+        }
+
+        async function lista() {
+            let filas;
+            try { filas = await P.sorteo.estado(); }
+            catch (e) { raiz.innerHTML = `<p class="res-vacio">${esc(e.message)}</p>`; return; }
+            raiz.innerHTML = `<div class="hub-grid">${filas.map(f => `
+                <article class="card-box hub-card" style="--c:${esc(f.color || '#D8C395')}">
+                    <h3>${esc(f.nombre)}</h3>
+                    <p>${f.activo ? '<b style="color:#6ee7a8">● Activo</b>' : '<b style="color:#888">○ Inactivo</b>'} · ${f.total} anotados · ticket <code>${esc(f.prefijo)}-XXXXX</code></p>
+                    ${f.fecha_limite ? `<p>Cierra: ${new Date(f.fecha_limite).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })}</p>` : ''}
+                    <div class="acciones">
+                        <a class="btn-access" href="sorteo.html?p=${esc(f.portal)}"><i class="fa-solid fa-dice"></i> Abrir</a>
+                        ${jefe || (f.portal === 'principal' && P.tiene(s, 'personalizar')) ? `<button class="btn-access btn-outline" data-activar="${esc(f.portal)}" data-on="${f.activo ? 1 : 0}">
+                            <i class="fa-solid fa-power-off"></i> ${f.activo ? 'Desactivar' : 'Activar'}</button>` : ''}
+                    </div>
+                </article>`).join('') || '<p class="res-vacio">No tienes portales asignados.</p>'}</div>`;
+            raiz.querySelectorAll('[data-activar]').forEach(b => b.addEventListener('click', async () => {
+                b.disabled = true;
+                try { await P.sorteo.config(b.dataset.activar, { activo: b.dataset.on !== '1' }); await lista(); }
+                catch (e) { alert(e.message); b.disabled = false; }
+            }));
+        }
+        lista();
+    })();
+    </script>
+</body>
+</html>

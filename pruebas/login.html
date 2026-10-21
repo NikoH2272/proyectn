@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Iniciar sesión | Pruebas by PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="pruebas" data-modo="login"></script>
+</head>
+<body data-tema="pruebas" class="auth-body">
+    <main class="auth-card">
+        <img src="imagenes/pruebas.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='../imagenes/proyectn.png'">
+        <h1><span class="t-a">MÓDULO</span> <span class="t-b">PRUEBAS</span></h1>
+        <p class="auth-sub">by PROYECTN · ACCESO ADMIN</p>
+        <form id="formLogin" data-portal="pruebas" data-destino="admin.html" autocomplete="on">
+            <div class="form-group">
+                <label for="usuario">Usuario</label>
+                <input id="usuario" name="usuario" type="text" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="pruebas">
+            </div>
+            <div class="form-group">
+                <label for="clave">Contraseña</label>
+                <input id="clave" name="clave" type="password" required autocomplete="current-password" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-generar">Ingresar</button>
+            <p id="authMsg" class="auth-msg" role="alert"></p>
+        </form>
+        <a href="./" class="auth-back">← Volver al portal</a>
+    </main>
+    <script src="../portal-kit/login.js?v=20261013e"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin · Dragon Fest by PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Orbitron se usa en la imagen que se descarga -->
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="imagenes/dragonfest.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="dragonfest" data-modo="protegido"></script>
+</head>
+<body data-tema="dragonfest">
+
+    <header class="site-header">
+        <a class="logo-container" href="admin.html">
+            <img src="imagenes/dragonfest.png" alt="Logo" class="logo-img" data-logo-categoria onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'">
+            <div class="logo"><span class="t-a">DRAGON FEST</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#resultados" onclick="closeMenu()">Herramienta</a></li>
+                <li><a href="#gestionCupos" onclick="closeMenu()"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="#usuariosPortal" onclick="closeMenu()"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><a href="./"><i class="fa-solid fa-trophy"></i> Portal mixto</a></li>
+                <li><a href="femenino.html"><i class="fa-solid fa-trophy"></i> Portal femenino</a></li>
+                <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="login.html" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="DF">
+        <div class="hero-copy">
+            <div class="eyebrow">Herramienta oficial · Free Fire</div>
+            <h1><span class="t-a">Dragon</span> <span class="t-b">Fest</span><small>by <b>PUMAS</b> · <span id="heroCategoria">Mixto</span></small></h1>
+            <p>Una sola herramienta para las dos categorías: elige <b>Mixto</b> o <b>Femenino</b> y genera la tabla lista para publicar en 1280×720.</p>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="imagenes/dragonfest.png" alt="" data-logo-categoria onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'">
+            </div>
+            <!-- Mascota del portal: PNG vertical sin fondo. Si no existe, se oculta sola. -->
+            <img class="hero-mascota" src="imagenes/mascotadragonfest.png" alt="Mascota" data-mascota-categoria onerror="this.hidden=true">
+        </div>
+    </section>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Procesador de resultados por salas</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Sube los archivos (<strong>.log</strong> o <strong>.txt</strong>) o ingresa salas manuales que se sumarán a la tabla compuesta (excluyendo el top killer).
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="selectModoCalculo">Modo de cálculo / tabla</label>
+                    <select id="selectModoCalculo" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="normal" selected>NORMAL (Total Score)</option>
+                        <option value="top">SOLO TOP (Rank Score)</option>
+                        <option value="kill">SOLO KILL (Kill Score)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selectTemaVisual">Categoría</label>
+                    <select id="selectTemaVisual" class="dropdown-select" onchange="renderizarResultados(); cambiarCategoria(this.value)">
+                        <option value="dragonfest" selected>MIXTO (Azul oscuro)</option>
+                        <option value="dragonfestfem">FEMENINO (Rosa)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="inputModerador">Moderador / admin</label>
+                    <input type="text" id="inputModerador" placeholder="Ej: Mod · PROYECTN" oninput="renderizarResultados()">
+                </div>
+                <div class="form-group">
+                    <label for="inputFechaHora">Fecha y hora (local)</label>
+                    <input type="datetime-local" id="inputFechaHora" onchange="renderizarResultados()">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="selectBloque">Bloque (si a esa hora se jugaron 2 bloques)</label>
+                    <select id="selectBloque" onchange="renderizarResultados()">
+                        <option value="">Un solo bloque</option>
+                        <option value="A">Bloque doble · BLOQUE A</option>
+                        <option value="B">Bloque doble · BLOQUE B</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <p class="muted" style="margin:10px 0 0">Con bloque doble, la imagen y el entreno guardado dicen <b>BLOQUE A</b> o <b>BLOQUE B</b> y se guardan por separado aunque sean a la misma hora.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputFileUpload">Archivos logs de sala (.log, .txt) · selecciona varios a la vez</label>
+                <input type="file" id="inputFileUpload" class="file-input-custom" multiple accept=".txt,.log" onchange="procesarArchivos()">
+            </div>
+
+            <div class="panel-suave manual-room-section">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-keyboard"></i> Agregar sala manual (suma puntaje, no top killer)</h3>
+                <p class="muted">Escribe o pega los equipos y sus puntajes en formato <strong>Equipo, Puntos</strong> (uno por línea):</p>
+                <div class="form-group">
+                    <textarea id="textareaSalaManual" rows="6" aria-label="Sala manual" placeholder="Equipo A, 20&#10;Equipo B, 15&#10;Equipo C, 10"></textarea>
+                </div>
+                <button class="btn-access" id="btnAgregarManual" onclick="agregarSalaManualMasiva()" style="margin-top: 15px;">
+                    <i class="fa-solid fa-plus"></i> Sumar como nueva sala
+                </button>
+            </div>
+
+            <div id="contenedorEdicionEquipos" style="margin-top: 25px; display: none;">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-pen-to-square"></i> Editar / corregir nombres de equipos</h3>
+                <div id="tablaEdicionEquipos" class="table-input-container"></div>
+            </div>
+
+            <div class="results-wrapper">
+                <div class="table-fixed-container">
+                    <div id="outputTablasLadoALado" class="result-box" style="margin-top: 30px;"></div>
+                </div>
+
+                <div style="margin-top: 40px; text-align: center;">
+                    <button class="btn-access" id="btnDescargarImagen" onclick="descargarTablaReducida()">
+                        <i class="fa-solid fa-download"></i> Descargar imagen reducida (1280x720)
+                    </button>
+                </div>
+                <div id="outputTablaReducida" class="result-box"></div>
+            </div>
+
+            <!-- Cargar el entreno a la base de datos (con confirmación) -->
+            <div id="guardarBD"></div>
+        </div>
+    </section>
+
+    <section id="gestionCupos" class="tool-section">
+        <h2 class="section-title">Cupos de Dragon Fest</h2>
+        <div class="form-grid">
+            <div class="form-group"><label for="gestionCuposCategoria">Categoría</label><select id="gestionCuposCategoria" data-segmentado><option value="mixto">Mixto</option><option value="femenino">Femenino</option></select></div>
+            <div class="form-group"><label for="gestionCuposSeccion">Sección</label><select id="gestionCuposSeccion" data-segmentado><option value="cupos">Cupos</option><option value="vip">VIP</option><option value="baneos">Baneos</option></select></div>
+        </div>
+        <section class="panel-suave" data-categoria-panel="mixto" aria-label="Administración de Dragon Fest mixto">
+            <div data-gestion-panel="cupos"><h3 class="subtitulo-bloque">Cupos · Mixto</h3><div id="cuposAdminMixto"></div></div>
+            <div data-gestion-panel="vip" hidden><h3 class="subtitulo-bloque">VIP · Mixto</h3><div id="vipCuposMixto"></div></div>
+            <div data-gestion-panel="baneos" hidden><h3 class="subtitulo-bloque">Baneos · Mixto</h3><div id="baneosCuposMixto"></div></div>
+        </section>
+        <section class="panel-suave" data-categoria-panel="femenino" aria-label="Administración de Dragon Fest femenino" hidden>
+            <div data-gestion-panel="cupos"><h3 class="subtitulo-bloque">Cupos · Femenino</h3><div id="cuposAdminFemenino"></div></div>
+            <div data-gestion-panel="vip" hidden><h3 class="subtitulo-bloque">VIP · Femenino</h3><div id="vipCuposFemenino"></div></div>
+            <div data-gestion-panel="baneos" hidden><h3 class="subtitulo-bloque">Baneos · Femenino</h3><div id="baneosCuposFemenino"></div></div>
+        </section>
+    </section>
+
+    <!-- Usuarios del portal (sql/31): el staff solo entra aquí; solo lo ven el admin del portal y el superadmin -->
+    <section id="usuariosPortal" class="tool-section">
+        <h2 class="section-title">Usuarios del portal</h2>
+        <div class="tool-container"><div id="usuariosPortalAdmin"></div></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>DRAGON FEST</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+        // Mixto (azul oscuro) / Femenino (rosa): cambia colores, logo y mascota de la página
+        function cambiarCategoria(valor) {
+            const fem = valor === 'dragonfestfem';
+            document.body.dataset.tema = valor;
+            document.getElementById('heroCategoria').textContent = fem ? 'Femenino' : 'Mixto';
+            const base = 'imagenes/';
+            // Si la imagen aún no existe: logo → el de Pumas; mascota → se oculta
+            document.querySelectorAll('[data-logo-categoria]').forEach(img => {
+                img.onerror = () => { img.onerror = null; img.src = 'imagenes/LOGO PUMAS WEB.png'; };
+                img.src = base + valor + '.png';
+            });
+            document.querySelectorAll('[data-mascota-categoria]').forEach(img => {
+                img.onerror = () => { img.hidden = true; };
+                img.hidden = false;
+                img.src = base + 'mascota' + valor + '.png';
+            });
+        }
+    </script>
+    <script src="script.js?v=20261013e"></script>
+    <script src="../../portal-kit/guardado.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="../../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'dragonfest'), { once: true });</script>
+    <script>
+        // Botón "Cargar a la base de datos" (salas de logs + salas manuales, con nombres corregidos y equipos borrados fuera)
+        PumasGuardado.montar({
+            contenedor: 'guardarBD',
+            portal: () => document.getElementById('selectTemaVisual').value,
+            nombrePortal: () => (document.getElementById('selectTemaVisual').value === 'dragonfestfem' ? 'Dragon Fest Femenino' : 'Dragon Fest Mixto'),
+            tituloPorDefecto: () => 'Entreno ' + (document.getElementById('selectTemaVisual').value === 'dragonfestfem' ? 'Dragon Fest Femenino' : 'Dragon Fest Mixto') +
+                (document.getElementById('selectBloque').value ? ' · Bloque ' + document.getElementById('selectBloque').value : ''),
+            jornadaPorDefecto: () => document.getElementById('selectBloque').value ? 'BLOQUE ' + document.getElementById('selectBloque').value : 'NORMAL',
+            datos: () => {
+                if (!salasProcesadas.length) return null;
+                const fh = document.getElementById('inputFechaHora').value;
+                return {
+                    salas: salasProcesadas,
+                    nombreVisible: n => equiposEliminados.has(n) ? null : (correccionesNombres[n] || n),
+                    fecha: fh ? new Date(fh) : new Date(),
+                    moderador: document.getElementById('inputModerador').value.trim()
+                };
+            }
+        });
+    </script>
+    <script>window.addEventListener('pg:sesion', () => {
+        const categoria = document.getElementById('gestionCuposCategoria');
+        const seccion = document.getElementById('gestionCuposSeccion');
+        const montadas = new Set();
+        const paneles = {
+            'mixto-cupos': () => PumasCupos.montarAdmin('cuposAdminMixto', 'dragonfest'),
+            'mixto-vip': () => PumasControl.montarVip('vipCuposMixto', 'dragonfest', { agregar: true }),
+            'mixto-baneos': () => PumasControl.montarBaneos('baneosCuposMixto', 'dragonfest'),
+            'femenino-cupos': () => PumasCupos.montarAdmin('cuposAdminFemenino', 'dragonfestfem'),
+            'femenino-vip': () => PumasControl.montarVip('vipCuposFemenino', 'dragonfestfem', { agregar: true }),
+            'femenino-baneos': () => PumasControl.montarBaneos('baneosCuposFemenino', 'dragonfestfem')
+        };
+        const actualizar = () => {
+            document.querySelectorAll('[data-categoria-panel]').forEach(panel => { panel.hidden = panel.dataset.categoriaPanel !== categoria.value; });
+            document.querySelectorAll('[data-gestion-panel]').forEach(panel => { panel.hidden = panel.dataset.gestionPanel !== seccion.value; });
+            const clave = categoria.value + '-' + seccion.value;
+            if (!montadas.has(clave)) { paneles[clave](); montadas.add(clave); }
+        };
+        categoria.addEventListener('change', actualizar);
+        seccion.addEventListener('change', actualizar);
+        actualizar();
+    }, { once: true });</script>
+</body>
+</html>

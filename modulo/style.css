@@ -1,0 +1,43 @@
+/* Imagen descargable (4:5, 800×1000) de los módulos creados desde el panel.
+   Usa los colores del módulo: --primary y --accent (los pone modulo.js). */
+.mod-captura { line-height: normal; letter-spacing: normal; }
+.mod-captura :where(*) { margin: 0; padding: 0; line-height: normal; }
+.mod-captura :where(:not(i, .fa-solid, .fa-regular, .fa-brands)) { font-family: 'Rajdhani', sans-serif; }
+
+.mod-captura {
+    position: relative; overflow: hidden; box-sizing: border-box;
+    width: 800px; height: 1000px; padding: 20px;
+    border: 2px solid rgba(var(--primary-rgb), .45); border-radius: 12px;
+    color: #fff; font-family: 'Rajdhani', sans-serif;
+    background:
+        radial-gradient(ellipse at 85% 8%, rgba(var(--primary-rgb), .35), transparent 45%),
+        radial-gradient(ellipse at 10% 95%, rgba(var(--accent-rgb), .28), transparent 50%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, .025) 0 2px, transparent 2px 22px),
+        linear-gradient(160deg, #0b0b0f 0%, #121218 55%, #08080a 100%);
+}
+.mod-marca { position: absolute; right: -60px; bottom: -60px; width: 460px; height: 460px; object-fit: contain; opacity: .08; }
+.mod-logo-cap { position: absolute; top: 34px; left: 40px; width: 92px; height: 92px; object-fit: contain; }
+.mod-cap-header { position: absolute; top: 46px; left: 150px; right: 40px; }
+.mod-cap-titulo { margin: 0; color: #fff; font: 900 2.5rem/1 'Orbitron', sans-serif !important; letter-spacing: 1px; text-transform: uppercase;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, .8); }
+.mod-cap-sub { margin-top: 6px; color: var(--primary); font-size: 1rem; font-weight: bold; letter-spacing: 1px; }
+.mod-box { position: absolute; left: 35px; width: 730px; padding: 8px; border: 1px solid rgba(var(--primary-rgb), .45); border-radius: 8px;
+    background: rgba(10, 10, 14, .92); box-shadow: 0 4px 20px rgba(0, 0, 0, .7); }
+.mod-box-title { margin-bottom: 4px; color: var(--primary); font: bold .82rem 'Orbitron', sans-serif !important; letter-spacing: .5px; }
+.mod-tabla-general { top: 180px; max-height: 470px; overflow: hidden; }
+.mod-table { width: 100%; border-collapse: collapse; color: #fff; font-size: .76rem; }
+.mod-table th { padding: 4px; border-bottom: 2px solid rgba(var(--primary-rgb), .45); color: var(--primary); font-size: .78rem; }
+.mod-table td { padding: 3.5px; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.mod-p1 { color: var(--primary); font-weight: bold; }
+.mod-p2 { color: var(--accent); font-weight: bold; }
+.mod-booyah-section { top: 680px; }
+.mod-booyah-grid { display: flex; gap: 6px; }
+.mod-card-item { width: 100%; padding: 5px 6px; border: 1px solid rgba(var(--accent-rgb), .4); border-radius: 5px; background: rgba(24, 24, 32, .9); font-size: .7rem; text-align: center; }
+.mod-sala-title { margin-bottom: 2px; color: var(--primary); font-weight: bold; }
+.mod-equipo-name { max-width: 95px; margin: 0 auto; overflow: hidden; color: #fff; font-weight: bold; text-overflow: ellipsis; white-space: nowrap; }
+.mod-card-info { margin-top: 2px; color: #a1a1aa; font-size: .65rem; }
+.mod-killers-section { top: 800px; }
+.mod-killers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.mod-killer-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 6px; border: 1px solid rgba(var(--accent-rgb), .4); border-radius: 5px;
+    background: rgba(24, 24, 32, .9); font-size: .7rem; }
+.mod-kill { color: var(--accent); font-weight: bold; }

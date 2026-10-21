@@ -1,0 +1,662 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Panel Admin | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Emilys+Candy&family=Jersey+25&family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styleadmin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="entrenamientos" data-modo="admin"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="imagenes/proyectn.png">
+    <style>
+        /* Menú con submenús: CARGAR ▾ y VIP ▾ */
+        .main-nav .nav-grupo { position: relative; }
+        .main-nav .nav-grupo-btn .fa-caret-down { margin-left: 2px; font-size: .75em; transition: transform .2s; }
+        .main-nav .nav-grupo.abierto .nav-grupo-btn .fa-caret-down { transform: rotate(180deg); }
+        .main-nav .nav-sub { display: none; position: absolute; top: calc(100% + 10px); left: 50%; z-index: 50; min-width: 240px; margin: 0; padding: 6px;
+            transform: translateX(-50%); list-style: none; background: #121317; border: 1px solid rgba(216,195,149,.35); border-radius: 8px; box-shadow: 0 12px 30px rgba(0,0,0,.6); }
+        .main-nav .nav-grupo.abierto .nav-sub { display: block; }
+        .main-nav .nav-sub li { margin: 0; }
+        .main-nav .nav-sub a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 5px; white-space: nowrap; }
+        .main-nav .nav-sub a:hover { background: rgba(216,195,149,.1); }
+        .main-nav .nav-sub a.activo { background: rgba(216,195,149,.16); }
+        .main-nav .nav-sub a i { width: 18px; text-align: center; }
+        @media (max-width: 900px) {
+            .main-nav .nav-sub { position: static; transform: none; min-width: 0; margin-top: 6px; box-shadow: none; }
+        }
+        /* ===== Celular ===== */
+        .menu-admin { display: none; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid rgba(216,195,149,.4); border-radius: 4px;
+            background: rgba(216,195,149,.08); color: var(--primary); font: 700 .72rem 'Michroma', sans-serif; letter-spacing: .06em; cursor: pointer; }
+        @media (max-width: 900px) {
+            body { width: 100%; }
+            header.site-header { flex-wrap: wrap; gap: 10px; padding: 10px 14px !important; }
+            header.site-header .logo-img { width: 34px; height: 34px; }
+            header.site-header .logo { font-size: 1rem; letter-spacing: 1px; }
+            .menu-admin { display: inline-flex; }
+            #navAdmin { display: none; width: 100%; max-height: calc(100vh - 70px); overflow-y: auto; }
+            #navAdmin.abierto { display: block; }
+            #navAdmin > ul { flex-direction: column; align-items: stretch; gap: 0; padding: 4px 0 8px; }
+            #navAdmin > ul > li > a { display: flex; align-items: center; gap: 10px; padding: 13px 4px; font-size: .78rem; border-bottom: 1px solid rgba(216,195,149,.12); }
+            #navAdmin .nav-grupo-btn .fa-caret-down { margin-left: auto; }
+            #navAdmin .nav-sub { margin: 0 0 6px; padding: 4px; border-radius: 4px; }
+            #navAdmin .nav-sub a { padding: 12px 10px; font-size: .74rem; }
+
+            .tool-section { padding: 18px 10px !important; }
+            .tool-container { padding: 18px 14px !important; }
+            .section-title { font-size: 1.15rem !important; margin-bottom: 16px !important; }
+            .tool-desc { font-size: .95rem; }
+            /* Cuadrículas de 2 columnas escritas en la página → una columna */
+            [style*="grid-template-columns: 1fr 1fr"], [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+            .form-group input, .form-group select, .form-group textarea { width: 100%; max-width: 100%; font-size: 16px; }
+            .btn-generar { width: 100%; max-width: none !important; }
+            /* Vistas previas e imágenes: se desplazan de lado en vez de cortarse */
+            .results-wrapper, #outputTablasLadoALado, #outputAvanzado, .result-box, #outputMetricasPreview, .an-imgs { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            #outputTablasLadoALado { justify-content: flex-start !important; }
+            #outputAvanzado > div { align-items: flex-start !important; }
+            table { font-size: .85rem; }
+            .cupos-head { flex-wrap: wrap; }
+            .cupo-actions .btn-mini { flex: 1 1 auto; }
+            .cupo-meter { min-width: 0; }
+            .cc-form { grid-template-columns: 1fr; }
+            .gen-acciones .btn-generar { flex-basis: 100%; }
+        }
+        .bloque-stats { margin-top: 15px; padding: 16px; border: 1px solid rgba(216,195,149,.3); border-radius: 8px; background: rgba(216,195,149,.05); }
+        .bloque-stats h3 { margin: 0 0 6px; color: #D8C395; font-family: 'Michroma'; font-size: .85rem; }
+        .bloque-stats .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 12px; margin-top: 12px; }
+        .bloque-stats input[type=file] { width: 100%; }
+        .check-salas { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: .82rem; }
+        .check-salas th { padding: 6px; color: #D8C395; font-family: 'Michroma'; font-size: .6rem; text-align: left; }
+        .check-salas td { padding: 6px; border-top: 1px solid rgba(255,255,255,.07); color: #ddd; }
+        .check-salas .si { color: #6ee7a8; } .check-salas .no { color: #ff8a8d; }
+        .gen-acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+        .gen-acciones .btn-generar { flex: 1 1 240px; }
+        .gen-tabla { width: 100%; border-collapse: collapse; font-size: .82rem; }
+        .gen-tabla th { position: sticky; top: 0; padding: 8px 6px; background: #121317; color: #D8C395; font-family: 'Michroma'; font-size: .6rem; text-align: left; }
+        .gen-tabla td { padding: 6px; border-top: 1px solid rgba(255,255,255,.06); color: #ddd; white-space: nowrap; }
+        .gen-scroll { max-height: 420px; overflow: auto; margin-top: 12px; border: 1px solid rgba(216,195,149,.2); border-radius: 6px; }
+    </style>
+
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <img src="imagenes/proyectn.png" alt="Logo PROYECTN" class="logo-img">
+        <div class="logo">ADMIN PANEL</div>
+    </div>
+    <button type="button" class="menu-admin" id="btnMenuAdmin" aria-label="Abrir menú" aria-expanded="false" onclick="alternarMenuAdmin()">
+        <i class="fa-solid fa-bars"></i><span>Menú</span>
+    </button>
+    <nav class="main-nav is-active" id="navAdmin" style="position: static; background: transparent; box-shadow: none;">
+        <ul>
+            <li class="nav-grupo" id="grupoCargar">
+                <a href="#" class="nav-grupo-btn" onclick="abrirSubmenu(event, 'grupoCargar')" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-upload"></i> Cargar <i class="fa-solid fa-caret-down"></i></a>
+                <ul class="nav-sub">
+                    <li><a href="#" onclick="cambiarPestanaAdmin('cargar')" id="navCargar"><i class="fa-solid fa-file-lines"></i> Cargar</a></li>
+                    <li><a href="#" onclick="cambiarPestanaAdmin('cargarStats')" id="navCargarStats"><i class="fa-solid fa-chart-simple"></i> Cargar con estadísticas</a></li>
+                    <li><a href="#" onclick="cambiarPestanaAdmin('generarCsv')" id="navGenerarCsv"><i class="fa-solid fa-file-csv"></i> Generar CSV</a></li>
+                </ul>
+            </li>
+            <li class="nav-grupo" id="grupoVip">
+                <a href="#" class="nav-grupo-btn" onclick="abrirSubmenu(event, 'grupoVip')" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-crown"></i> VIP <i class="fa-solid fa-caret-down"></i></a>
+                <ul class="nav-sub">
+                    <li><a href="#" onclick="cambiarPestanaAdmin('resultadosOficiales')" id="navOficiales"><i class="fa-solid fa-shield-halved"></i> Oficiales</a></li>
+                    <li><a href="#" onclick="cambiarPestanaAdmin('registrarVip')" id="navVipReg"><i class="fa-solid fa-user-plus"></i> Registrar VIP</a></li>
+                </ul>
+            </li>
+            <li><a href="#" onclick="cambiarPestanaAdmin('caidas')" id="navCaidas" style="color: var(--secondary);"><i class="fa-solid fa-parachute-box"></i> Caídas</a></li>
+            <li><a href="#" onclick="cambiarPestanaAdmin('borrarEntrenos')" id="navBorrar" style="color: var(--secondary);"><i class="fa-solid fa-trash-can"></i> Borrar</a></li>
+            <li><a href="#" onclick="cambiarPestanaAdmin('metricas')" id="navMetricas" style="color: var(--secondary);"><i class="fa-solid fa-chart-pie"></i> Métricas</a></li>
+            <li><a href="./" style="color: #fff;" target="_blank"><i class="fa-solid fa-list"></i> Público</a></li>
+            <li class="nav-grupo" id="grupoCupos">
+                <a href="#" class="nav-grupo-btn" onclick="abrirSubmenu(event, 'grupoCupos')" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-calendar-plus"></i> Programar Cupos <i class="fa-solid fa-caret-down"></i></a>
+                <ul class="nav-sub">
+                    <li><a href="#" onclick="cambiarPestanaAdmin('programar')" id="navProgramar"><i class="fa-solid fa-calendar-plus"></i> Programar</a></li>
+                    <li><a href="#" onclick="cambiarPestanaAdmin('cuposVip')" id="navCuposVip"><i class="fa-solid fa-crown"></i> VIP</a></li>
+                    <li><a href="#" onclick="cambiarPestanaAdmin('baneados')" id="navBaneados"><i class="fa-solid fa-ban"></i> Baneados</a></li>
+                </ul>
+            </li>
+            <li id="navConfigLi" hidden><a href="#" onclick="cambiarPestanaAdmin('config')" id="navConfig" style="color: var(--secondary);"><i class="fa-solid fa-gear"></i> Configuración</a></li>
+            <li><a href="#" onclick="cerrarSesion()" style="color: #ff5555;"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            
+        </ul>
+    </nav>
+</header>
+
+    <!-- SECCIÓN 1: CARGAR RESULTADOS -->
+    <section id="seccionCargar" class="tool-section" style="padding-top: 40px;">
+        <h2 class="section-title" id="tituloCargar">Cargar Resultados de Entrenamientos</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Sube los registros <code>.log</code> o <code>.txt</code>. Verifica y ajusta los nombres antes de generar la vista previa y guardar.
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>TIPO DE PARTIDA</label>
+                    <select id="selectTipoPartida">
+                        <option value="NORMAL">NORMAL</option>
+                        <option value="TRANSMITIDO">TRANSMITIDO</option>
+                        <option value="AGUANTE">AGUANTE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>FECHA Y HORA</label>
+                    <input type="datetime-local" id="inputFechaHoraEntreno" style="background:#0a0b10; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:12px; border-radius:6px; width:100%;">
+                </div>
+                <div class="form-group">
+                    <label>MODERADOR / ADMIN</label>
+                    <input type="text" id="inputModerador" placeholder="Ej: Coach Niko">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>MODO DE VISUALIZACIÓN DE TABLA</label>
+                <select id="selectModoCalculo">
+                    <option value="1">NORMAL (Puntuación Total Estándar)</option>
+                    <option value="2">SCORE RANK (Solo Puntuación por Posición)</option>
+                    <option value="3">SCORE KILL (Solo Puntuación por Kills)</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label id="labelLogs">SUBIR ARCHIVOS LOGS DE SALAS (.log, .txt)</label>
+                <input type="file" id="fileInput" multiple accept=".txt,.log" onchange="prepararRenombradoEquipos()">
+            </div>
+
+            <!-- Solo en "Cargar con estadísticas" (completos_admin.js): repetición .json/.bin y resultados completos .csv -->
+            <div class="bloque-stats" id="bloqueCompletos" hidden>
+                <h3><i class="fa-solid fa-chart-simple"></i> ESTADÍSTICAS DE LA SALA</h3>
+                <p class="form-hint" style="margin:0">Sube los archivos de <b>4 a 6 salas</b>: por cada sala su <b>match .log</b> (arriba), su <b>replay .json</b> y su <b>.bin</b>. Se emparejan por el número de la partida que va en el nombre. Con el .json salen tiempo vivo, primera sangre, kill más lejana, caídas y armas de las kills; el .csv de resultados completos es opcional y suma daño, headshots, revividas y paredes gloo.</p>
+                <div class="stats-grid">
+                    <div class="form-group">
+                        <label>REPLAYS (.json) · 4 A 6</label>
+                        <input type="file" id="fileReplays" multiple accept=".json">
+                    </div>
+                    <div class="form-group">
+                        <label>REPLAYS (.bin) · 4 A 6</label>
+                        <input type="file" id="fileBins" multiple accept=".bin">
+                    </div>
+                    <div class="form-group">
+                        <label>RESULTADOS COMPLETOS (.csv) · OPCIONAL</label>
+                        <input type="file" id="fileCompletos" multiple accept=".csv">
+                    </div>
+                </div>
+                <div id="checklistSalas"></div>
+                <p class="form-hint" id="infoCompletos" style="margin-top:10px"></p>
+            </div>
+
+            <div class="layout-panel-carga" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; align-items: start;">
+                
+                <div id="seccionRenombrar" style="display: none; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(216,195,149,0.2);">
+                    <h3 style="color: #ffcc00; margin-bottom: 10px; font-family: 'Michroma'; font-size: 0.95rem;">Verificar Equipos</h3>
+                    <div id="listaEquiposInputs" style="display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto;"></div>
+                    <button onclick="procesarConNombresPersonalizados()" class="btn-generar" style="margin-top: 15px; padding: 10px 20px; background: #D8C395; color: #000; font-weight: bold; border: none; border-radius: 5px; cursor: pointer;">
+                        CONFIRMAR Y ACTUALIZAR VISTA
+                    </button>
+                </div>
+
+                <div style="display: flex; flex-direction: column; width: 100%;">
+                    <div class="results-wrapper">
+                        <div id="outputTablasLadoALado" class="result-box" style="display: flex; justify-content: center; width: 100%;">
+                            <div style="color: var(--gray); text-align: center; padding: 40px; border: 1px dashed rgba(216,195,149,0.2); border-radius: 8px; width: 100%;">
+                                Sube archivos y confirma los nombres para generar la vista previa.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="outputAvanzado"></div>
+
+                    <div id="contenedorTextoCargadoCopiable" style="display: none; margin-top: 20px; background: rgba(18, 19, 23, 0.95); border: 1px solid rgba(216,195,149, 0.3); border-radius: 8px; padding: 15px; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-family: 'Michroma'; color: #D8C395; font-size: 0.85rem;">TEXTO DESCRIPTIVO PARA REDES / DISCORD</span>
+                            <button onclick="copiarTextoCargado()" style="background: var(--primary); color: var(--dark); border: none; padding: 6px 12px; border-radius: 4px; font-family: 'Michroma'; font-weight: bold; font-size: 0.75rem; cursor: pointer;">
+                                <i class="fa-solid fa-copy"></i> COPIAR TEXTO
+                            </button>
+                        </div>
+                        <textarea id="inputTextoCargadoCopiable" readonly style="width: 100%; height: 140px; background: #0a0b10; border: 1px solid rgba(216,195,149, 0.2); color: #fff; padding: 10px; border-radius: 6px; font-family: 'Trebuchet MS'; font-size: 0.9rem; resize: none;"></textarea>
+                    </div>
+
+                    <div id="contenedorBotonGuardarFinal" style="display: none; margin-top: 20px; width: 100%;">
+                        <button class="btn-generar" onclick="procesarArchivosLog()">
+                            <i class="fa-solid fa-gears"></i> PROCESAR Y GUARDAR EN BASE DE DATOS
+                        </button>
+                        <button class="btn-generar" onclick="abrirGenerarBaneo(true)" style="margin-top: 10px; background: rgba(255,85,85,.15); color: #ff8a8d; border: 1px solid rgba(255,85,85,.5);">
+                            <i class="fa-solid fa-gavel"></i> GENERAR BANEO (no jugaron 2 salas o la última)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <button onclick="limpiarBaseDeDatosCompletamente()" style="width: 100%; padding: 12px; background: rgba(255, 51, 51, 0.15); color: #ff5555; border: 1px solid rgba(255, 51, 51, 0.4); border-radius: 6px; font-family: 'Michroma'; font-weight: bold; cursor: pointer;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> LIMPIAR TODA LA BASE DE DATOS
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- GENERAR CSV OFICIALES (completos_admin.js): equipos y jugadores, sin guardar nada en la base -->
+    <section id="seccionGenerarCsv" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Generar CSV oficiales</h2>
+        <div class="tool-container">
+            <div id="generadorCsv"></div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 2: RESULTADOS EQUIPOS OFICIALES -->
+    <section id="seccionResultadosOficiales" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Resultados Exclusivos de Equipos Oficiales</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Lista consolidada que muestra el rendimiento y puntuación de los equipos que forman parte de la lista oficial registrada.
+            </p>
+
+            <div id="tablaFiltroEquiposOficiales" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: 20px;">
+                <div style="text-align: center; color: var(--gray); padding: 20px; grid-column: span 2;">Cargando datos filtrados...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 3: REGISTRAR EQUIPOS VIP -->
+    <section id="seccionRegistrarVip" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Registro de Equipos VIP / Oficiales</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Agrega equipos individualmente o registra múltiples equipos de forma masiva pegando la lista de nombres.
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">
+                
+                <!-- Registro Individual -->
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(216,195,149,0.2);">
+                    <h3 style="color: var(--primary); font-family: 'Michroma'; font-size: 0.95rem; margin-bottom: 15px;"><i class="fa-solid fa-user-plus"></i> Registro Individual</h3>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>NOMBRE DEL EQUIPO</label>
+                        <input type="text" id="inputNombreVip" placeholder="Ej: PROYECTN">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>LOGO / ESCUDO (OPCIONAL)</label>
+                        <input type="file" id="inputLogoVip" accept="image/*">
+                    </div>
+                    <button onclick="registrarNuevoEquipoVip()" class="btn-generar" style="margin-top: 0;">
+                        <i class="fa-solid fa-circle-plus"></i> GUARDAR EQUIPO VIP
+                    </button>
+                </div>
+
+                <!-- Registro Masivo -->
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(216,195,149,0.2);">
+                    <h3 style="color: var(--primary); font-family: 'Michroma'; font-size: 0.95rem; margin-bottom: 15px;"><i class="fa-solid fa-list-check"></i> Registro Masivo por Lista</h3>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>PEGAR LISTA (Un nombre por línea)</label>
+                        <textarea id="inputListaMasivaVip" placeholder="PROYECTN&#10;Loro Squad&#10;Team Alpha" style="width: 100%; height: 110px; background: #0a0b10; border: 1px solid rgba(216,195,149,0.2); color: #fff; padding: 10px; border-radius: 6px; font-family: 'Trebuchet MS'; font-size: 0.9rem; resize: none;"></textarea>
+                    </div>
+                    <button onclick="registrarEquiposMasivos()" class="btn-generar" style="margin-top: 0; background: #D8C395; color: #000;">
+                        <i class="fa-solid fa-file-arrow-up"></i> PROCESAR LISTA MASIVA
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Exportar VIP sin resultados y solicitudes de la página pública (vip_admin.js) -->
+            <div style="display:grid;grid-template-columns:1fr;gap:20px;margin-top:10px">
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(216,195,149,0.2);">
+                    <h3 style="color: var(--primary); font-family: 'Michroma'; font-size: 0.95rem; margin-bottom: 12px;"><i class="fa-solid fa-file-export"></i> VIP sin resultados</h3>
+                    <div id="vipExportar"></div>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(216,195,149,0.2);">
+                    <h3 style="color: var(--primary); font-family: 'Michroma'; font-size: 0.95rem; margin-bottom: 12px;"><i class="fa-solid fa-key"></i> Códigos de acceso al registro VIP</h3>
+                    <div id="vipCodigos"></div>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid rgba(216,195,149,0.2);">
+                    <h3 style="color: var(--primary); font-family: 'Michroma'; font-size: 0.95rem; margin-bottom: 12px;"><i class="fa-solid fa-crown"></i> Solicitudes de registro VIP
+                        <button class="btn-mini" onclick="PumasVipAdmin.recargar()" style="float:right"><i class="fa-solid fa-rotate-right"></i></button></h3>
+                    <div id="vipSolicitudes"></div>
+                </div>
+            </div>
+
+            <!-- Listado de Equipos Actuales -->
+            <div style="margin-top: 35px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 25px;">
+                <h3 style="color: var(--primary); font-family: 'Michroma'; font-size: 1rem; margin-bottom: 15px;">Listado de Equipos VIP Actuales</h3>
+                <div style="width: 100%; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 0.95rem;">
+                        <thead>
+                            <tr style="color: var(--primary); font-family: 'Michroma'; border-bottom: 2px solid rgba(216,195,149,0.3); font-size: 0.85rem;">
+                                <th style="text-align: center; padding: 10px;">LOGO</th>
+                                <th style="text-align: left; padding: 10px;">EQUIPO</th>
+                                <th style="text-align: center; padding: 10px;">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaListaVipAdmin">
+                            <tr><td colspan="3" style="text-align: center; color: var(--gray); padding: 20px;">Cargando equipos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 4: BORRAR ENTRENAMIENTOS -->
+    <section id="seccionBorrarEntrenos" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Gestión y Eliminación de Entrenamientos</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Aquí puedes visualizar el historial de sesiones registradas y eliminar un entrenamiento en específico si cometiste algún error al subirlo.
+            </p>
+
+            <div style="margin-top: 20px; width: 100%; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="color: var(--primary); font-family: 'Michroma'; border-bottom: 2px solid rgba(216,195,149,0.3); font-size: 0.85rem;">
+                            <th style="text-align: left; padding: 10px;">ID</th>
+                            <th style="text-align: left; padding: 10px;">TÍTULO</th>
+                            <th style="text-align: left; padding: 10px;">TIPO / JORNADA</th>
+                            <th style="text-align: left; padding: 10px;">MODERADOR</th>
+                            <th style="text-align: center; padding: 10px;">FECHA</th>
+                            <th style="text-align: center; padding: 10px;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaListaEntrenamientosAdmin">
+                        <tr><td colspan="6" style="text-align: center; color: var(--gray); padding: 20px;">Cargando sesiones...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <!-- SECCIÓN: PROGRAMAR ENTRENAMIENTOS (CUPOS) -->
+    <section id="seccionProgramar" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Programar Entrenamiento (Abrir Cupos)</h2>
+        <div class="tool-container">
+            <p class="tool-desc">Configura los detalles del próximo entrenamiento. Puedes publicarlo al instante o programar la hora en que aparecerá en la página de cupos.</p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>TÍTULO DEL ENTRENAMIENTO</label>
+                    <input type="text" id="progTitulo" placeholder="Ej: Práctica Oficial PROYECTN - Lunes">
+                </div>
+                <div class="form-group">
+                    <label>FECHA Y HORA DEL ENTRENO</label>
+                    <input type="datetime-local" id="progFecha">
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>TIPO DE CUPO</label>
+                    <select id="progTipo">
+                        <option value="PUBLICO">PÚBLICO (cualquier equipo)</option>
+                        <option value="VIP">VIP (solo equipos VIP · sale solo en el link oculto)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="form-hint" style="margin-top: 28px;"><i class="fa-solid fa-circle-info"></i> Los equipos y números <b>baneados</b> no consiguen cupo en ninguno de los dos.</div>
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>¿SE REQUIERE STAFF?</label>
+                    <select id="progStaff" onchange="document.getElementById('contenedorStaffEquipos').style.display = this.value === 'SI' ? 'block' : 'none';">
+                        <option value="NO">NO</option>
+                        <option value="SI">SÍ, HABRÁ CUPOS DE STAFF</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>CUPOS TOTALES DE EQUIPOS</label>
+                    <input type="number" id="progTotalEquipos" value="15" min="1" max="50">
+                </div>
+            </div>
+
+            <div class="form-group" id="contenedorStaffEquipos" style="display: none; margin-top: 15px;">
+                <label>EQUIPOS ASEGURADOS POR STAFF (Uno por línea)</label>
+                <textarea id="progStaffEquipos" placeholder="Pumas Squad&#10;Team Alpha"></textarea>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Estos equipos se restan de los cupos y aparecen en la lista pública.</div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>¿REQUIERE HORA DE PUBLICACIÓN?</label>
+                    <select id="progRequierePub" onchange="document.getElementById('contenedorPublicarEn').style.display = this.value === 'SI' ? 'flex' : 'none';">
+                        <option value="NO">NO, PUBLICAR AL INSTANTE</option>
+                        <option value="SI">SÍ, PROGRAMAR LA PUBLICACIÓN</option>
+                    </select>
+                </div>
+                <div class="form-group" id="contenedorPublicarEn" style="display: none;">
+                    <label>SE PUBLICA EL (HORA COLOMBIA)</label>
+                    <input type="datetime-local" id="progPublicarEn">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>LINK DEL GRUPO (WHATSAPP / DISCORD)</label>
+                <input type="url" id="progLink" placeholder="https://chat.whatsapp.com/...">
+            </div>
+
+            <button onclick="guardarProgramacion()" class="btn-generar" style="margin-top: 25px;">
+                <i class="fa-solid fa-save"></i> GUARDAR ENTRENAMIENTO
+            </button>
+        </div>
+
+        <div class="tool-container" style="margin-top: 30px;">
+            <div class="cupos-head">
+                <h3><i class="fa-solid fa-list-check"></i> Historial de cupos públicos</h3>
+                <button class="btn-mini" onclick="cargarEntrenamientosProgramadosAdmin('PUBLICO')"><i class="fa-solid fa-rotate-right"></i> Refrescar</button>
+            </div>
+            <div class="cupos-tabs" id="tabsCupos"></div>
+            <div id="listaProgramadosAdmin" class="cupos-list">
+                <div class="cupos-empty">Cargando entrenamientos programados...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CAÍDAS: la caída de cada equipo por mapa (caidas.js) -->
+    <section id="seccionCaidas" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Caídas por equipo</h2>
+        <div class="tool-container"><div id="caidasPumas"></div></div>
+    </section>
+
+    <!-- CONFIGURACIÓN DEL PORTAL DE PUMAS (sql/28): secciones públicas y usuarios del staff -->
+    <section id="seccionConfig" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Configuración de Entrenos PROYECTN</h2>
+        <div class="tool-container"><div id="configPumas"></div></div>
+    </section>
+
+    <!-- CUPOS VIP (sql/25) -->
+    <section id="seccionCuposVip" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Cupos VIP</h2>
+        <div class="tool-container"><div id="cuposVipAdmin"></div></div>
+
+        <div class="tool-container" style="margin-top: 30px;">
+            <div class="cupos-head">
+                <h3><i class="fa-solid fa-crown"></i> Historial de cupos VIP</h3>
+                <button class="btn-mini" onclick="cargarEntrenamientosProgramadosAdmin('VIP')"><i class="fa-solid fa-rotate-right"></i> Refrescar</button>
+            </div>
+            <div class="cupos-tabs" id="tabsCuposVip"></div>
+            <div id="listaVipAdmin" class="cupos-list">
+                <div class="cupos-empty">Cargando cupos VIP...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BANEADOS: por equipo y por número (sql/25) -->
+    <section id="seccionBaneados" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Baneados</h2>
+        <div class="tool-container"><div id="baneadosAdmin"></div></div>
+    </section>
+
+    <!-- SECCIÓN 5: MÉTRICAS GLOBALES (4:5) -->
+    <section id="seccionMetricas" class="tool-section" style="padding-top: 40px; display: none;">
+        <h2 class="section-title">Métricas Globales (Formato 4:5)</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Genera la tarjeta con el fondo y estadísticas consolidadas de todos los entrenamientos en un formato vertical 4:5.
+            </p>
+
+            <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+                <button onclick="generarVistaPreviaMetricas()" class="btn-generar" style="max-width: 350px; padding: 12px 25px; font-size: 1rem;">
+                    <i class="fa-solid fa-gears"></i> CONFIRMAR Y GENERAR MÉTRICAS
+                </button>
+            </div>
+
+            <div class="results-wrapper">
+                <div id="outputMetricasPreview" class="result-box" style="display: flex; justify-content: center; width: 100%;">
+                    <div style="color: var(--gray); text-align: center; padding: 40px; border: 1px dashed rgba(216,195,149,0.2); border-radius: 8px; width: 100%;">
+                        Haz clic en "Confirmar y Generar Métricas" para renderizar la tarjeta vertical.
+                    </div>
+                </div>
+            </div>
+
+            <div id="contenedorTextoMetricasCopiable" style="display: none; margin-top: 25px; background: rgba(18, 19, 23, 0.95); border: 1px solid rgba(216,195,149, 0.3); border-radius: 8px; padding: 15px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-family: 'Michroma'; color: #D8C395; font-size: 0.85rem;">TEXTO DESCRIPTIVO PARA REDES / DISCORD</span>
+                    <button onclick="copiarTextoMetricas()" style="background: var(--primary); color: var(--dark); border: none; padding: 6px 12px; border-radius: 4px; font-family: 'Michroma'; font-weight: bold; font-size: 0.75rem; cursor: pointer;">
+                        <i class="fa-solid fa-copy"></i> COPIAR TEXTO
+                    </button>
+                </div>
+                <textarea id="inputTextoMetricasCopiable" readonly style="width: 100%; height: 150px; background: #0a0b10; border: 1px solid rgba(216,195,149, 0.2); color: #fff; padding: 10px; border-radius: 6px; font-family: 'Trebuchet MS'; font-size: 0.9rem; resize: none;"></textarea>
+            </div>
+
+        </div>
+    </section>
+    
+
+    <footer>
+        <p>&copy; 2026 PROYECTN. Panel de Administración.</p>
+    </footer>
+
+    <script>
+// Pestañas del panel. "cargar" y "cargarStats" usan la misma sección: la segunda muestra el bloque de estadísticas
+        const PESTANAS = {
+            cargar:              { sec: 'seccionCargar', nav: 'navCargar' },
+            cargarStats:         { sec: 'seccionCargar', nav: 'navCargarStats' },
+            generarCsv:          { sec: 'seccionGenerarCsv', nav: 'navGenerarCsv' },
+            resultadosOficiales: { sec: 'seccionResultadosOficiales', nav: 'navOficiales', alAbrir: () => cargarResultadosEquiposOficiales() },
+            registrarVip:        { sec: 'seccionRegistrarVip', nav: 'navVipReg', alAbrir: () => cargarListaEquiposVipAdmin() },
+            borrarEntrenos:      { sec: 'seccionBorrarEntrenos', nav: 'navBorrar', alAbrir: () => cargarListaEntrenamientosParaBorrar() },
+            metricas:            { sec: 'seccionMetricas', nav: 'navMetricas' },
+            programar:           { sec: 'seccionProgramar', nav: 'navProgramar', alAbrir: () => cargarEntrenamientosProgramadosAdmin('PUBLICO') },
+            cuposVip:            { sec: 'seccionCuposVip', nav: 'navCuposVip', alAbrir: () => {
+                PumasControl.montarVip('cuposVipAdmin', 'entrenamientos', { alCrear: () => cargarEntrenamientosProgramadosAdmin('VIP') });
+                cargarEntrenamientosProgramadosAdmin('VIP');
+            } },
+            baneados:            { sec: 'seccionBaneados', nav: 'navBaneados', alAbrir: () => PumasControl.montarBaneos('baneadosAdmin', 'entrenamientos') },
+            config:              { sec: 'seccionConfig', nav: 'navConfig', alAbrir: () => PumasConfig.montar('configPumas') },
+            caidas:              { sec: 'seccionCaidas', nav: 'navCaidas', alAbrir: () => PumasCaidas.montar('caidasPumas') }
+        };
+
+        function cerrarSubmenus(excepto) {
+            document.querySelectorAll('.nav-grupo.abierto').forEach(g => {
+                if (g.id === excepto) return;
+                g.classList.remove('abierto');
+                g.querySelector('.nav-grupo-btn').setAttribute('aria-expanded', 'false');
+            });
+        }
+        function abrirSubmenu(e, id) {
+            e.preventDefault();
+            e.stopPropagation();
+            const g = document.getElementById(id);
+            cerrarSubmenus(id);
+            const abierto = g.classList.toggle('abierto');
+            g.querySelector('.nav-grupo-btn').setAttribute('aria-expanded', abierto ? 'true' : 'false');
+        }
+        document.addEventListener('click', e => { if (!e.target.closest('.nav-grupo')) cerrarSubmenus(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarSubmenus(); });
+
+        function alternarMenuAdmin(forzar) {
+            const nav = document.getElementById('navAdmin'), btn = document.getElementById('btnMenuAdmin');
+            const abierto = nav.classList.toggle('abierto', forzar);
+            btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+            btn.querySelector('i').className = abierto ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
+
+        function cambiarPestanaAdmin(pestana) {
+            if (window.event && window.event.preventDefault) window.event.preventDefault();
+            if (document.getElementById('navAdmin').classList.contains('abierto')) { alternarMenuAdmin(false); window.scrollTo(0, 0); }
+            const elegida = PESTANAS[pestana] || PESTANAS.cargar;
+            cerrarSubmenus();
+            new Set(Object.values(PESTANAS).map(p => p.sec)).forEach(id => {
+                const sec = document.getElementById(id);
+                if (sec) sec.style.display = id === elegida.sec ? 'block' : 'none';
+            });
+            Object.values(PESTANAS).forEach(p => {
+                const nav = document.getElementById(p.nav);
+                if (!nav) return;
+                const activa = p === elegida;
+                nav.style.color = activa ? 'var(--primary)' : 'var(--secondary)';
+                nav.classList.toggle('activo', activa);
+            });
+            // El botón del grupo (CARGAR ▾ / VIP ▾) se marca si la pestaña activa está dentro
+            document.querySelectorAll('.nav-grupo').forEach(g => {
+                g.querySelector('.nav-grupo-btn').style.color = g.querySelector('#' + elegida.nav) ? 'var(--primary)' : 'var(--secondary)';
+            });
+            if (elegida.sec === 'seccionCargar' && window.modoCargaEstadisticas) window.modoCargaEstadisticas(pestana === 'cargarStats');
+            if (elegida.alAbrir) elegida.alAbrir();
+        }
+
+        const sesionUsuario = localStorage.getItem('pumas_user');
+        if (!sesionUsuario) {
+            window.location.href = 'login.html';
+        } else {
+            const usuarioObj = JSON.parse(sesionUsuario);
+            document.getElementById('inputModerador').value = usuarioObj.nombre;
+        }
+
+        function cerrarSesion() {
+            PumasPortal.logout('login.html');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const localDate = new Date(now.getTime() - (offset*60*1000)).toISOString().slice(0,16);
+            const inputFecha = document.getElementById('inputFechaHoraEntreno');
+            if(inputFecha && !inputFecha.value) inputFecha.value = localDate;
+            cambiarPestanaAdmin('cargar');
+        });
+    </script>
+    <script src="../../portal-kit/completos.js?v=20261013e"></script>
+    <script src="admin_logica.js?v=20261013e"></script>
+    <script src="completos_admin.js?v=20261013e"></script>
+    <script src="../../portal-kit/generador-csv.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="config_portal.js?v=20261013e"></script>
+    <script src="caidas.js?v=20261013e"></script>
+    <script>
+        // Permisos por usuario (staff de Pumas): solo los módulos habilitados; Configuración solo para los admins
+        window.addEventListener('pg:sesion', () => PumasConfig.aplicarPermisos(PESTANAS, cambiarPestanaAdmin), { once: true });
+    </script>
+    <script>
+        // GENERAR BANEO: equipos que no jugaron 2 salas o no jugaron la última (con los .log cargados)
+        function equiposParaBaneo() {
+            if (typeof globalEquipos === 'undefined' || !globalEquipos.length) return [];
+            return globalEquipos.map(e => ({ equipo: e.name, salas: Array.from({ length: globalNumSalas }, (_, i) => e.salasPuntos[i] !== undefined) }));
+        }
+        function abrirGenerarBaneo(avisar) {
+            const hay = PumasControl.revisarSalas('entrenamientos', equiposParaBaneo());
+            if (!hay && avisar) alert(globalNumSalas < 2 ? 'Carga al menos 2 salas para revisar.' : 'Todos los equipos jugaron 2 o más salas y la última. No hay a quién banear.');
+        }
+        // Después de guardar los resultados se abre sola si hay equipos para revisar
+        window.alTerminarEntreno = () => abrirGenerarBaneo(false);
+    </script>
+    <script>PumasGenerador.montar('generadorCsv');</script>
+    <script src="vip_admin.js?v=20261013e"></script>
+</body>
+</html>

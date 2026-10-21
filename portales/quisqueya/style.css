@@ -1,0 +1,92 @@
+﻿/* Ascensos QFD · estilos propios de la herramienta.
+   La apariencia general (cabecera, botones, formularios) viene de ../../portal-kit/portal.css */
+
+/* La página usa otra letra e interlineado: dentro de la imagen se restablecen
+   (como estaba antes) para que entren todos los equipos y jugadores. */
+.result-box { line-height: normal; letter-spacing: normal; }
+.result-box :where(*) { margin: 0; padding: 0; line-height: normal; }
+.result-box :where(:not(i, .fa-solid, .fa-regular, .fa-brands)) { font-family: 'Rajdhani', sans-serif; }
+
+.table-fixed-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-input-container {
+    width: 100%;
+    max-height: 260px;
+    overflow: auto;
+    background: rgba(8, 14, 20, 0.95);
+    border: 1px solid rgba(var(--primary-rgb), 0.35);
+    border-radius: 2px;
+    padding: 6px;
+    margin-bottom: 20px;
+}
+.table-input-container table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.table-input-container th, .table-input-container td { border: 1px solid rgba(255, 255, 255, 0.1); padding: 3px 8px; text-align: center; color: var(--light); font-size: 0.8rem; }
+.table-input-container th { position: sticky; top: 0; z-index: 1; background: #0e2230; color: var(--primary); font-family: var(--font-display); font-size: .7rem; letter-spacing: .08em; }
+
+.input-edit-team {
+    width: 100%;
+    max-width: 300px;
+    padding: 3px 8px;
+    background: #0b1117;
+    border: 1px solid rgba(var(--primary-rgb), 0.4);
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 2px;
+    text-align: left;
+}
+
+.btn-tabla-eliminar,
+.btn-tabla-restaurar {
+    border: none;
+    padding: 3px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.72rem;
+}
+.btn-tabla-eliminar { background: #e5484d; color: #fff; }
+.btn-tabla-eliminar:hover { background: #c4373c; }
+.btn-tabla-restaurar { background: var(--primary); color: #001018; }
+.btn-tabla-restaurar:hover { background: var(--accent); }
+
+/* Tabla de vista previa (pantalla) */
+.side-by-side-wrapper { display: flex; gap: 20px; flex-wrap: nowrap; background: rgba(10, 16, 22, 0.95); padding: 25px; border: 1px solid rgba(var(--primary-rgb), .2); border-radius: 2px; align-items: flex-start; min-width: 650px; }
+.column-table-general { flex: 0 0 100%; max-width: 100%; }
+.table-general-box { background-size: cover; background-position: center; border-radius: 2px; overflow-x: auto; }
+.table-general-overlay { background: rgba(14, 21, 30, 0.95); padding: 15px; }
+.table-general-box table { width: 100%; border-collapse: collapse; margin-top: 10px; background: rgba(8, 12, 18, 0.9); }
+.table-general-box th, .table-general-box td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: #fff; font-size: 0.85rem; }
+.table-general-box th { background: rgba(var(--primary-rgb), 0.15); color: var(--primary); font-family: 'Orbitron', sans-serif; }
+
+#outputTablaReducida {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 480px;
+    margin: 20px auto 0;
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+/* TEMAS VISUALES PARA LA IMAGEN (no cambiar: definen la descarga) */
+.tema-fdquisqueya {
+    --tema-table-bg: transparent;
+    --tema-cell-bg: transparent;
+    --tema-header-bg: rgba(0, 140, 200, 0.85);
+    --tema-text: #ffffff;
+    --tema-header-text: #80e5ff;
+    --tema-border: rgba(0, 191, 255, 0.35);
+    background-image: url('imagenes/fd.png');
+}
+
+@media (max-width: 900px) {
+    .side-by-side-wrapper { flex-wrap: wrap; }
+}

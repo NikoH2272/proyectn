@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Test Juegos | Admin PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../portal-kit/portal.css?v=20261019a">
+<link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../portal-kit/portal.js?v=20261019a" data-modo="login" data-sin-efecto></script>
+<style>
+body{background:#0a0a0a;color:#F4EEDC;font-family:inherit;min-height:100vh}
+.wrap{max-width:1000px;margin:0 auto;padding:28px 18px}
+.banner{display:flex;align-items:center;gap:12px;padding:12px 18px;
+  background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.4);border-radius:8px;margin-bottom:20px;font-size:.86rem;color:#ffaa80}
+.banner b{color:#FF6B35;font-family:'Michroma',sans-serif;font-size:.78rem;letter-spacing:.05em}
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.hdr h1{font:900 1.2rem 'Michroma',sans-serif;letter-spacing:.08em;color:#D8C395;text-transform:uppercase;margin:0}
+
+/* Portal selector */
+.psel{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.psel label{font:700 .72rem 'Michroma',sans-serif;letter-spacing:.08em;color:#888;text-transform:uppercase}
+.psel select,.psel input{background:#111;border:1px solid rgba(216,195,149,.3);color:#F4EEDC;border-radius:6px;
+  padding:7px 12px;font:inherit;font-size:.86rem;outline:none;min-width:160px}
+
+/* Tabs */
+.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:8px 16px;border:1px solid rgba(216,195,149,.2);border-radius:6px;
+  background:rgba(255,255,255,.04);color:#888;font:700 .75rem 'Michroma',sans-serif;
+  letter-spacing:.05em;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tab:hover{border-color:rgba(216,195,149,.45);color:#D8C395}
+.tab.act{background:rgba(216,195,149,.14);border-color:rgba(216,195,149,.55);color:#D8C395}
+
+/* Exportar panel */
+.exp-panel{margin-top:22px;padding:18px;background:rgba(255,255,255,.04);border:1px solid rgba(216,195,149,.18);border-radius:8px}
+.exp-panel h3{font:700 .76rem 'Michroma',sans-serif;letter-spacing:.1em;color:#D8C395;text-transform:uppercase;margin:0 0 14px}
+.exp-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn-exp{padding:9px 18px;border-radius:6px;font:700 .74rem 'Michroma',sans-serif;letter-spacing:.06em;cursor:pointer;border:1px solid;transition:all .2s}
+.btn-csv{background:rgba(77,255,145,.1);border-color:rgba(77,255,145,.4);color:#4dff91}
+.btn-csv:hover{background:rgba(77,255,145,.2)}
+.btn-json{background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.4);color:#00E5FF}
+.btn-json:hover{background:rgba(0,229,255,.2)}
+.exp-filter select{background:#111;border:1px solid rgba(216,195,149,.3);color:#F4EEDC;border-radius:6px;padding:7px 12px;font:inherit;font-size:.82rem;outline:none}
+.exp-msg{margin-top:10px;font-size:.82rem;min-height:1.2em;color:#4dff91}
+.exp-msg.err{color:#ff6b6b}
+
+/* Score preview */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:16px}
+.score-col h4{font:700 .68rem 'Michroma',sans-serif;letter-spacing:.08em;color:#FF6B35;text-transform:uppercase;margin:0 0 8px}
+.score-row{display:flex;justify-content:space-between;padding:4px 8px;border-radius:4px;background:rgba(255,255,255,.03);font-size:.8rem;margin-bottom:3px}
+.score-row .pts{color:#FFD54A;font-weight:700;font-family:'Michroma',sans-serif}
+.empty{color:#555;font-size:.8rem;font-style:italic}
+
+/* Vuln report */
+.vuln-panel{margin-top:22px;padding:18px;background:rgba(255,50,50,.04);border:1px solid rgba(229,72,77,.2);border-radius:8px}
+.vuln-panel h3{font:700 .76rem 'Michroma',sans-serif;letter-spacing:.1em;color:#ff8a8d;text-transform:uppercase;margin:0 0 14px}
+.vuln-item{display:flex;gap:10px;padding:8px 10px;border-radius:6px;margin-bottom:8px;background:rgba(255,255,255,.03);font-size:.83rem;align-items:flex-start}
+.vuln-ok{color:#4dff91}.vuln-warn{color:#FFD54A}.vuln-badge{font:700 .62rem 'Michroma',sans-serif;letter-spacing:.05em;padding:2px 8px;border-radius:3px;white-space:nowrap;margin-top:2px}
+.badge-ok{background:rgba(77,255,145,.15);color:#4dff91;border:1px solid rgba(77,255,145,.3)}
+.badge-warn{background:rgba(255,213,74,.15);color:#FFD54A;border:1px solid rgba(255,213,74,.3)}
+.badge-err{background:rgba(229,72,77,.15);color:#ff8a8d;border:1px solid rgba(229,72,77,.3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+    <h1>🧪 Test de Juegos</h1>
+    <span style="font:700 .7rem 'Michroma',sans-serif;color:#FF6B35;letter-spacing:.06em">ADMIN ONLY</span>
+</div>
+
+<div class="banner">
+    <i class="fa-solid fa-flask" style="font-size:1.1rem;color:#FF6B35"></i>
+    <div><b>MODO ADMIN</b> — Los juegos cargan aunque estén inactivos en BD. Scores guardados afectan producción.</div>
+</div>
+
+<!-- Selector de portal -->
+<div class="psel">
+    <label>Portal</label>
+    <select id="selPortal"><option value="">Cargando…</option></select>
+    <label>Juego</label>
+    <select id="selTipo">
+        <option value="juego">🐍 Snake</option>
+        <option value="juego_tetris">🟦 Tetris</option>
+        <option value="juego_3lineas">✕○ 3 en Línea</option>
+        <option value="juego_pacman">🟡 Pac-Man</option>
+        <option value="juego_breakout">🧱 Breakout</option>
+        <option value="juego_bomberman">💣 Bomberman</option>
+        <option value="juego_invaders">🚀 Space Invaders</option>
+        <option value="juego_flappy">🐦 Flappy Bird</option>
+    </select>
+    <button class="tab act" id="btnCargar" style="padding:8px 20px">▶ Cargar</button>
+</div>
+
+<!-- Área de juego -->
+<div id="areaJuego"></div>
+
+<!-- Exportar datos -->
+<div class="exp-panel">
+    <h3><i class="fa-solid fa-file-export" style="margin-right:6px;color:#D8C395"></i>Exportar datos del portal</h3>
+    <div class="exp-actions">
+        <div class="exp-filter">
+            <select id="expTipo">
+                <option value="">Todos los tipos</option>
+                <option value="juego">Snake</option>
+                <option value="juego_tetris">Tetris</option>
+                <option value="juego_3lineas">3 en Línea</option>
+                <option value="juego_pacman">Pac-Man</option>
+                <option value="juego_breakout">Breakout</option>
+                <option value="juego_bomberman">Bomberman</option>
+                <option value="juego_invaders">Space Invaders</option>
+                <option value="juego_flappy">Flappy Bird</option>
+                <option value="registro">Registros</option>
+            </select>
+        </div>
+        <button class="btn-exp btn-csv" id="btnCsv"><i class="fa-solid fa-table"></i> CSV</button>
+        <button class="btn-exp btn-json" id="btnJson"><i class="fa-solid fa-code"></i> JSON</button>
+    </div>
+    <p class="exp-msg" id="expMsg"></p>
+    <div class="score-grid" id="expPreview"></div>
+</div>
+
+<!-- Reporte de seguridad -->
+<div class="vuln-panel">
+    <h3><i class="fa-solid fa-shield-halved" style="margin-right:6px"></i>Checklist de seguridad</h3>
+    <div id="vulnList">
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span>Funciones SQL usan <code>security definer</code> + <code>set search_path = public</code> → evita hijacking de schema.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span>Tokens de admin validados con <code>_exigir_permiso()</code> antes de cualquier escritura.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span>Nombres sanitizados con <code>left(trim(…), 80)</code> y regex de palabras ofensivas.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span><code>esc()</code> en el cliente escapa <code>&lt; &gt; " ' &amp;</code> en todo HTML dinámico → previene XSS.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span>Scores upsert: solo se guarda si el nuevo puntaje es mayor → no permite inflación desde cliente.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-warn">⚠ REVISAR</span><span><b>Puntos vienen del cliente sin validación en BD.</b> Un usuario puede enviar <code>puntos: 9999999</code> directamente vía API. Considera agregar un límite máximo en <code>din_registrar</code> según el tipo de juego.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-warn">⚠ REVISAR</span><span><b>Rate limit no implementado en RLS/RPC.</b> Supabase limita por IP pero no hay throttling per-usuario en <code>din_registrar</code>. Considera agregar un chequeo de tiempo mínimo entre registros del mismo nombre.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span>Claves de admin (tokens UUID) no expuestas en JS público — se cargan sólo en páginas admin con autenticación.</span></div>
+        <div class="vuln-item"><span class="vuln-badge badge-ok">✓ OK</span><span>RLS de Supabase activo: <code>anon</code> sólo puede ejecutar RPCs listados, no acceso directo a tablas.</span></div>
+    </div>
+</div>
+
+</div>
+
+<script src="../portal-kit/juegos.js?v=20261019a"></script>
+<script>
+(function() {
+    const P = window.PumasPortal;
+    let _token = null, _portal = null;
+
+    /* ── Esperar init ── */
+    function init() {
+        if (!P?.juegos?.montarAdmin || !P?.admin?.token) { setTimeout(init, 200); return; }
+        _token = P.admin.token;
+        cargarPortales();
+    }
+
+    async function cargarPortales() {
+        const sel = document.getElementById('selPortal');
+        try {
+            const portales = Object.keys(P.PORTALES || {});
+            sel.innerHTML = portales.map(p => `<option value="${p}">${p}</option>`).join('');
+            _portal = portales[0] || '';
+        } catch (e) {
+            sel.innerHTML = '<option value="">Error al cargar</option>';
+        }
+    }
+
+    /* ── Cargar juego ── */
+    document.getElementById('btnCargar').addEventListener('click', () => {
+        const portal = document.getElementById('selPortal').value;
+        const tipo   = document.getElementById('selTipo').value;
+        if (!portal || !tipo) return;
+        _portal = portal;
+        document.getElementById('areaJuego').innerHTML = '';
+        P.juegos.montarAdmin(portal, 'areaJuego', tipo);
+    });
+
+    /* ── Exportar ── */
+    async function exportar(fmt) {
+        const portal = document.getElementById('selPortal').value;
+        const tipo   = document.getElementById('expTipo').value || null;
+        const msg    = document.getElementById('expMsg');
+        const prev   = document.getElementById('expPreview');
+        if (!portal) { msg.textContent = 'Selecciona un portal primero.'; msg.className='exp-msg err'; return; }
+        msg.textContent = 'Exportando…'; msg.className = 'exp-msg';
+        prev.innerHTML = '';
+        try {
+            const { data, error } = await P.sb.rpc('din_exportar', {
+                p_token: _token, p_portal: portal, p_tipo: tipo
+            });
+            if (error) throw error;
+            const rows = data || [];
+            if (!rows.length) { msg.textContent = 'Sin datos para exportar.'; return; }
+
+            if (fmt === 'json') {
+                descargar(JSON.stringify(rows, null, 2), `${portal}_${tipo||'todos'}_${hoy()}.json`, 'application/json');
+                msg.textContent = `✓ ${rows.length} registros descargados.`;
+            } else {
+                const cols = ['id','portal','tipo','nombre','numero','ig','puntos','creado'];
+                const csv = [cols.join(','), ...rows.map(r => cols.map(k => JSON.stringify(r[k] ?? '')).join(','))].join('\n');
+                descargar(csv, `${portal}_${tipo||'todos'}_${hoy()}.csv`, 'text/csv');
+                msg.textContent = `✓ ${rows.length} registros en CSV.`;
+            }
+
+            // Preview agrupado por tipo
+            const byTipo = {};
+            rows.forEach(r => { (byTipo[r.tipo] = byTipo[r.tipo]||[]).push(r); });
+            prev.innerHTML = Object.entries(byTipo).map(([t, rs]) => `
+                <div>
+                    <h4>${t} (${rs.length})</h4>
+                    ${rs.slice(0,5).map((r,i)=>`<div class="score-row"><span>${i+1}. ${r.nombre||'—'}</span><span class="pts">${r.puntos??'—'}</span></div>`).join('')}
+                    ${rs.length>5 ? `<div class="empty">… y ${rs.length-5} más</div>` : ''}
+                </div>
+            `).join('');
+        } catch (e) {
+            msg.textContent = 'Error: ' + (e.message || e);
+            msg.className = 'exp-msg err';
+        }
+    }
+
+    function descargar(contenido, nombre, tipo) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+        a.download = nombre; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }
+
+    function hoy() { return new Date().toISOString().slice(0,10); }
+
+    document.getElementById('btnCsv').addEventListener('click',  () => exportar('csv'));
+    document.getElementById('btnJson').addEventListener('click', () => exportar('json'));
+
+    init();
+})();
+</script>
+</body>
+</html>

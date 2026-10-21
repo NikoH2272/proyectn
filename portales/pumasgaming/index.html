@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Historial de Entrenamientos | Pumgas Gaming</title>
+    <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Emilys+Candy&family=Jersey+25&family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../portal-kit/latam.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="entrenamientos" data-modo="publico"></script>
+    <script src="../../portal-kit/descargas.js?v=20261013e"></script>
+    <link rel="icon" type="image/x-icon" href="imagenes/proyectn.png">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <img src="imagenes/LOGO PUMAS WEB.png" alt="Logo PROYECTN" class="logo-img">
+        <div class="logo">Pumas Gaming</div>
+    </div>
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="../"><i class="fa-solid fa-house"></i> Portal</a></li>
+            <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Apartar Cupo</a></li>
+            <li id="navDinamicas" hidden><a href="dinamicas.html"><i class="fa-solid fa-bolt"></i> Dinámicas</a></li>
+            <li id="navJuegos" hidden><a href="juegos.html"><i class="fa-solid fa-gamepad"></i> Juegos</a></li>
+            <li><a href="#" onclick="cambiarPestanaPublica('global')" id="navGlobal" style="color: var(--primary);"><i class="fa-solid fa-globe"></i> General</a></li>
+            <li><a href="#" onclick="cambiarPestanaPublica('analisis')" id="navAnalisis" style="color: var(--secondary);"><i class="fa-solid fa-chart-simple"></i> Análisis de entrenos</a></li>
+            <li><a href="#" onclick="cambiarPestanaPublica('vip')" id="navVip" style="color: var(--secondary);"><i class="fa-solid fa-shield-halved"></i> Resultados Equipos VIP</a></li>
+            <li><a href="login.html" class="btn-access" style="padding: 8px 18px; font-size: 0.9rem;"><i class="fa-solid fa-user-lock"></i> Iniciar Sesión</a></li>
+        </ul>
+    </nav>
+</header>
+
+    <section class="portal-hero">
+        <div class="hero-copy">
+            <div class="eyebrow">Historial de Entrenos · Free Fire</div>
+            <h1>Pumas<span>Gaming</span></h1>
+            <p>Panel de control global y consolidado de sesiones de práctica oficiales.</p>
+            <div class="hero-actions">
+                <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Apartar Cupo</a>
+                <a href="/entrenoslatam/" class="btn-access btn-outline"><i class="fa-solid fa-earth-americas"></i> LATAM</a>
+            </div>
+            <div class="stat-row">
+                <div><b id="statTotalEquipos">0</b><small>Equipos</small></div>
+                <div><b id="statTotalKills">0</b><small>Kills</small></div>
+                <div><b id="statTotalMapas">0</b><small>Mapas</small></div>
+                <div><b id="statTotalEntrenamientos">0</b><small>Entrenos</small></div>
+            </div>
+        </div>
+        <div class="hero-mark" aria-hidden="true">
+            <img src="imagenes/LOGO PUMAS WEB.png" alt="" onerror="this.onerror=null;this.style.display='none'">
+            <span class="mark-fallback">PG</span>
+        </div>
+    </section>
+
+    <!-- VISTA 1: GENERAL -->
+    <main class="dashboard-modulos" id="vistaGeneral">
+        
+        <!-- MÓDULO 1: CALENDARIO -->
+        <div class="dashboard-col" id="modulo-calendario">
+            <div class="tabla-contenedor">
+                <div class="header-card-title">
+                    <i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i>
+                    <h3>Calendario de Sesiones</h3>
+                </div>
+                <div style="width: 100%;">
+                    <div id="calendarContainer" class="calendar-container">
+                        <div class="calendar-header">
+                            <button class="btn-ver" onclick="cambiarMes(-1)" style="padding: 4px 10px;">&lt;</button>
+                            <h4 id="monthYearDisplay" style="color: var(--light); margin: 0; font-family: 'Michroma'; font-size: 1.1rem;">Mes Año</h4>
+                            <button class="btn-ver" onclick="cambiarMes(1)" style="padding: 4px 10px;">&gt;</button>
+                        </div>
+                        <div class="calendar-weekdays">
+                            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+                        </div>
+                        <div id="calendarGrid" class="calendar-grid"></div>
+                    </div>
+
+                    <div id="daySessionsContainer" style="margin-top: 25px; display: none;">
+                        <div style="border-top: 1px solid rgba(216,195,149, 0.2); margin-bottom: 15px;"></div>
+                        <h4 id="selectedDayTitle" style="color: var(--primary); margin-bottom: 12px; font-family: 'Michroma';"></h4>
+                        <table class="tabla-estilizada">
+                            <thead>
+                                <tr>
+                                    <th>TORNEO / SESIÓN</th>
+                                    <th style="text-align: center;">ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodySesionesDia"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 2: TOP 50 EQUIPOS (En 2 columnas) -->
+        <div class="dashboard-col" id="modulo-equipos">
+            <div class="tabla-contenedor">
+                <div class="header-card-title">
+                    <i class="fa-solid fa-globe" style="color: var(--primary);"></i>
+                    <h3 id="tituloTop50">Top 50 Equipos · Semana</h3>
+                    <span class="header-leyenda"><b>PG</b> Puntos Generales · <b>PR</b> Puntos Reales</span>
+                </div>
+                <div class="orden-toggle" id="ordenSemana" role="group" aria-label="Ordenar Top 50"><span>Ordenar por</span><button type="button" class="orden-btn on" data-orden="pr" onclick="ordenarSemana('pr')" title="Puntos Reales = PG ÷ sesiones">PR</button><button type="button" class="orden-btn" data-orden="pg" onclick="ordenarSemana('pg')" title="Puntos Generales = total de puntos">PG</button><button type="button" class="orden-btn" data-orden="kill" onclick="ordenarSemana('kill')" title="Kills totales">KILLS</button></div>
+                <p class="leyenda-tabla"><b>SESIONES</b> entrenos jugados · <b>BOOYAH</b> victorias · <b>KILL</b> kills · <b>PG</b> Puntos Generales (total) · <b>PR</b> Puntos Reales (PG ÷ sesiones, en número entero)</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; width: 100%;">
+                    <table class="tabla-estilizada">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>EQUIPO</th>
+                                <th style="text-align:center;">SESIONES</th>
+                                <th style="text-align:center;">BOOYAH</th>
+                                <th style="text-align:center;">KILL</th><th style="text-align:center;" title="Puntos Generales (total)">PG</th><th style="text-align:center;" title="Puntos Reales = PG ÷ sesiones">PR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyTablaGlobal1">
+                            <tr><td colspan="5" style="text-align:center; color: var(--gray);">Calculando...</td></tr>
+                        </tbody>
+                    </table>
+                    <table class="tabla-estilizada">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>EQUIPO</th>
+                                <th style="text-align:center;">SESIONES</th>
+                                <th style="text-align:center;">BOOYAH</th>
+                                <th style="text-align:center;">KILL</th><th style="text-align:center;" title="Puntos Generales (total)">PG</th><th style="text-align:center;" title="Puntos Reales = PG ÷ sesiones">PR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyTablaGlobal2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO 3: TOP KILLERS -->
+        <div class="dashboard-col" id="modulo-killers">
+            <div class="tabla-contenedor">
+                <div class="header-card-title">
+                    <i class="fa-solid fa-skull" style="color: var(--primary);"></i>
+                    <h3>Top 10 Killers<span class="wk-range">Por KDA (kills ÷ salas) y por kills totales · mínimo 3 salas</span></h3>
+                </div>
+                <div class="top-killers-grid" id="gridTopKillersGlobal" style="max-height: none; overflow-y: visible;">
+                    <div style="color: var(--gray); text-align:center; padding: 20px;">Cargando killers...</div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- MÓDULO 4: TOP 100 HISTÓRICO -->
+        <div class="dashboard-col" id="modulo-top100">
+            <div class="tabla-contenedor" style="min-height:auto;">
+                <div class="header-card-title"><i class="fa-solid fa-trophy" style="color: var(--primary);"></i><h3>Top 100 Equipos Históricos</h3><span class="header-leyenda"><b>PG</b> Puntos Generales · <b>PR</b> Puntos Reales</span></div>
+                <div class="orden-toggle" id="ordenHistorico" role="group" aria-label="Ordenar histórico"><span>Ordenar por</span><button type="button" class="orden-btn on" data-orden="pr" onclick="ordenarHistorico('pr')" title="Puntos Reales = PG ÷ sesiones">PR</button><button type="button" class="orden-btn" data-orden="pg" onclick="ordenarHistorico('pg')" title="Puntos Generales = total de puntos">PG</button><button type="button" class="orden-btn" data-orden="kill" onclick="ordenarHistorico('kill')" title="Kills totales">KILLS</button> <small id="notaHistorico">Orden: PR (PG ÷ sesiones) → booyah</small></div>
+                <p style="color:var(--gray);margin-bottom:16px;">Acumulado de todos los entrenamientos de la base de datos. PR = PG ÷ sesiones, en número entero; desempate por booyah.</p>
+                <p class="leyenda-tabla"><b>SESIONES</b> entrenos jugados · <b>BOOYAH</b> victorias · <b>KILL</b> kills · <b>PG</b> Puntos Generales (total) · <b>PR</b> Puntos Reales (PG ÷ sesiones, en número entero)</p>
+                <div class="tabla-doble"><table class="tabla-estilizada"><thead><tr><th>#</th><th>EQUIPO</th><th style="text-align:center;">SESIONES</th><th style="text-align:center;">BOOYAH</th><th style="text-align:center;">KILL</th><th style="text-align:center;" title="Puntos Generales (total)">PG</th><th style="text-align:center;" title="Puntos Reales = PG ÷ sesiones">PR</th></tr></thead><tbody id="bodyTop100a"><tr><td colspan="5" style="text-align:center;color:var(--gray);">Calculando...</td></tr></tbody></table><table class="tabla-estilizada"><thead><tr><th>#</th><th>EQUIPO</th><th style="text-align:center;">SESIONES</th><th style="text-align:center;">BOOYAH</th><th style="text-align:center;">KILL</th><th style="text-align:center;" title="Puntos Generales (total)">PG</th><th style="text-align:center;" title="Puntos Reales = PG ÷ sesiones">PR</th></tr></thead><tbody id="bodyTop100b"><tr><td colspan="5" style="text-align:center;color:var(--gray);">Calculando...</td></tr></tbody></table></div>
+            </div>
+        </div>
+        <!-- MÓDULO 5: DESTACADOS -->
+        <div class="dashboard-col" id="modulo-destacados">
+            <div class="tabla-contenedor" style="min-height:auto;">
+                <div class="header-card-title"><i class="fa-solid fa-star" style="color: var(--primary);"></i><h3>Destacados</h3></div>
+                <div class="dest-grid" id="pumasDestacados"><div style="color: var(--gray); text-align:center; padding: 20px;">Calculando...</div></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- VISTA: ANÁLISIS DE ENTRENOS (estadísticas de los replays y resultados completos de la sala) -->
+    <section id="vistaAnalisis" style="display: none; width: 100%; max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+        <div class="tabla-contenedor" style="min-height: auto;">
+            <div class="header-card-title">
+                <i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i>
+                <h3>Análisis de entrenos</h3>
+            </div>
+            <div id="pumasAvanzadas"><p style="color: var(--gray); text-align: center; padding: 20px;">Todavía no hay entrenos con análisis.</p></div>
+        </div>
+    </section>
+
+    <!-- VISTA 2: RESULTADOS EQUIPOS VIP -->
+    <section id="vistaVip" style="display: none; width: 100%; max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+        <div class="tabla-contenedor" style="min-height: auto;">
+            <div class="header-card-title">
+                <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i>
+                <h3>Resultados Oficiales - Equipos VIP</h3>
+            </div>
+            <p style="color: var(--gray); font-size: 0.95rem; margin-bottom: 20px;">
+                Tabla comparativa con el listado completo de equipos oficiales registrados y su rendimiento actual.
+            </p>
+            <div style="width: 100%; overflow-x: auto;">
+                <table class="tabla-estilizada">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 10px;">#</th>
+                            <th style="text-align: left; padding: 10px;">EQUIPO VIP</th>
+                            <th style="text-align: center; padding: 10px;">TAG</th>
+                            <th style="text-align: center; padding: 10px;">BOOYAH 🏆</th>
+                            <th style="text-align: center; padding: 10px;">TOTAL PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyTablaVip">
+                        <tr><td colspan="5" style="text-align: center; color: var(--gray); padding: 20px;">Cargando equipos VIP...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="seccionJuegos" style="width:100%;max-width:1100px;margin:0 auto">
+        <div id="pgJuego"></div>
+    </section>
+
+    <div id="modalDetalleSesion" class="modal-vista" style="display: none;">
+        <div class="modal-vista-box">
+            <button class="modal-vista-x" onclick="cerrarModalDetalle()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+            <div id="vistaSesionBody"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="../../portal-kit/dinamicas.js?v=20261014a"></script>
+    <script src="../../portal-kit/juegos.js?v=20261014a"></script>
+    <script src="../../portal-kit/latam.js?v=20261013e"></script>
+    <script src="script_entrenamientos.js?v=20261013e"></script>
+    <script src="vista_sesion.js?v=20261013e"></script>
+    <script src="../../portal-kit/completos.js?v=20261013e"></script>
+    <script>PumasCompletos.montarPublico('pumasAvanzadas', 'entrenamientos');</script>
+    <script>
+        // Mostrar links de nav cuando hay dinámica o juego activos
+        (async function () {
+            // Sistema legado (registro / encuesta en din_sesiones)
+            for (const tipo of ['registro', 'encuesta']) {
+                try {
+                    const r = await PumasPortal.dinamica.publico('entrenamientos', tipo);
+                    if (r && r.activo) { document.getElementById('navDinamicas').hidden = false; return; }
+                } catch(e) {}
+            }
+            // Sistema nuevo de encuestas (din_encuestas)
+            try {
+                const lista = await PumasPortal.enc.publico('entrenamientos');
+                if (lista && lista.length) { document.getElementById('navDinamicas').hidden = false; }
+            } catch(e) {}
+        })();
+    </script>
+    <script>
+        // Secciones que el admin de Pumas ocultó (Admin Pumas → Configuración → Portal público)
+        (async function () {
+            let cfg;
+            try { cfg = await PumasPortal.pumas.portal(); } catch (e) { return; }
+            const ocultos = new Set(cfg.ocultos || []);
+            const ocultar = el => { if (el) { el.hidden = true; el.style.setProperty('display', 'none', 'important'); } };
+            const li = sel => { const a = document.querySelector(sel); return a && a.closest('li'); };
+            const mapa = {
+                apartar_cupo: () => ocultar(li('.main-nav a[href="cupos.html"]')),
+                calendario: () => ocultar(document.getElementById('modulo-calendario')),
+                equipos: () => ocultar(document.getElementById('modulo-equipos')),
+                killers: () => ocultar(document.getElementById('modulo-killers')),
+                top100: () => ocultar(document.getElementById('modulo-top100')),
+                destacados: () => ocultar(document.getElementById('modulo-destacados')),
+                analisis: () => { ocultar(li('#navAnalisis')); ocultar(document.getElementById('vistaAnalisis')); },
+                vip: () => { ocultar(li('#navVip')); ocultar(document.getElementById('vistaVip')); }
+            };
+            ocultos.forEach(id => mapa[id] && mapa[id]());
+        })();
+    </script>
+</body>
+</html>

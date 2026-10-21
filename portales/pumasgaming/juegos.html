@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C79JND219Y');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Juegos · PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css?v=20261014a">
+<link rel="icon" href="imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../portal-kit/portal.js?v=20261014a" data-portal="entrenamientos" data-modo="publico"></script>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <img src="imagenes/proyectn.png" alt="Logo PROYECTN" class="logo-img">
+        <div class="logo">PROYECTN</div>
+    </div>
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="../"><i class="fa-solid fa-house"></i> Portal</a></li>
+            <li><a href="./"><i class="fa-solid fa-globe"></i> Resultados</a></li>
+            <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Apartar Cupo</a></li>
+            <li id="navDinamicas" hidden><a href="dinamicas.html"><i class="fa-solid fa-bolt"></i> Dinámicas</a></li>
+            <li><a href="juegos.html" style="color:var(--primary)"><i class="fa-solid fa-gamepad"></i> Juegos</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div id="pgJuego"></div>
+
+<footer>
+    <p>&copy; 2026 PROYECTN. Todos los derechos reservados.</p>
+</footer>
+
+<script src="../../portal-kit/juegos.js?v=20261014a"></script>
+<script>
+    // Mostrar link Dinámicas si hay dinámica activa
+    (async function () {
+        for (const tipo of ['registro', 'encuesta']) {
+            try {
+                const r = await PumasPortal.dinamica.publico('entrenamientos', tipo);
+                if (r && r.activo) { document.getElementById('navDinamicas').hidden = false; return; }
+            } catch(e) {}
+        }
+        try {
+            const lista = await PumasPortal.enc.publico('entrenamientos');
+            if (lista && lista.length) { document.getElementById('navDinamicas').hidden = false; }
+        } catch(e) {}
+    })();
+</script>
+</body>
+</html>

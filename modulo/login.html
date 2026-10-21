@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Iniciar sesión | {MODULO} by PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="@p" data-modo="login"></script>
+</head>
+<body class="auth-body">
+    <main class="auth-card">
+        <img src="../imagenes/proyectn.png" alt="Logo" class="logo-img" data-mod-logo>
+        <h1 data-mod-titulo>MÓDULO</h1>
+        <p class="auth-sub">by PROYECTN · ACCESO ADMIN</p>
+        <form id="formLogin" data-destino="/admin/" autocomplete="on">
+            <div class="form-group">
+                <label for="usuario">Usuario</label>
+                <input id="usuario" name="usuario" type="text" required autocomplete="username" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="form-group">
+                <label for="clave">Contraseña</label>
+                <input id="clave" name="clave" type="password" required autocomplete="current-password" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-generar">Ingresar</button>
+            <p id="authMsg" class="auth-msg" role="alert"></p>
+        </form>
+        <a data-mod-href="./" href="./" class="auth-back">← Volver al portal</a>
+    </main>
+    <script>
+        // El módulo viene en ?p= (o dentro de ?next=): el login revisa ese portal y vuelve a su herramienta
+        (function () {
+            const q = new URLSearchParams(location.search);
+            const p = q.get('p') || ((/[?&]p=([a-z0-9_]+)/.exec(q.get('next') || '') || [])[1]);
+            if (!p) return;
+            const f = document.getElementById('formLogin');
+            f.dataset.portal = p;
+            f.dataset.destino = '/modulo/admin.html?p=' + p;
+        })();
+    </script>
+    <script src="modulo.js?v=20261013e"></script>
+    <script src="../portal-kit/login.js?v=20261013e"></script>
+</body>
+</html>

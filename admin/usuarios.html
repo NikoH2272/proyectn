@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Usuarios y roles | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+    <style>
+        .us-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 1180px; margin: 0 auto 10px; }
+        .us-tab { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 16px; border: 1px solid rgba(var(--primary-rgb), .35);
+            background: transparent; color: var(--primary); font: 700 .7rem var(--font-display); letter-spacing: .05em; cursor: pointer; }
+        .us-tab b { padding: 1px 7px; border-radius: 10px; background: rgba(var(--primary-rgb), .2); }
+        .us-tab.on { background: var(--primary); color: #0a0a0a; }
+        .us-tab.on b { background: rgba(0, 0, 0, .2); }
+        .us-eventos summary { cursor: pointer; color: var(--primary); white-space: nowrap; }
+        .us-eventos { text-align: left; }
+        .us-eventos[open] { min-width: 210px; max-height: 260px; overflow: auto; padding: 6px 0; }
+        .us-eventos .chk { display: flex; margin: 3px 0; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo"><span class="t-a">PUMAS</span> ADMIN</div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section>
+        <h2 class="section-title">Usuarios y roles</h2>
+        <main id="gestionUsuarios" data-login="login.html"></main>
+    </section>
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+    <script src="../ascensos/categorias.js?v=20261013e"></script>
+    <script src="../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script src="../entrenamientos/config_portal.js?v=20261013e"></script>
+    <script src="../portal-kit/usuarios.js?v=20261013e"></script>
+</body>
+</html>

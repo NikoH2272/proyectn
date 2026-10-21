@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C79JND219Y');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PROYECTN Corp · Eventos | PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+<link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+<style>
+.beta-banner{display:flex;align-items:center;gap:12px;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.3);border-radius:10px;padding:14px 18px;margin-bottom:22px}
+.beta-badge{background:rgba(255,184,77,.2);color:#ffb84d;font:700 .7rem 'Michroma',sans-serif;letter-spacing:.12em;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.beta-banner p{margin:0;color:#aaa;font-size:.88rem}
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.ev-card{background:rgba(255,255,255,.04);border:1px solid rgba(216,195,149,.2);border-radius:10px;overflow:hidden;opacity:.6;pointer-events:none}
+.ev-card-head{padding:14px 16px;border-bottom:1px solid rgba(216,195,149,.14);display:flex;align-items:center;gap:10px}
+.ev-card-head h3{margin:0;font:700 .88rem 'Michroma',sans-serif;color:#D8C395;letter-spacing:.06em}
+.ev-card-body{padding:14px 16px}
+.ev-placeholder{display:flex;flex-direction:column;align-items:center;gap:16px;padding:60px 20px;text-align:center;color:#555}
+.ev-placeholder i{font-size:3rem;opacity:.3}
+.ev-placeholder p{font-size:.9rem;max-width:420px;line-height:1.6}
+</style>
+</head>
+<body>
+<header class="site-header">
+    <a class="logo-container" href="./">
+        <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+        <div class="logo"><span class="t-a">PUMAS</span> CORP</div>
+    </a>
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+            <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+            <li><a href="#" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h2 class="section-title"><i class="fa-solid fa-building" style="margin-right:8px;opacity:.7"></i>PROYECTN Corp · Eventos</h2>
+    <p class="tool-desc">Gestión de eventos pagos y gratuitos de PROYECTN. Crea, publica y administra tu lineup de torneos y clínicas.</p>
+
+    <div class="beta-banner">
+        <span class="beta-badge"><i class="fa-solid fa-flask"></i> BETA</span>
+        <p>Esta sección está en desarrollo. Pronto podrás crear, publicar y gestionar todos tus eventos desde aquí.</p>
+    </div>
+
+    <!-- Placeholder de tarjetas futuras -->
+    <div class="ev-grid">
+        <div class="ev-card">
+            <div class="ev-card-head">
+                <i class="fa-solid fa-ticket" style="color:#D8C395"></i>
+                <h3>Eventos pagos</h3>
+            </div>
+            <div class="ev-card-body" style="color:#666;font-size:.85rem">Torneos y clínicas con inscripción de pago. Inscripciones, aforo y pagos verificados.</div>
+        </div>
+        <div class="ev-card">
+            <div class="ev-card-head">
+                <i class="fa-solid fa-star" style="color:#D8C395"></i>
+                <h3>Eventos gratuitos</h3>
+            </div>
+            <div class="ev-card-body" style="color:#666;font-size:.85rem">Scrims abiertos, clínicas comunitarias y activaciones de marca sin costo.</div>
+        </div>
+        <div class="ev-card">
+            <div class="ev-card-head">
+                <i class="fa-solid fa-calendar-days" style="color:#D8C395"></i>
+                <h3>Calendario</h3>
+            </div>
+            <div class="ev-card-body" style="color:#666;font-size:.85rem">Vista de calendario con todos los eventos activos y próximos.</div>
+        </div>
+        <div class="ev-card">
+            <div class="ev-card-head">
+                <i class="fa-solid fa-users" style="color:#D8C395"></i>
+                <h3>Inscritos</h3>
+            </div>
+            <div class="ev-card-body" style="color:#666;font-size:.85rem">Lista de participantes por evento, confirmaciones y lista de espera.</div>
+        </div>
+    </div>
+
+    <div class="ev-placeholder">
+        <i class="fa-solid fa-wrench"></i>
+        <p>Estamos construyendo esta sección. Cuando esté lista, podrás gestionar todos los eventos de PROYECTN Corp desde aquí — con inscripciones, pagos, aforo y publicación automática en el portal.</p>
+    </div>
+</section>
+
+<footer><p>&copy; 2026 <b>PUMAS CORP</b> · Eventos · <span style="opacity:.4;font-size:.78em">BETA</span></p></footer>
+
+<script>
+(async function () {
+    const P = PumasPortal;
+    const s = await P.validar();
+    if (!s) { location.replace('login.html?next=' + encodeURIComponent('/admin/eventos.html')); return; }
+    if (!P.tiene(s, 'gestionar')) { location.replace('./'); return; }
+    document.documentElement.classList.remove('pg-verificando');
+    document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+    document.querySelectorAll('[data-pg-salir]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); }));
+})();
+</script>
+</body>
+</html>

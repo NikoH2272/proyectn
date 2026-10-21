@@ -1,0 +1,31 @@
+/* Entrenos LATAM · estilos de la página (la base viene de ../portal-kit/portal.css) */
+@import url('../portal-kit/latam.css?v=20261008o');
+
+.latam-barra { padding-top: 26px; padding-bottom: 0; }
+.latam-filtro { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.chip {
+  padding: 7px 14px; border: 1px solid var(--c, var(--primary)); border-radius: 20px;
+  color: var(--light); background: transparent; font: 700 .68rem var(--font-display); letter-spacing: .06em; cursor: pointer;
+}
+.chip.on, .chip:hover { color: #0A0A0A; background: var(--c, var(--primary)); }
+
+/* Módulos en el mismo orden que el portal de Pumas */
+/* Tablas generales arriba a todo el ancho; killers y calendario abajo */
+.lt-modulos { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr); align-items: start; gap: 22px; width: min(100%, 1360px); margin: 0 auto; padding: 28px clamp(16px, 4vw, 56px) 60px; }
+.lt-modulos .card-box { max-width: none; margin: 0; }
+.lt-ancho { grid-column: 1 / -1; }
+
+/* Tablas, killers y botones de orden: ver ../portal-kit/portal.css (compartidos con los portales) */
+
+/* Calendario: ver ../portal-kit/portal.css (compartido con los portales) */
+
+/* LATAM: Top 50 a la izquierda y calendario a la derecha (en celular, uno debajo del otro) */
+@media (min-width: 1101px) { #semana { grid-column: 1; } #calendario { grid-column: 2; } }
+@media (max-width: 760px) { #latamCalendario { display: block; } #latamCalendario .ses-titulo { margin-top: 20px; } }
+.ses-titulo { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 10px; color: var(--primary); font: 800 .78rem var(--font-display); }
+
+@media (max-width: 1100px) {
+  .lt-modulos { grid-template-columns: 1fr; }
+  #semana, #calendario { grid-column: 1; }
+  .lt-ancho { grid-column: 1; }
+}

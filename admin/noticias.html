@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Noticias | Admin PROYECTN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261021b">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261021b" data-modo="login"></script>
+    <style>
+        .noticias-admin { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+        /* tabs por tipo */
+        .tipo-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+        .tipo-tab  { padding: 10px 18px; font: 500 .82rem var(--font-display); letter-spacing: .06em;
+                     color: var(--gray); background: none; border: none; cursor: pointer;
+                     border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+        .tipo-tab.active  { color: var(--primary); border-bottom-color: var(--primary); }
+        .tipo-tab:hover:not(.active) { color: var(--light); }
+
+        .tipo-panel { display: none; }
+        .tipo-panel.active { display: block; }
+
+        /* lista de noticias */
+        .noticia-item {
+            display: grid; grid-template-columns: 1fr auto; gap: 12px 16px; align-items: start;
+            padding: 16px 18px; background: var(--surface); border: 1px solid var(--border);
+            border-left: 3px solid var(--c, var(--primary)); border-radius: 2px; margin-bottom: 12px;
+        }
+        .noticia-item .ni-body { display: flex; flex-direction: column; gap: 4px; }
+        .noticia-item .ni-fecha { font: 500 .65rem var(--font-display); letter-spacing: .1em;
+                                   text-transform: uppercase; color: var(--gray); }
+        .noticia-item .ni-contenido { font-size: .9rem; color: var(--light); line-height: 1.5; }
+        .noticia-item .ni-url { font-size: .78rem; color: var(--primary); }
+        .noticia-item .ni-acciones { display: flex; gap: 6px; flex-shrink: 0; }
+        .noticia-item.inactiva { opacity: .45; }
+
+        /* formulario nueva noticia */
+        .form-nueva {
+            padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 28px;
+        }
+        .form-nueva h3 { margin: 0 0 16px; font: 600 .85rem var(--font-display); color: var(--primary); }
+        .form-nueva .fila { display: flex; gap: 10px; flex-wrap: wrap; }
+        .form-nueva .fila .form-group { flex: 1 1 200px; }
+        .form-nueva textarea { min-height: 80px; resize: vertical; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="../">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo">PROYECTN <span style="opacity:.5">Admin</span></div>
+        </a>
+        <nav class="main-nav" style="display:block;position:static;width:auto;padding:0;border:0;background:none;box-shadow:none">
+            <ul style="flex-direction:row;gap:18px">
+                <li><a href="index.html" style="border:0"><i class="fa-solid fa-house"></i> Hub</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" id="btnSalir" style="border:0"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="noticias-admin">
+        <h2 class="section-title">Noticias &amp; Actualizaciones</h2>
+        <p class="tool-desc">Gestiona el contenido que aparece en la sección Noticias de la página principal.</p>
+
+        <nav class="tipo-tabs" id="tipoTabs">
+            <button class="tipo-tab active" data-tipo="actualizacion" onclick="cambiarTipo('actualizacion', this)">
+                <i class="fa-solid fa-rotate-right"></i> Actualizaciones
+            </button>
+            <button class="tipo-tab" data-tipo="recomendacion" onclick="cambiarTipo('recomendacion', this)">
+                <i class="fa-solid fa-lightbulb"></i> Recomendaciones
+            </button>
+            <button class="tipo-tab" data-tipo="grupos_interes" onclick="cambiarTipo('grupos_interes', this)">
+                <i class="fa-brands fa-whatsapp"></i> Grupos de Interés
+            </button>
+            <button class="tipo-tab" data-tipo="ffws" onclick="cambiarTipo('ffws', this)">
+                <i class="fa-solid fa-earth-americas"></i> Noticias Relevantes <span style="font-size:.65rem;background:#FFD54A22;color:#FFD54A;border:1px solid #FFD54A44;padding:1px 5px;border-radius:3px;margin-left:4px">beta</span>
+            </button>
+        </nav>
+
+        <!-- ── Panel por tipo ── -->
+        <div id="panel-actualizacion"  class="tipo-panel active"></div>
+        <div id="panel-recomendacion"  class="tipo-panel"></div>
+        <div id="panel-grupos_interes" class="tipo-panel"></div>
+        <div id="panel-ffws"           class="tipo-panel"></div>
+    </div>
+
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+
+    <script>
+    (async function () {
+        const P = PumasPortal;
+        const s = await P.validar();
+        if (!s) { location.replace('login.html?next=' + encodeURIComponent('/admin/noticias.html')); return; }
+        document.documentElement.classList.remove('pg-verificando');
+        document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+        document.getElementById('btnSalir').addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); });
+
+        const db = P.db;
+        function getToken() {
+            try { return JSON.parse(localStorage.getItem('pg_session') || '').token || ''; } catch { return ''; }
+        }
+
+        // ── colores por tipo ──────────────────────────────────────────
+        const colorDeTipo = {
+            actualizacion:  '#B6FF00',
+            ffws:           '#4FC3F7',
+            recomendacion:  '#FFD54A',
+            grupos_interes: '#25D366'
+        };
+
+        // ── render ───────────────────────────────────────────────────
+        async function cargarTipo(tipo) {
+            const panel = document.getElementById('panel-' + tipo);
+            panel.innerHTML = '<p class="tool-desc" style="opacity:.5">Cargando...</p>';
+
+            const { data, error } = await db().rpc('admin_noticias_listar', {
+                p_token: getToken(),
+                p_tipo:  tipo
+            });
+
+            if (error) { panel.innerHTML = `<p class="tool-desc" style="color:#e5484d">Error: ${P.escaparHtml(error.message)}</p>`; return; }
+
+            const lista  = Array.isArray(data) ? data : [];
+            const color  = colorDeTipo[tipo] || 'var(--primary)';
+            let   html   = formHTML(tipo, color);
+
+            if (!lista.length) {
+                html += '<p class="tool-desc" style="opacity:.5">No hay entradas de este tipo todavía.</p>';
+            } else {
+                lista.forEach(n => { html += itemHTML(n, color); });
+            }
+            panel.innerHTML = html;
+        }
+
+        function formHTML(tipo, color) {
+            const esGrupo = tipo === 'grupos_interes';
+            return `<div class="form-nueva card-box" style="--c:${color}">
+                <h3><i class="fa-solid fa-plus"></i> Agregar nueva</h3>
+                <div class="fila">
+                    <div class="form-group" style="flex:0 0 160px">
+                        <label>${esGrupo ? 'PLATAFORMA' : 'FECHA / ETIQUETA'}</label>
+                        <input type="text" id="nf-fecha-${tipo}" placeholder="${esGrupo ? 'Ej: WhatsApp' : 'Ej: Nov 2026'}">
+                    </div>
+                    <div class="form-group" style="flex:2">
+                        <label>${esGrupo ? 'NOMBRE DEL GRUPO' : 'CONTENIDO'}</label>
+                        <textarea id="nf-contenido-${tipo}" placeholder="${esGrupo ? 'Nombre del grupo o descripción...' : 'Texto de la noticia...'}"></textarea>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>${esGrupo ? 'ENLACE DE INVITACIÓN' : 'URL (opcional)'}</label>
+                        <input type="url" id="nf-url-${tipo}" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="acciones" style="margin-top:12px">
+                    <button class="btn-access" onclick="guardarNueva('${tipo}')">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                </div>
+                <p class="muted" id="nf-msg-${tipo}" role="status"></p>
+            </div>`;
+        }
+
+        function itemHTML(n, color) {
+            const urlHtml = n.url ? `<a class="ni-url" href="${P.escaparHtml(n.url)}" target="_blank">${P.escaparHtml(n.url)}</a>` : '';
+            return `<div class="noticia-item${n.activo ? '' : ' inactiva'}" id="ni-${n.id}" style="--c:${color}">
+                <div class="ni-body">
+                    <span class="ni-fecha">${P.escaparHtml(n.fecha_display)}</span>
+                    <span class="ni-contenido">${P.escaparHtml(n.contenido)}</span>
+                    ${urlHtml}
+                </div>
+                <div class="ni-acciones">
+                    <button class="btn-mini" title="${n.activo ? 'Desactivar' : 'Activar'}" onclick="toggleActivo('${n.id}', ${n.activo}, '${n.tipo}')">
+                        <i class="fa-solid fa-${n.activo ? 'eye' : 'eye-slash'}"></i>
+                    </button>
+                    <button class="btn-mini" title="Editar" onclick="editar('${n.id}', '${n.tipo}', ${JSON.stringify(n).replace(/</g,'&lt;')})">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn-mini" title="Eliminar" onclick="eliminar('${n.id}', '${n.tipo}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        // ── acciones ─────────────────────────────────────────────────
+        window.cambiarTipo = function(tipo, el) {
+            document.querySelectorAll('.tipo-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tipo-panel').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            const panel = document.getElementById('panel-' + tipo);
+            panel.classList.add('active');
+            if (!panel.dataset.cargado) { cargarTipo(tipo); panel.dataset.cargado = '1'; }
+        };
+
+        window.guardarNueva = async function(tipo) {
+            const fecha     = document.getElementById('nf-fecha-'    + tipo).value.trim();
+            const contenido = document.getElementById('nf-contenido-' + tipo).value.trim();
+            const url       = document.getElementById('nf-url-'      + tipo).value.trim() || null;
+            const msg       = document.getElementById('nf-msg-'      + tipo);
+            if (!contenido) { msg.textContent = 'El contenido no puede estar vacío.'; return; }
+            msg.textContent = 'Guardando...';
+            const { error } = await db().rpc('admin_noticias_guardar', {
+                p_token: getToken(), p_tipo: tipo, p_fecha: fecha, p_contenido: contenido, p_url: url
+            });
+            if (error) { msg.textContent = 'Error: ' + error.message; return; }
+            msg.textContent = '';
+            const panel = document.getElementById('panel-' + tipo);
+            delete panel.dataset.cargado;
+            cargarTipo(tipo);
+        };
+
+        window.toggleActivo = async function(id, actual, tipo) {
+            const { error } = await db().rpc('admin_noticias_toggle', {
+                p_token: getToken(), p_id: id, p_activo: !actual
+            });
+            if (error) { alert('Error: ' + error.message); return; }
+            const panel = document.getElementById('panel-' + tipo);
+            delete panel.dataset.cargado;
+            cargarTipo(tipo);
+        };
+
+        window.editar = async function(id, tipo, n) {
+            const nuevaFecha     = prompt('Fecha / etiqueta:', n.fecha_display);
+            if (nuevaFecha === null) return;
+            const nuevoContenido = prompt('Contenido:', n.contenido);
+            if (nuevoContenido === null) return;
+            const nuevaUrl = prompt('URL (dejar vacío para quitar):', n.url || '');
+            const { error } = await db().rpc('admin_noticias_actualizar', {
+                p_token:     getToken(),
+                p_id:        id,
+                p_fecha:     nuevaFecha.trim(),
+                p_contenido: nuevoContenido.trim(),
+                p_url:       nuevaUrl.trim() || null
+            });
+            if (error) { alert('Error: ' + error.message); return; }
+            const panel = document.getElementById('panel-' + tipo);
+            delete panel.dataset.cargado;
+            cargarTipo(tipo);
+        };
+
+        window.eliminar = async function(id, tipo) {
+            const ok = await P.confirmar({ titulo: '¿Eliminar esta entrada?', si: 'Eliminar', no: 'Cancelar' });
+            if (!ok) return;
+            const { error } = await db().rpc('admin_noticias_borrar', {
+                p_token: getToken(), p_id: id
+            });
+            if (error) { alert('Error: ' + error.message); return; }
+            const panel = document.getElementById('panel-' + tipo);
+            delete panel.dataset.cargado;
+            cargarTipo(tipo);
+        };
+
+        // carga inicial
+        cargarTipo('actualizacion');
+    })();
+    </script>
+</body>
+</html>

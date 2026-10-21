@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Entrenos LATAM by PROYECTN · Resultados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="imagenes/latam.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="entrenoslatam" data-modo="publico"></script>
+    <script src="../portal-kit/descargas.js?v=20261013e"></script>
+</head>
+<body>
+
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="imagenes/latam.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">ENTRENOS LATAM</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#semana">Semana</a></li>
+                <li><a href="#killers">Killers</a></li>
+                <li><a href="#historico">Histórico</a></li>
+                <li><a href="#destacados">Destacados</a></li>
+                <li><a href="#individuales">Por entreno</a></li>
+                <li><a href="/#latam"><i class="fa-solid fa-house"></i> Inicio</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="LATAM">
+        <div class="hero-copy">
+            <div class="eyebrow">PROYECTN · Rusheo · ROW · QFD · Dragon Fest · ZMF</div>
+            <h1><span class="t-a">Entrenos</span> LATAM<small>by <b>PUMAS</b></small></h1>
+            <p>Resultados consolidados de todos los entrenos LATAM, PROYECTN incluido, con la fórmula de puntos reales.</p>
+            <div class="stat-row">
+                <div><b id="statEquipos">0</b><small>Equipos</small></div>
+                <div><b id="statKills">0</b><small>Kills</small></div>
+                <div><b id="statMapas">0</b><small>Mapas jugados</small></div>
+                <div><b id="statEntrenos">0</b><small>Entrenos</small></div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="imagenes/latam.png" alt="" onerror="this.onerror=null;this.src='imagenes/proyectn.png'">
+            </div>
+            <!-- Mascota LATAM: PNG vertical sin fondo. Si no existe, se oculta sola. -->
+            <img class="hero-mascota" src="imagenes/mascotalatam.png" alt="Mascota" onerror="this.hidden=true">
+        </div>
+    </section>
+
+    <section class="latam-barra">
+        <div id="latamLeyenda"></div>
+        <div class="latam-filtro" id="latamFiltro" role="group" aria-label="Filtrar por entreno"></div>
+    </section>
+
+    <main class="lt-modulos">
+        <!-- 1. TOP 50 SEMANA -->
+        <article class="card-box" id="semana">
+            <div class="tabla-cabecera">
+                <h3 class="subtitulo-bloque" id="tituloTop50">Top 50 Equipos · Semana</h3>
+                <div class="orden-toggle" id="ordenSemana" role="group" aria-label="Ordenar Top 50"></div>
+            </div>
+            <p class="leyenda-tabla"><b>SES</b> entrenos jugados · <b>BOO</b> booyah · <b>KILL</b> kills · <b>PG</b> Puntos Generales · <b>PR</b> Puntos Reales (PG ÷ sesiones)</p>
+            <div class="tabla-doble">
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodySemanaA" data-latam-vacio><tr class="vacio"><td colspan="7"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</td></tr></tbody>
+                </table>
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodySemanaB"></tbody>
+                </table>
+            </div>
+        </article>
+
+        <!-- CALENDARIO (a la derecha del Top 50) -->
+        <article class="card-box" id="calendario">
+            <h3 class="subtitulo-bloque"><i class="fa-solid fa-calendar-days"></i> Calendario de sesiones</h3>
+            <div id="latamCalendario"><p class="res-vacio">Cargando...</p></div>
+        </article>
+
+        <!-- 2. TOP 100 HISTÓRICO -->
+        <article class="card-box lt-ancho" id="historico">
+            <div class="tabla-cabecera">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-trophy"></i> Top 100 Equipos históricos LATAM</h3>
+                <div class="orden-toggle" id="ordenHistorico" role="group" aria-label="Ordenar histórico"></div>
+            </div>
+            <p class="leyenda-tabla"><b>PG</b> Puntos Generales · <b>PR</b> Puntos Reales (PG ÷ sesiones). <span id="notaHistorico">Orden: PR (PG ÷ sesiones) → booyah</span></p>
+            <div class="tabla-doble">
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodyTop100A" data-latam-vacio><tr class="vacio"><td colspan="7"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</td></tr></tbody>
+                </table>
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodyTop100B"></tbody>
+                </table>
+            </div>
+        </article>
+        <!-- 3. TOP KILLERS -->
+        <article class="card-box lt-ancho" id="killers">
+            <h3 class="subtitulo-bloque"><i class="fa-solid fa-skull"></i> Top 10 Killers LATAM<span class="wk-range">Por KDA (kills ÷ salas) y por kills totales · mínimo 3 salas</span></h3>
+            <div class="lt-killers" id="gridKillers"><p class="res-vacio">Cargando...</p></div>
+        </article>
+
+    </main>
+
+    <!-- 5. DESTACADOS -->
+    <section id="destacados">
+        <h2 class="section-title">Destacados LATAM</h2>
+        <div class="dest-grid" id="latamDestacados"><p class="res-vacio">Cargando...</p></div>
+    </section>
+
+    <!-- 6. TABLAS INDIVIDUALES DE CADA ENTRENO -->
+    <section id="individuales">
+        <h2 class="section-title">Tablas por entreno</h2>
+        <div class="ind-grid" id="latamIndividuales"><p class="res-vacio">Cargando...</p></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>ENTRENOS LATAM</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="../portal-kit/latam.js?v=20261013e"></script>
+    <script>Latam.iniciarPortal();</script>
+</body>
+</html>

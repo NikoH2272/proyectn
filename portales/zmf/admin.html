@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin · ZMF by PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="imagenes/zmf.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="zmf" data-modo="protegido"></script>
+</head>
+<body data-tema="zmf">
+
+    <header class="site-header">
+        <a class="logo-container" href="admin.html">
+            <img src="imagenes/zmf.png" alt="Logo" class="logo-img" data-logo-categoria onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'">
+            <div class="logo"><span class="t-a">ZMF</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#resultados" onclick="closeMenu()">Herramienta</a></li>
+                <li><a href="#gestionCupos" onclick="closeMenu()"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="#usuariosPortal" onclick="closeMenu()"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><a href="./"><i class="fa-solid fa-trophy"></i> Portal mixto</a></li>
+                <li><a href="femenino.html"><i class="fa-solid fa-trophy"></i> Portal femenino</a></li>
+                <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="login.html" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="ZMF">
+        <div class="hero-copy">
+            <div class="eyebrow">Entrenamientos · Free Fire</div>
+            <h1><span class="t-a">ZMF</span><small>by <b>PUMAS</b> · <span id="heroCategoria">Mixto</span></small></h1>
+            <p>Carga los logs de cada sala, corrige nombres y descarga la tabla oficial en formato 4:5.</p>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="imagenes/zmf.png" alt="" data-logo-categoria onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'">
+            </div>
+            <!-- Mascota del portal: PNG vertical sin fondo. Si no existe, se oculta sola. -->
+            <img class="hero-mascota" src="imagenes/mascotazmf.png" alt="Mascota" data-mascota-categoria onerror="this.hidden=true">
+        </div>
+    </section>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Gestión y resultados de torneos</h2>
+        <div class="tool-container">
+            <p class="tool-desc">Carga tus archivos de registro (.log / .txt) para procesar las estadísticas oficiales de las salas.</p>
+
+            <div class="form-grid tres">
+                <div class="form-group">
+                    <label for="inputModerador">Moderador / admin</label>
+                    <input type="text" id="inputModerador" placeholder="Ej. Admin">
+                </div>
+                <div class="form-group">
+                    <label for="inputFechaTorneo">Fecha</label>
+                    <input type="date" id="inputFechaTorneo">
+                </div>
+                <div class="form-group">
+                    <label for="inputHoraTorneo">Hora</label>
+                    <input type="time" id="inputHoraTorneo">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="selectCategoria">Categoría</label>
+                <select id="selectCategoria" class="dropdown-select" onchange="cambiarCategoria(this.value)">
+                    <option value="zmf" selected>MIXTO (Rojo)</option>
+                    <option value="zmffem">FEMENINO (Rosa)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fileInput">Archivos de registro (.log / .txt)</label>
+                <input type="file" id="fileInput" accept=".log,.txt,.csv" multiple onchange="prepararRenombradoEquipos()">
+            </div>
+
+            <div id="seccionRenombrar" class="panel-suave" style="display: none;">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-pen-to-square"></i> Corrección de nombres de equipos</h3>
+                <div id="listaEquiposInputs" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
+                <button class="btn-generar" style="margin-top: 20px;" onclick="procesarConNombresPersonalizados()">
+                    <i class="fa-solid fa-gears"></i> Generar tabla de resultados final
+                </button>
+            </div>
+
+            <div class="results-wrapper">
+                <div id="outputTablasLadoALado" class="result-box"></div>
+            </div>
+
+            <!-- Cargar el entreno a la base de datos (con confirmación) -->
+            <div id="guardarBD"></div>
+        </div>
+    </section>
+
+    <section id="gestionCupos" class="tool-section">
+        <h2 class="section-title">Cupos de ZMF</h2>
+        <div class="form-grid">
+            <div class="form-group"><label for="gestionCuposCategoria">Categoría</label><select id="gestionCuposCategoria" data-segmentado><option value="mixto">Mixto</option><option value="femenino">Femenino</option></select></div>
+            <div class="form-group"><label for="gestionCuposSeccion">Sección</label><select id="gestionCuposSeccion" data-segmentado><option value="cupos">Cupos</option><option value="vip">VIP</option><option value="baneos">Baneos</option></select></div>
+        </div>
+        <section class="panel-suave" data-categoria-panel="mixto" aria-label="Administración de ZMF mixto">
+            <div data-gestion-panel="cupos"><h3 class="subtitulo-bloque">Cupos · Mixto</h3><div id="cuposAdminMixto"></div></div>
+            <div data-gestion-panel="vip" hidden><h3 class="subtitulo-bloque">VIP · Mixto</h3><div id="vipCuposMixto"></div></div>
+            <div data-gestion-panel="baneos" hidden><h3 class="subtitulo-bloque">Baneos · Mixto</h3><div id="baneosCuposMixto"></div></div>
+        </section>
+        <section class="panel-suave" data-categoria-panel="femenino" aria-label="Administración de ZMF femenino" hidden>
+            <div data-gestion-panel="cupos"><h3 class="subtitulo-bloque">Cupos · Femenino</h3><div id="cuposAdminFemenino"></div></div>
+            <div data-gestion-panel="vip" hidden><h3 class="subtitulo-bloque">VIP · Femenino</h3><div id="vipCuposFemenino"></div></div>
+            <div data-gestion-panel="baneos" hidden><h3 class="subtitulo-bloque">Baneos · Femenino</h3><div id="baneosCuposFemenino"></div></div>
+        </section>
+    </section>
+
+    <!-- Usuarios del portal (sql/31): el staff solo entra aquí; solo lo ven el admin del portal y el superadmin -->
+    <section id="usuariosPortal" class="tool-section">
+        <h2 class="section-title">Usuarios del portal</h2>
+        <div class="tool-container"><div id="usuariosPortalAdmin"></div></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>ZMF</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+        // Mixto (rojo) / Femenino (rosa): cambia colores, logo, mascota y la imagen (fondo y título)
+        function cambiarCategoria(valor) {
+            const fem = valor === 'zmffem';
+            document.body.dataset.tema = valor;
+            document.getElementById('heroCategoria').textContent = fem ? 'Femenino' : 'Mixto';
+            document.querySelectorAll('[data-logo-categoria]').forEach(img => {
+                img.onerror = () => { img.onerror = null; img.src = 'imagenes/LOGO PUMAS WEB.png'; };
+                img.src = 'imagenes/' + valor + '.png';
+            });
+            document.querySelectorAll('[data-mascota-categoria]').forEach(img => {
+                img.onerror = () => { img.hidden = true; };
+                img.hidden = false;
+                img.src = 'imagenes/mascota' + valor + '.png';
+            });
+            if (typeof _rFD !== 'undefined' && _rFD.length && document.getElementById('tablaCaptura')) procesarConNombresPersonalizados();
+        }
+    </script>
+    <script src="script.js?v=20261013e"></script>
+    <script src="../../portal-kit/guardado.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="../../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'zmf'), { once: true });</script>
+    <script>
+        // Botón "Cargar a la base de datos" (usa los logs subidos y los nombres corregidos)
+        PumasGuardado.montar({
+            contenedor: 'guardarBD',
+            portal: () => document.getElementById('selectCategoria').value,
+            nombrePortal: () => document.getElementById('selectCategoria').value === 'zmffem' ? 'ZMF Femenino' : 'ZMF Mixto',
+            tituloPorDefecto: () => 'Entreno ' + (document.getElementById('selectCategoria').value === 'zmffem' ? 'ZMF Femenino' : 'ZMF Mixto'),
+            datos: () => {
+                if (typeof _rFD === 'undefined' || !_rFD.length || !document.getElementById('tablaCaptura')) return null;
+                const ren = {};
+                document.querySelectorAll('.input-nombre-editable').forEach(i => { ren[i.dataset.original] = i.value.trim() || i.dataset.original; });
+                const f = document.getElementById('inputFechaTorneo').value, h = document.getElementById('inputHoraTorneo').value;
+                return {
+                    salas: _rFD.map(PumasGuardado.parsearLog),
+                    nombreVisible: n => ren[n] || n,
+                    fecha: f ? new Date(f + 'T' + (h || '00:00')) : new Date(),
+                    moderador: document.getElementById('inputModerador').value.trim()
+                };
+            }
+        });
+    </script>
+    <script>window.addEventListener('pg:sesion', () => {
+        const categoria = document.getElementById('gestionCuposCategoria');
+        const seccion = document.getElementById('gestionCuposSeccion');
+        const montadas = new Set();
+        const paneles = {
+            'mixto-cupos': () => PumasCupos.montarAdmin('cuposAdminMixto', 'zmf'),
+            'mixto-vip': () => PumasControl.montarVip('vipCuposMixto', 'zmf', { agregar: true }),
+            'mixto-baneos': () => PumasControl.montarBaneos('baneosCuposMixto', 'zmf'),
+            'femenino-cupos': () => PumasCupos.montarAdmin('cuposAdminFemenino', 'zmffem'),
+            'femenino-vip': () => PumasControl.montarVip('vipCuposFemenino', 'zmffem', { agregar: true }),
+            'femenino-baneos': () => PumasControl.montarBaneos('baneosCuposFemenino', 'zmffem')
+        };
+        const actualizar = () => {
+            document.querySelectorAll('[data-categoria-panel]').forEach(panel => { panel.hidden = panel.dataset.categoriaPanel !== categoria.value; });
+            document.querySelectorAll('[data-gestion-panel]').forEach(panel => { panel.hidden = panel.dataset.gestionPanel !== seccion.value; });
+            const clave = categoria.value + '-' + seccion.value;
+            if (!montadas.has(clave)) { paneles[clave](); montadas.add(clave); }
+        };
+        categoria.addEventListener('change', actualizar);
+        seccion.addEventListener('change', actualizar);
+        actualizar();
+    }, { once: true });</script>
+</body>
+</html>

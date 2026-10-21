@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin · {MODULO} by PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="@p" data-modo="protegido"></script>
+</head>
+<body>
+
+    <header class="site-header">
+        <a class="logo-container" data-mod-href="admin.html" href="admin.html">
+            <img src="../imagenes/proyectn.png" alt="Logo" class="logo-img" data-mod-logo>
+            <div class="logo"><span data-mod-titulo>MÓDULO</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a data-mod-href="./" href="./"><i class="fa-solid fa-trophy"></i> Ver portal</a></li>
+                <li><a href="#resultados"><i class="fa-solid fa-table"></i> Herramienta</a></li>
+                <li><a href="#cupos"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a data-mod-href="cupos.html" href="cupos.html"><i class="fa-solid fa-up-right-from-square"></i> Cupos públicos</a></li>
+                <li><a href="#usuariosPortal"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><a data-mod-href="/admin/sorteo.html" href="/admin/sorteo.html"><i class="fa-solid fa-dice"></i> Sorteo</a></li>
+                <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="login.html" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main data-mod-cuerpo>
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title"><span data-mod-nombre>Módulo</span> · Herramienta</h2>
+        <div class="tool-container">
+            <p class="tool-desc">Carga los archivos de registro (.log / .txt) de cada sala, corrige nombres y descarga la tabla oficial 4:5.</p>
+            <div class="form-grid tres">
+                <div class="form-group"><label for="inputModerador">Moderador / admin</label><input type="text" id="inputModerador" placeholder="Ej. Admin"></div>
+                <div class="form-group"><label for="inputFechaTorneo">Fecha</label><input type="date" id="inputFechaTorneo"></div>
+                <div class="form-group"><label for="inputHoraTorneo">Hora</label><input type="time" id="inputHoraTorneo"></div>
+            </div>
+            <div class="form-group">
+                <label for="fileInput">Archivos de registro (.log / .txt)</label>
+                <input type="file" id="fileInput" accept=".log,.txt,.csv" multiple onchange="prepararRenombradoEquipos()">
+            </div>
+            <div id="seccionRenombrar" class="panel-suave" style="display: none;">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-pen-to-square"></i> Corrección de nombres de equipos</h3>
+                <div id="listaEquiposInputs"></div>
+                <button class="btn-generar" style="margin-top: 20px;" onclick="procesarConNombresPersonalizados()">
+                    <i class="fa-solid fa-gears"></i> Generar tabla de resultados final
+                </button>
+            </div>
+            <div class="results-wrapper"><div id="outputTablasLadoALado" class="result-box"></div></div>
+            <div id="guardarBD"></div>
+        </div>
+    </section>
+
+    <section class="tool-section" id="cupos">
+        <h2 class="section-title">Cupos</h2>
+        <div class="tool-container">
+            <div class="form-group" style="max-width:460px">
+                <label for="gestionCuposSeccion">Sección</label>
+                <select id="gestionCuposSeccion" data-segmentado><option value="cupos">Cupos</option><option value="vip">VIP</option><option value="baneos">Baneos</option></select>
+            </div>
+            <section class="panel-suave">
+                <div data-gestion-panel="cupos"><h3 class="subtitulo-bloque">Cupos</h3><div id="cuposAdmin"></div></div>
+                <div data-gestion-panel="vip" hidden><h3 class="subtitulo-bloque">VIP · horarios y equipos autorizados</h3><div id="vipCuposAdmin"></div></div>
+                <div data-gestion-panel="baneos" hidden><h3 class="subtitulo-bloque">Baneos por equipo o teléfono</h3><div id="baneosCuposAdmin"></div></div>
+            </section>
+        </div>
+    </section>
+
+    <section id="usuariosPortal" class="tool-section">
+        <h2 class="section-title">Usuarios del portal</h2>
+        <div class="tool-container"><div id="usuariosPortalAdmin"></div></div>
+    </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 <b data-mod-nombre>MÓDULO</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="modulo.js?v=20261013e"></script>
+    <script src="script.js?v=20261013e"></script>
+    <script src="../portal-kit/guardado.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script>window.addEventListener('pg:sesion', () => moduloListo.then(m => { if (m) PumasUsuariosPortal.montar('usuariosPortalAdmin', m.id); }), { once: true });</script>
+    <script>
+        moduloListo.then(m => {
+            if (!m) return;
+            window.MODULO = m;
+            const seccion = document.getElementById('gestionCuposSeccion');
+            const montadas = new Set();
+            const paneles = {
+                cupos: () => PumasCupos.montarAdmin('cuposAdmin', m.id),
+                vip: () => PumasControl.montarVip('vipCuposAdmin', m.id, { agregar: true }),
+                baneos: () => PumasControl.montarBaneos('baneosCuposAdmin', m.id)
+            };
+            const actualizar = () => {
+                document.querySelectorAll('[data-gestion-panel]').forEach(panel => { panel.hidden = panel.dataset.gestionPanel !== seccion.value; });
+                if (!montadas.has(seccion.value)) { paneles[seccion.value](); montadas.add(seccion.value); }
+            };
+            seccion.addEventListener('change', actualizar);
+            actualizar();
+            PumasGuardado.montar({
+                contenedor: 'guardarBD',
+                portal: () => m.id,
+                nombrePortal: () => m.nombre,
+                tituloPorDefecto: () => 'Entreno ' + m.nombre,
+                datos: () => {
+                    if (!_rFD.length || !document.getElementById('tablaCaptura')) return null;
+                    const ren = {};
+                    document.querySelectorAll('.input-nombre-editable').forEach(i => { ren[i.dataset.original] = i.value.trim() || i.dataset.original; });
+                    const f = document.getElementById('inputFechaTorneo').value, h = document.getElementById('inputHoraTorneo').value;
+                    return {
+                        salas: _rFD.map(PumasGuardado.parsearLog),
+                        nombreVisible: n => ren[n] || n,
+                        fecha: f ? new Date(f + 'T' + (h || '00:00')) : new Date(),
+                        moderador: document.getElementById('inputModerador').value.trim()
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Módulos | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="../ascensos/style.css?v=20261013e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo"><span class="t-a">PUMAS</span> ADMIN</div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><a href="usuarios.html"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section>
+        <h2 class="section-title">Módulos y portales</h2>
+        <main id="modulos"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
+    </section>
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+    <script src="../portal-kit/modulos.js?v=20261013e"></script>
+</body>
+</html>

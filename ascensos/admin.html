@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin · Ascensos AZA by PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Orbitron y Rajdhani se usan en la imagen que se descarga -->
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="imagenes/proyectn.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="ascensosaza" data-modo="protegido"></script>
+</head>
+<body data-tema="aza">
+
+    <header class="site-header">
+        <a class="logo-container" href="admin.html">
+            <img src="imagenes/aza.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">ASCENSOS</span> <span class="t-b">AZA</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-trophy"></i> Ver portal</a></li>
+                <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Cupos públicos</a></li>
+                <li><a href="/admin/sorteo.html?p=ascensosaza"><i class="fa-solid fa-dice"></i> Sorteo</a></li>
+                <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="login.html" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Ascensos AZA · Herramienta</h2>
+        <div class="asc-tabs" role="tablist">
+            <button data-tab="panelResultados"><i class="fa-solid fa-table"></i> Resultados</button>
+            <button data-tab="panelIA"><i class="fa-solid fa-wand-magic-sparkles"></i> Con IA</button>
+            <button data-tab="panelJornadas"><i class="fa-solid fa-clock-rotate-left"></i> Jornadas guardadas</button>
+            <button data-tab="panelBaneados"><i class="fa-solid fa-ban"></i> Baneados</button>
+            <button data-tab="panelCupos"><i class="fa-solid fa-ticket"></i> Cupos</button>
+            <button data-tab="panelModeradores" hidden><i class="fa-solid fa-user-shield"></i> Moderadores</button>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div class="tool-container asc-panel" id="panelResultados">
+            <div class="asc-barra" id="ascBorrador"></div>
+
+            <div class="form-grid cuatro">
+                <div class="form-group">
+                    <label for="selectCategoria">Evento (de quién son los resultados)</label>
+                    <select id="selectCategoria"></select>
+                </div>
+                <div class="form-group">
+                    <label for="inputFecha">Fecha</label>
+                    <input type="date" id="inputFecha">
+                </div>
+                <div class="form-group">
+                    <label for="selectHorario">Horario</label>
+                    <select id="selectHorario">
+                        <option>2PM MEXICO</option><option>4PM MEXICO</option><option>6PM MEXICO</option>
+                        <option>8PM MEXICO</option><option>10PM MEXICO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputModerador">Moderador</label>
+                    <input type="text" id="inputModerador" maxlength="40" placeholder="Ej: Mod · PROYECTN">
+                </div>
+            </div>
+            <div class="form-grid cuatro">
+                <div class="form-group">
+                    <label for="selectCantidadSalas">Salas a jugar</label>
+                    <select id="selectCantidadSalas">
+                        <option value="3">3 salas</option><option value="4">4 salas</option><option value="5">5 salas</option><option value="6">6 salas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selectModo">Puntaje</label>
+                    <select id="selectModo">
+                        <option value="top">Solo top (posición)</option>
+                        <option value="top_kill">Top + kills</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 2">
+                    <label for="inputTexto">Título / jornada (sale en la imagen)</label>
+                    <input type="text" id="inputTexto" maxlength="60" placeholder="Ej: JORNADA 1 - 31 AGO">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEquipos">Equipos y tags (uno por línea: Equipo - Tag)</label>
+                <textarea id="inputEquipos" class="equipos" spellcheck="false"></textarea>
+            </div>
+
+            <div class="asc-aviso-ban" id="avisoBaneados" hidden></div>
+            <div id="contenedorSalas"></div>
+
+            <div id="ascConfirmar" class="asc-confirmar"></div>
+
+            <h3 class="subtitulo-bloque" style="margin-top:26px"><i class="fa-solid fa-image"></i> Imagen 2000 × 2000</h3>
+            <div class="asc-previa" id="ascPrevia"></div>
+
+            <div class="asc-acciones">
+                <button class="btn-access" id="btnGuardarJornada"><i class="fa-solid fa-cloud-arrow-up"></i> Generar imagen y guardar</button>
+                <button class="btn-access btn-outline" id="btnSoloImagen"><i class="fa-solid fa-download"></i> Solo descargar imagen</button>
+            </div>
+            <p class="asc-estado" id="ascEstado" role="status"></p>
+        </div>
+
+        <!-- CON IA: lee las capturas de slots y resultados -->
+        <div class="tool-container asc-panel" id="panelIA" hidden>
+            <div id="iaPanel"></div>
+        </div>
+
+        <!-- JORNADAS -->
+        <div class="tool-container asc-panel" id="panelJornadas" hidden>
+            <p class="tool-desc">Jornadas guardadas en la base de Ascensos AZA (salen en el portal público). Puedes borrar las que estén mal y volver a cargarlas.</p>
+            <div class="jornadas-admin" id="jornadasAdmin"></div>
+        </div>
+
+        <!-- BANEADOS -->
+        <div class="tool-container asc-panel" id="panelBaneados" hidden>
+            <p class="tool-desc">Equipos que no pueden jugar. Salen en el portal público y se marcan en rojo cuando aparecen en la lista de equipos.</p>
+            <div id="baneadosAdmin"></div>
+        </div>
+
+        <!-- MODERADORES: Administrador Ascensos, Ascensos AZA y superadmin -->
+        <div class="tool-container asc-panel" id="panelModeradores" hidden>
+            <p class="tool-desc">Los moderadores entran con su usuario y clave a esta herramienta: abren cupos y suben resultados.
+                La <b>IA viene apagada</b> hasta que la habilites, y solo pueden usar los <b>eventos</b> que marques. Su nombre sale como moderador en la imagen.</p>
+            <div id="moderadoresAdmin"></div>
+        </div>
+
+        <!-- CUPOS -->
+        <div class="tool-container asc-panel" id="panelCupos" hidden>
+            <p class="tool-desc">Abre cupos para la próxima jornada, igual que en PROYECTN. Los equipos se inscriben en <a href="cupos.html">la página de cupos</a>.</p>
+            <div id="cuposAdmin"></div>
+            <h3 class="subtitulo-bloque" style="margin-top:30px">Baneos por equipo o teléfono</h3>
+            <div id="baneosCuposAdmin"></div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>ASCENSOS AZA</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+    </script>
+    <script src="categorias.js?v=20261013e"></script>
+    <script src="../portal-kit/baneados.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="ascensos.js?v=20261013e"></script>
+    <script>window.addEventListener('pg:sesion', () => {
+        PumasControl.montarBaneos('baneosCuposAdmin', 'ascensosaza');
+    }, { once: true });</script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin | PROYECTN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261021a">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261021a" data-modo="login"></script>
+    <style>
+      /* ── Admin Hub layout ── */
+      .admin-hub {
+        padding: 40px 48px 80px;
+        max-width: 1520px;
+        margin: 0 auto;
+      }
+      .hub-bienvenida {
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+        margin-bottom: 48px;
+      }
+      .hub-bienvenida h1 {
+        margin: 0; font: 700 1.8rem/1.1 var(--font-display, "Space Grotesk", sans-serif);
+        color: var(--text, #F4F5F7);
+      }
+      .hub-bienvenida h1 span { color: var(--primary, #B6FF00); }
+      .hub-bienvenida .rol-badge {
+        padding: 4px 12px; border: 1px solid var(--border, #30343B); border-radius: 2px;
+        font: 500 .7rem/1 var(--font-display, "Space Grotesk", sans-serif);
+        letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted, #A8ADB6);
+      }
+
+      /* aviso rol */
+      .aviso-rol {
+        padding: 14px 18px; margin-bottom: 28px;
+        border-left: 3px solid #e5484d; background: rgba(229,72,77,.08);
+        font-size: .88rem; color: var(--text, #F4F5F7);
+      }
+
+      /* hub section label */
+      .hub-section { margin-bottom: 56px; }
+      .hub-section-title {
+        display: flex; align-items: center; gap: 14px; margin: 0 0 24px;
+        font: 600 .65rem/1 var(--font-display, "Space Grotesk", sans-serif);
+        letter-spacing: .22em; text-transform: uppercase; color: var(--text-muted, #A8ADB6);
+      }
+      .hub-section-title::before { content: ''; height: 1px; width: 0; flex: 0 0 0; }
+      .hub-section-title::after  { content: ''; height: 1px; background: var(--line); flex: 1; }
+
+      /* sub-groups inside Portales */
+      .hub-subgroup { margin-bottom: 36px; }
+      .hub-subgroup-label {
+        font: 500 .68rem/1 var(--font-body, "Inter", sans-serif);
+        letter-spacing: .12em; text-transform: uppercase;
+        color: var(--primary, #B6FF00); margin-bottom: 14px; opacity: .7;
+      }
+
+      /* ── Card mark diamond (watermark) ── */
+      .hub-card-mark {
+        position: absolute; top: -20px; right: -20px;
+        width: 80px; height: 80px; opacity: .05;
+        transform: rotate(45deg); overflow: hidden; pointer-events: none;
+      }
+      .hub-card-mark img {
+        width: 100%; height: 100%; object-fit: contain; transform: rotate(-45deg);
+      }
+
+      /* ── background grid pattern ── */
+      body::after {
+        content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+        background-image:
+          linear-gradient(rgba(182,255,0,.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(182,255,0,.025) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+
+      @media (max-width: 900px) {
+        .admin-hub { padding: 24px 20px 60px; }
+      }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="../">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo">PROYECTN <span style="opacity:.5">Admin</span></div>
+        </a>
+        <nav class="main-nav" style="display:block;position:static;width:auto;padding:0;border:0;background:none;box-shadow:none">
+            <ul style="flex-direction:row;gap:18px">
+                <li data-pg-permiso="gestionar" hidden><a href="usuarios.html" style="border:0"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li data-pg-permiso="gestionar" hidden><a href="entrenos.html" style="border:0"><i class="fa-solid fa-pen-to-square"></i> Entrenos</a></li>
+                <li data-pg-permiso="personalizar" hidden><a href="config.html" style="border:0"><i class="fa-solid fa-wand-magic-sparkles"></i> Personalizar</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span> <small class="muted" id="rolNombre"></small></span></li>
+                <li><a href="#" class="pg-salir" id="btnSalir" style="border:0"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="admin-hub">
+        <div class="aviso-rol" id="avisoRol" hidden></div>
+
+        <div class="hub-bienvenida">
+            <h1>Panel <span>PROYECTN</span></h1>
+            <span class="rol-badge" id="rolBadge"></span>
+        </div>
+
+        <!-- ── Portales ── -->
+        <section class="hub-section" id="sec-portales">
+            <h2 class="hub-section-title"><span>Portales</span></h2>
+
+            <div class="hub-subgroup" id="grupo-entrenos" hidden>
+                <div class="hub-subgroup-label">Principal</div>
+                <div class="hub-grid" id="hub-entrenos"></div>
+            </div>
+
+            <div class="hub-subgroup" id="grupo-ascensos" hidden>
+                <div class="hub-subgroup-label">Ascensos</div>
+                <div class="hub-grid" id="hub-ascensos"></div>
+            </div>
+
+            <div class="hub-subgroup" id="grupo-ligas" hidden>
+                <div class="hub-subgroup-label">Ligas &amp; Privadas</div>
+                <div class="hub-grid" id="hub-ligas"></div>
+            </div>
+
+            <div class="hub-subgroup" id="grupo-otros" hidden>
+                <div class="hub-subgroup-label">Otros módulos</div>
+                <div class="hub-grid" id="hub-otros"></div>
+            </div>
+
+            <p class="tool-desc" id="sinPortales" hidden>Tu usuario no tiene portales asignados.</p>
+        </section>
+
+        <!-- ── Dinámicas ── -->
+        <section class="hub-section">
+            <h2 class="hub-section-title"><span>Dinámicas</span></h2>
+            <div class="hub-grid" id="hub-dinamicas"></div>
+        </section>
+
+        <!-- ── Sistema ── -->
+        <section class="hub-section" id="sec-sistema" hidden>
+            <h2 class="hub-section-title"><span>Sistema</span></h2>
+            <div class="hub-grid" id="hub-sistema"></div>
+        </section>
+    </main>
+
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+
+    <script>
+    (async function () {
+        const P = PumasPortal;
+        const s = await P.validar();
+        if (!s) { location.replace('login.html?next=' + encodeURIComponent('/admin/')); return; }
+        if (P.inicioDe(s) !== '/admin/' && !P.tiene(s, 'gestionar')) { location.replace(P.inicioDe(s)); return; }
+        document.documentElement.classList.remove('pg-verificando');
+        document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+        const rolNombreEl = document.getElementById('rolNombre');
+        rolNombreEl.textContent = s.rol_nombre ? '· ' + s.rol_nombre : '';
+        document.getElementById('rolBadge').textContent = s.rol_nombre || s.rol || 'Usuario';
+        document.querySelectorAll('[data-pg-permiso]').forEach(n => { n.hidden = !P.tiene(s, n.dataset.pgPermiso); });
+
+        const aviso = document.getElementById('avisoRol');
+        if (!('rol' in s)) {
+            aviso.hidden = false;
+            aviso.textContent = 'La base de datos tiene la versión vieja de las funciones de login (sin roles). Corre sql/05_reparar_funciones.sql en Supabase y vuelve a entrar.';
+        } else if (!s.rol) {
+            aviso.hidden = false;
+            aviso.textContent = 'Tu usuario no tiene rol asignado. Corre sql/04_corregir_usuarios.sql en Supabase o pide a un superadmin que te asigne uno.';
+        } else if (s.usuario === 'coachniko' && !P.tiene(s, 'gestionar')) {
+            aviso.hidden = false;
+            aviso.textContent = 'coachniko tiene el rol "' + (s.rol_nombre || s.rol) + '" y no puede gestionar usuarios. Corre sql/04_corregir_usuarios.sql para dejarlo como superadmin.';
+        }
+
+        document.getElementById('btnSalir').addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); });
+
+        // ── helpers ──────────────────────────────────────────────────────
+        function hexRgb(h) {
+            const n = h.replace('#', '');
+            const full = n.length === 3 ? n.split('').map(c => c + c).join('') : n;
+            return `${parseInt(full.slice(0,2),16)},${parseInt(full.slice(2,4),16)},${parseInt(full.slice(4,6),16)}`;
+        }
+        function mark() {
+            return `<div class="hub-card-mark"><img src="../imagenes/proyectn.png" alt=""></div>`;
+        }
+        function tarjeta(color, html) {
+            const rgb = hexRgb(color);
+            return `<article class="card-box hub-card" style="--c:${color};--c-rgb:${rgb}">${mark()}${html}</article>`;
+        }
+
+        // ── colores y textos de portales ──────────────────────────────────
+        const colores = {
+            principal:      '#B6FF00',
+            entrenamientos: '#B6FF00',
+            ascensosqfd:    '#4FC3F7',
+            ascensosaza:    '#00E0C6',
+            ascensos:       '#38BDF8',
+            row:            '#E53935',
+            rusheo:         '#FF8A00',
+            zmf:            '#E10600',
+            dragonfest:     '#2E6BFF',
+            dragonfestfem:  '#FF4FA3',
+            zmffem:         '#F0306E',
+            pruebas:        '#9BE15D'
+        };
+        const nombreOverride = {
+            entrenamientos: 'Pumas Gaming',
+            ascensosqfd:    'Ascensos Quisqueya'
+        };
+        const textos = {
+            principal:      'Página de inicio de PROYECTN.',
+            entrenamientos: 'Carga de resultados, cupos, VIP y métricas de entrenos.',
+            ascensosqfd:    'Procesador de salas y tabla de ascensos Quisqueya.',
+            ascensosaza:    'Ascensos AZA: anotación por salas, imagen 2000×2000, baneados y cupos.',
+            ascensos:       'Portal de ascensos general.',
+            row:            'Resultados de ROW x Maya, imagen 4:5.',
+            rusheo:         'Resultados de Rusheo, imagen 4:5.',
+            zmf:            'ZMF mixto. Herramienta compartida con femenino.',
+            zmffem:         'ZMF femenino. Herramienta compartida con mixto.',
+            dragonfest:     'Dragon Fest mixto. Herramienta compartida con femenino.',
+            dragonfestfem:  'Dragon Fest femenino. Herramienta compartida con mixto.',
+            pruebas:        'Módulo de pruebas para probar sin tocar lo real.'
+        };
+
+        // grupos de portales
+        const GRUPO_ENTRENOS  = new Set(['principal']);
+        const GRUPO_ASCENSOS  = new Set(['ascensos', 'ascensosaza']);
+        const GRUPO_LIGAS     = new Set(['entrenamientos', 'ascensosqfd', 'row', 'rusheo', 'zmf', 'zmffem', 'dragonfest', 'dragonfestfem']);
+
+        function grupoDePortal(k) {
+            if (GRUPO_ENTRENOS.has(k))  return 'entrenos';
+            if (GRUPO_ASCENSOS.has(k))  return 'ascensos';
+            if (GRUPO_LIGAS.has(k))     return 'ligas';
+            return 'otros';
+        }
+
+        // ── cargar módulos ───────────────────────────────────────────────
+        const filasPortales = await P.cargarModulos();
+        const datoDe = id => filasPortales.find(r => r.id === id) || {};
+
+        // ── construir tarjetas de portales ────────────────────────────────
+        const grupos = { entrenos: [], ascensos: [], ligas: [], otros: [] };
+        let totalPortales = 0;
+
+        const EXCLUIR = new Set(['torneos', 'corp']);
+        Object.entries(P.PORTALES).filter(([k]) => P.puede(s, k) && !EXCLUIR.has(k)).forEach(([k, p]) => {
+            const principal = k === 'principal', entrenos = k === 'entrenamientos';
+            const d = datoDe(k);
+            const color  = d.color_tema || colores[k] || d.color || '#B6FF00';
+            const nombre = nombreOverride[k] || d.nombre || p.nombre;
+            const texto  = textos[k] || d.subtitulo || 'Módulo creado desde el panel.';
+            const abrir  = principal
+                ? `<a class="btn-access" href="${p.url}"><i class="fa-solid fa-house"></i> Ver</a>`
+                : `<a class="btn-access" href="${p.admin}"><i class="fa-solid fa-screwdriver-wrench"></i> ${entrenos ? 'Panel' : 'Herramienta'}</a>
+                   <a class="btn-access btn-outline" href="${p.url}"><i class="fa-solid fa-trophy"></i> Portal</a>`;
+            const html = `<h3>${P.escaparHtml(nombre)}</h3><p>${P.escaparHtml(texto)}</p><div class="acciones">${abrir}</div>`;
+            grupos[grupoDePortal(k)].push(tarjeta(color, html));
+            totalPortales++;
+        });
+
+        // poblar sub-grupos
+        Object.entries(grupos).forEach(([g, cards]) => {
+            if (!cards.length) return;
+            const grid = document.getElementById('hub-' + g);
+            const wrap = document.getElementById('grupo-' + g);
+            if (grid && wrap) { grid.innerHTML = cards.join(''); wrap.hidden = false; }
+        });
+
+        if (totalPortales === 0) document.getElementById('sinPortales').hidden = false;
+
+        // ── sección Dinámicas ─────────────────────────────────────────────
+        const cardsDinamicas = [];
+
+        cardsDinamicas.push(tarjeta('#4dff91',
+            `<h3><i class="fa-solid fa-bolt"></i> Dinámicas</h3>
+             <p>Registro de equipos, encuestas, juego retro con tabla de líderes. Activa cada dinámica de forma independiente.</p>
+             <div class="acciones"><a class="btn-access" href="dinamicas.html"><i class="fa-solid fa-bolt"></i> Abrir</a></div>`));
+
+        cardsDinamicas.push(tarjeta('#FFD54A',
+            `<h3><i class="fa-solid fa-dice"></i> Sorteos</h3>
+             <p>Equipos anotados y sorteo en vivo de tus portales.${P.tiene(s, 'gestionar') ? ' Activa o desactiva el sorteo de cualquier portal.' : ''}</p>
+             <div class="acciones"><a class="btn-access" href="sorteo.html"><i class="fa-solid fa-dice"></i> Sorteos</a></div>`));
+
+
+        document.getElementById('hub-dinamicas').innerHTML = cardsDinamicas.join('');
+
+        // ── sección Sistema (solo gestionar / personalizar) ───────────────
+        const cardsSistema = [];
+
+        if (P.tiene(s, 'gestionar')) cardsSistema.push(tarjeta('#F4F5F7',
+            `<h3><i class="fa-solid fa-users-gear"></i> Usuarios y roles</h3>
+             <p>Crea usuarios y roles, asigna permisos y cambia contraseñas.</p>
+             <div class="acciones"><a class="btn-access" href="usuarios.html"><i class="fa-solid fa-user-shield"></i> Gestionar</a></div>`));
+
+        if (P.tiene(s, 'gestionar')) cardsSistema.push(tarjeta('#e5484d',
+            `<h3><i class="fa-solid fa-pen-to-square"></i> Corregir entrenos</h3>
+             <p>Borra un entreno de cualquier portal o corrige el nombre de un equipo.</p>
+             <div class="acciones"><a class="btn-access" href="entrenos.html"><i class="fa-solid fa-screwdriver-wrench"></i> Corregir</a></div>`));
+
+        if (P.tiene(s, 'gestionar')) cardsSistema.push(tarjeta('#6ee7a8',
+            `<h3><i class="fa-solid fa-download"></i> Respaldo</h3>
+             <p>Descarga una copia de toda la base (portales, usuarios sin contraseñas, roles y todos los entrenos) en un archivo.</p>
+             <div class="acciones"><button class="btn-access" id="btnRespaldo"><i class="fa-solid fa-download"></i> Generar respaldo</button></div>
+             <p class="muted" id="respaldoMsg" role="status"></p>`));
+
+        if (P.tiene(s, 'gestionar')) cardsSistema.push(tarjeta('#B04DD6',
+            `<h3><i class="fa-solid fa-cubes"></i> Módulos</h3>
+             <p>Crea módulos nuevos con su color y logo, o cambia color, logo y título de cualquier portal.</p>
+             <div class="acciones"><a class="btn-access" href="modulos.html"><i class="fa-solid fa-palette"></i> Módulos</a></div>`));
+
+        if (P.tiene(s, 'gestionar')) cardsSistema.push(tarjeta('#4285F4',
+            `<h3><i class="fa-solid fa-microchip"></i> Motores de IA</h3>
+             <p>Activa Gemini, el motor privado o Claude para la lectura de capturas de Ascensos AZA.</p>
+             <div class="acciones"><a class="btn-access" href="ia.html"><i class="fa-solid fa-microchip"></i> Motores</a></div>`));
+
+        if (P.tiene(s, 'gestionar')) cardsSistema.push(tarjeta('#FF8A00',
+            `<h3><i class="fa-solid fa-file-csv"></i> Resultados completos</h3>
+             <p>Elige qué eventos suben el .csv completo de la sala (daño, headshots, gloo, revividas).</p>
+             <div class="acciones"><a class="btn-access" href="exportar.html"><i class="fa-solid fa-file-csv"></i> Configurar</a></div>`));
+
+        if (P.tiene(s, 'personalizar')) cardsSistema.push(tarjeta('#7FD1FF',
+            `<h3><i class="fa-solid fa-house"></i> Inicio</h3>
+             <p>Torneos aliados y sorteo del inicio: se activan aquí y solo salen cuando están activos.</p>
+             <div class="acciones"><a class="btn-access" href="inicio.html"><i class="fa-solid fa-sliders"></i> Editar inicio</a></div>`));
+
+        if (P.tiene(s, 'personalizar')) cardsSistema.push(tarjeta('#B6FF00',
+            `<h3><i class="fa-solid fa-wand-magic-sparkles"></i> Personalización</h3>
+             <p>Efecto para todas las páginas: calabazas, fantasmas, nieve o iconos.</p>
+             <div class="acciones"><a class="btn-access" href="config.html"><i class="fa-solid fa-sliders"></i> Personalizar</a></div>`));
+
+        cardsSistema.push(tarjeta('#4dff91',
+            `<h3><i class="fa-solid fa-newspaper"></i> Noticias</h3>
+             <p>Gestiona actualizaciones, noticias FFWS y recomendaciones que aparecen en la página principal.</p>
+             <div class="acciones"><a class="btn-access" href="noticias.html"><i class="fa-solid fa-pen-to-square"></i> Editar noticias</a></div>`));
+
+        if (cardsSistema.length) {
+            document.getElementById('hub-sistema').innerHTML = cardsSistema.join('');
+            document.getElementById('sec-sistema').hidden = false;
+        }
+
+        // ── respaldo ──────────────────────────────────────────────────────
+        const btnR = document.getElementById('btnRespaldo');
+        if (btnR) btnR.addEventListener('click', async () => {
+            const msg = document.getElementById('respaldoMsg');
+            const ok = await P.confirmar({
+                titulo: '¿Generar respaldo?',
+                html: '<p>Se descargará un archivo <b>.json</b> con todos los datos de la base: portales, roles, usuarios (<b>sin contraseñas</b>), configuración y todos los entrenos con sus resultados y killers.</p><p>Guárdalo en un lugar seguro (Drive, PC). Los archivos de logs del storage no se incluyen.</p>',
+                si: 'Sí, generar', no: 'Cancelar'
+            });
+            if (!ok) return;
+            btnR.disabled = true; msg.textContent = 'Generando respaldo...';
+            try {
+                const datos = await P.respaldo();
+                const fecha = new Date();
+                const nombre = 'proyectn-respaldo-' + fecha.toISOString().slice(0, 16).replace('T', '_').replace(':', '-') + '.json';
+                const blob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = nombre;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+                const total = Object.values(datos.filas_por_tabla || {}).reduce((x, y) => x + y, 0);
+                msg.textContent = '✔ Respaldo descargado: ' + nombre + ' (' + total.toLocaleString('es') + ' filas, ' + Math.max(1, Math.round(blob.size / 1024)).toLocaleString('es') + ' KB).';
+            } catch (err) {
+                msg.textContent = 'No se pudo generar: ' + err.message;
+            } finally { btnR.disabled = false; }
+        });
+    })();
+    </script>
+</body>
+</html>

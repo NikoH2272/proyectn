@@ -1,0 +1,199 @@
+﻿/* Rusheo · estilos de la imagen descargable (4:5).
+   La apariencia de la página viene de ../../portal-kit/portal.css.
+   Los colores de la imagen se fijan aquí para que no cambien con el tema de la página. */
+
+.rusheo-captura-container {
+    --primary: #ff70a6;
+    --secondary: #ffd166;
+    --light: #ffffff;
+    --gray: #a0a0a0;
+    --rusheo-captura-bg: #0c0914;
+    --rusheo-captura-border: rgba(255, 112, 166, 0.4);
+    --rusheo-box-bg: rgba(20, 14, 30, 0.92);
+    --rusheo-box-border: rgba(255, 209, 102, 0.4);
+    --rusheo-txt-primario: #ff70a6;
+    --rusheo-txt-secundario: #ffd166;
+    --rusheo-kill-color: #ff3366;
+}
+
+/* La página usa otra letra e interlineado: dentro de la imagen se restablecen
+   (como estaba antes) para que entren todos los equipos y jugadores. */
+.rusheo-captura-container { line-height: normal; letter-spacing: normal; }
+.rusheo-captura-container :where(*) { margin: 0; padding: 0; line-height: normal; }
+.rusheo-captura-container :where(:not(i, .fa-solid, .fa-regular, .fa-brands)) { font-family: 'Rajdhani', sans-serif; }
+
+/* --- CONTENEDOR PRINCIPAL DE LA CAPTURA (800x1000px) --- */
+.rusheo-captura-container {
+    width: 800px;
+    height: 1000px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--light);
+    padding: 20px;
+    box-sizing: border-box;
+    border: 2px solid var(--rusheo-captura-border);
+    border-radius: 12px;
+    background-color: var(--rusheo-captura-bg);
+}
+
+/* --- ENCABEZADO Y CAJA DE INFO --- */
+.rusheo-header {
+    text-align: center;
+    position: absolute;
+    top: 80px;
+    left: 400px;
+    right: 40px;
+}
+
+.rusheo-titulo {
+    font-family: 'Carter One', cursive;
+    font-size: 2.5rem;
+    color: var(--light);
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 8px var(--primary);
+}
+
+/* Caja contenedora para los datos del subtítulo.
+   position: relative es necesario: sin él, la descarga (html2canvas) pinta el
+   fondo de la caja ENCIMA del texto y la fecha/hora sale tapada y pálida. */
+.rusheo-subtitulo-box {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    background: rgba(12, 8, 20, 0.88);
+    border: 1px solid var(--rusheo-box-border);
+    padding: 8px 22px;
+    border-radius: 6px;
+}
+
+.rusheo-sub-line {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    color: var(--secondary);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.rusheo-sub-line:first-child { margin-top: 0; }
+
+/* --- CAJAS INTERNAS --- */
+.rusheo-box {
+    position: absolute;
+    left: 35px;
+    width: 730px;
+    background: var(--rusheo-box-bg);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--rusheo-box-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.rusheo-box-title {
+    color: var(--secondary);
+    font-family: 'Carter One', cursive;
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* --- POSICIONAMIENTO Y TABLA GENERAL --- */
+.rusheo-tabla-general {
+    top: 280px;
+    max-height: 410px;
+    overflow: hidden;
+}
+
+.rusheo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    color: var(--light);
+}
+
+.rusheo-table th {
+    color: var(--secondary);
+    border-bottom: 2px solid var(--rusheo-box-border);
+    font-size: 0.78rem;
+    padding: 4px;
+}
+
+.rusheo-table td {
+    padding: 3.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- CLASES DE COLOR PARA POSICIONES --- */
+.rusheo-txt-white { color: var(--light); }
+.rusheo-txt-primario { color: var(--rusheo-txt-primario); }
+.rusheo-txt-secundario { color: var(--rusheo-txt-secundario); }
+.rusheo-td-bold { font-weight: bold; }
+
+/* --- SECCIÓN BOOYAH --- */
+.rusheo-booyah-section {
+    top: 700px;
+}
+
+.rusheo-booyah-grid {
+    display: flex;
+    gap: 6px;
+}
+
+.rusheo-card-item {
+    font-size: 0.7rem;
+    background: var(--rusheo-box-bg);
+    padding: 5px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--rusheo-box-border);
+    text-align: center;
+    width: 100%;
+}
+
+.rusheo-sala-title {
+    color: var(--secondary);
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.rusheo-equipo-name {
+    color: var(--light);
+    font-weight: bold;
+    max-width: 95px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0 auto;
+}
+
+.rusheo-card-info {
+    color: var(--gray);
+    font-size: 0.65rem;
+    margin-top: 2px;
+}
+
+/* --- SECCIÓN TOP KILLERS --- */
+.rusheo-killers-section {
+    top: 840px;
+}
+
+.rusheo-killers-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.rusheo-killer-item {
+    font-size: 0.7rem;
+    background: var(--rusheo-box-bg);
+    padding: 5px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--rusheo-box-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

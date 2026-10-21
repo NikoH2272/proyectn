@@ -1,0 +1,732 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C79JND219Y');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Corp Admin | PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../portal-kit/portal.css?v=20261015">
+<link rel="icon" href="../imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../portal-kit/portal.js?v=20261015" data-modo="login" data-sin-efecto></script>
+<style>
+/* ── Corp Admin vars ── */
+:root {
+  --ca-gold:   #D8C395;
+  --ca-gold2:  #F4EEDC;
+  --ca-amber:  #B8A875;
+  --ca-red:    #cc7070;
+  --ca-bg:     #0A0A0A;
+  --ca-bg2:    #181818;
+  --ca-bg3:    #222222;
+  --ca-line:   rgba(216,195,149,.22);
+  --ca-text:   #F4EEDC;
+  --ca-gray:   #8A8070;
+  /* alias para compatibilidad */
+  --ca-blue:   #B8A875;
+  --ca-teal:   #D8C395;
+}
+*{box-sizing:border-box}
+body{background:var(--ca-bg);color:var(--ca-text);font-family:'Segoe UI',sans-serif;font-size:.9rem;margin:0;visibility:visible!important}
+
+/* ── Layout ── */
+.ca-wrap{max-width:1160px;margin:0 auto;padding:0 1rem 4rem}
+.ca-header{display:flex;align-items:center;gap:12px;padding:1rem 0 1.4rem;border-bottom:1px solid var(--ca-line);margin-bottom:1.4rem}
+.ca-header h1{font-family:'Michroma',sans-serif;font-size:.95rem;letter-spacing:.1em;color:var(--ca-gold);margin:0;text-transform:uppercase}
+.ca-header .ca-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ── Tabs principales ── */
+.ca-tabs{display:flex;gap:0;border-bottom:1px solid var(--ca-line);margin-bottom:1.6rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ca-tab{padding:.75rem 1.2rem;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--ca-gray);border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s,border-color .15s;user-select:none}
+.ca-tab:hover{color:var(--ca-gold2)}
+.ca-tab.activo{color:var(--ca-gold);border-bottom-color:var(--ca-gold)}
+.ca-panel{display:none}
+.ca-panel.activo{display:block}
+
+/* ── Paneles de dos columnas ── */
+.ca-grid{display:grid;grid-template-columns:300px 1fr;gap:1.2rem;align-items:start}
+@media(max-width:780px){.ca-grid{grid-template-columns:1fr}}
+
+/* ── Lista lateral ── */
+.ca-list-panel{background:var(--ca-bg2);border:1px solid var(--ca-line);border-radius:10px;overflow:hidden}
+.ca-list-head{display:flex;align-items:center;gap:8px;padding:11px 14px;background:rgba(216,195,149,.07);border-bottom:1px solid var(--ca-line)}
+.ca-list-head h3{flex:1;margin:0;font-family:'Michroma',sans-serif;font-size:.76rem;letter-spacing:.1em;color:var(--ca-amber);text-transform:uppercase}
+.ca-list{list-style:none;margin:0;padding:0;max-height:58vh;overflow-y:auto}
+.ca-list li{padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(74,111,255,.1);display:flex;align-items:center;gap:8px;transition:background .12s}
+.ca-list li:hover{background:rgba(74,111,255,.1)}
+.ca-list li.activo{background:rgba(240,168,0,.09);border-left:3px solid var(--ca-gold)}
+.ca-list .ca-li-text{flex:1;font-size:.83rem;font-weight:600;color:var(--ca-text)}
+.ca-list .ca-li-tipo{font-size:.65rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.12rem .4rem;border-radius:20px}
+.tipo-gratis{background:rgba(0,196,168,.12);color:var(--ca-teal);border:1px solid rgba(0,196,168,.3)}
+.tipo-pago  {background:rgba(240,168,0,.12);color:var(--ca-gold);border:1px solid rgba(240,168,0,.3)}
+.ca-empty{padding:1.2rem;text-align:center;color:var(--ca-gray);font-size:.8rem}
+
+/* ── Editor ── */
+.ca-editor{background:var(--ca-bg2);border:1px solid var(--ca-line);border-radius:10px;overflow:hidden}
+.ca-editor-head{display:flex;align-items:center;gap:10px;padding:11px 16px;background:rgba(216,195,149,.07);border-bottom:1px solid var(--ca-line)}
+.ca-editor-head h2{flex:1;margin:0;font-family:'Michroma',sans-serif;font-size:.8rem;letter-spacing:.1em;color:var(--ca-gold);text-transform:uppercase}
+.ca-editor-body{padding:1.2rem 1.4rem}
+.ca-editor-empty{padding:2rem;text-align:center;color:var(--ca-gray);font-size:.85rem}
+.ca-editor-empty i{font-size:2rem;opacity:.2;display:block;margin-bottom:.5rem}
+
+/* ── Forms ── */
+.ca-form{display:flex;flex-direction:column;gap:10px}
+.ca-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.ca-row{grid-template-columns:1fr}}
+.ca-label{font-size:.7rem;color:var(--ca-gray);font-family:'Michroma',sans-serif;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:3px}
+.ca-input,.ca-select,.ca-textarea{background:rgba(20,20,38,.8);border:1px solid var(--ca-line);color:var(--ca-text);border-radius:6px;padding:7px 10px;font:inherit;font-size:.86rem;outline:none;width:100%;transition:border-color .15s}
+.ca-input:focus,.ca-select:focus,.ca-textarea:focus{border-color:var(--ca-gold)}
+.ca-textarea{resize:vertical;min-height:65px}
+
+/* ── Botones ── */
+.ca-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.48rem 1rem;border-radius:7px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s;border:1.5px solid transparent}
+.ca-btn-pri{background:linear-gradient(135deg,#B8A875,#D8C395);color:#0A0A0A;border-color:#D8C395}
+.ca-btn-pri:hover{filter:brightness(1.1)}
+.ca-btn-sec{background:rgba(216,195,149,.08);color:var(--ca-gold);border-color:var(--ca-gold)}
+.ca-btn-sec:hover{background:rgba(216,195,149,.18)}
+.ca-btn-gold{background:rgba(240,168,0,.12);color:var(--ca-gold);border-color:var(--ca-gold)}
+.ca-btn-gold:hover{background:rgba(240,168,0,.25)}
+.ca-btn-red{background:rgba(255,107,107,.1);color:var(--ca-red);border-color:rgba(255,107,107,.35)}
+.ca-btn-red:hover{background:rgba(255,107,107,.22)}
+.ca-btn-sm{padding:.28rem .7rem;font-size:.74rem}
+.ca-btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+
+/* ── Status ── */
+.ca-status{font-size:.76rem;padding:.35rem .65rem;border-radius:5px;margin-top:.4rem;display:none}
+.ca-status.ok {background:rgba(0,196,168,.12);color:var(--ca-teal);border:1px solid rgba(0,196,168,.3);display:block}
+.ca-status.err{background:rgba(255,107,107,.1);color:var(--ca-red);border:1px solid rgba(255,107,107,.3);display:block}
+
+/* ── Login ── */
+#ca-login{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:1.5rem}
+.ca-login-box{background:var(--ca-bg2);border:1px solid var(--ca-line);border-radius:12px;padding:2rem 1.8rem;max-width:360px;width:100%}
+.ca-login-box h2{font-family:'Michroma',sans-serif;color:var(--ca-gold);font-size:.9rem;letter-spacing:.1em;text-transform:uppercase;margin:0 0 1.3rem;text-align:center}
+#ca-app{display:none}
+
+/* ── Preview card ── */
+.ca-preview{border:1px solid var(--ca-line);border-radius:10px;padding:1rem;margin-top:.8rem;background:var(--ca-bg3)}
+.ca-preview-title{font-family:'Michroma',sans-serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ca-gray);margin-bottom:.6rem}
+
+/* ── Spinner ── */
+.ca-spin{display:inline-block;animation:caspin 1s linear infinite}
+@keyframes caspin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="ca-login">
+  <div class="ca-login-box">
+    <h2><i class="fa-solid fa-bolt" style="margin-right:.4rem;color:var(--ca-gold)"></i>PROYECTN Corp Admin</h2>
+    <div class="ca-form">
+      <div>
+        <label class="ca-label">Usuario</label>
+        <input class="ca-input" type="text" id="login-user" placeholder="Sin @" autocomplete="username">
+      </div>
+      <div>
+        <label class="ca-label">Contraseña</label>
+        <input class="ca-input" type="password" id="login-pass" autocomplete="current-password">
+      </div>
+      <button class="ca-btn ca-btn-pri" id="btn-login" style="margin-top:.3rem">
+        <i class="fa-solid fa-right-to-bracket"></i> Entrar
+      </button>
+      <div class="ca-status" id="login-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="ca-app">
+<div class="ca-wrap">
+
+  <div class="ca-header">
+    <i class="fa-solid fa-bolt" style="color:var(--ca-gold);font-size:1.1rem"></i>
+    <h1>Corp Admin</h1>
+    <div class="ca-actions">
+      <a href="/torneos/" target="_blank" class="ca-btn ca-btn-sec ca-btn-sm">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Corp
+      </a>
+      <a href="torneos.html" class="ca-btn ca-btn-sec ca-btn-sm">
+        <i class="fa-solid fa-trophy"></i> Torneos
+      </a>
+      <button class="ca-btn ca-btn-sm" onclick="P.logout()" style="background:rgba(255,107,107,.1);color:var(--ca-red);border-color:rgba(255,107,107,.3)" title="Cerrar sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="ca-tabs" id="ca-tabs">
+    <div class="ca-tab activo" data-tab="actividades" onclick="abrirTab(this)">
+      <i class="fa-solid fa-bolt"></i> Actividades
+    </div>
+    <div class="ca-tab" data-tab="canales" onclick="abrirTab(this)">
+      <i class="fa-solid fa-comments"></i> Canales
+    </div>
+    <div class="ca-tab" data-tab="config" onclick="abrirTab(this)">
+      <i class="fa-solid fa-sliders"></i> Configuración
+    </div>
+  </div>
+
+  <!-- ── TAB: ACTIVIDADES ── -->
+  <div class="ca-panel activo" id="panel-actividades">
+    <div class="ca-grid">
+      <!-- Lista -->
+      <div>
+        <div class="ca-list-panel">
+          <div class="ca-list-head">
+            <h3><i class="fa-solid fa-bolt" style="margin-right:.3rem"></i>Actividades</h3>
+            <button class="ca-btn ca-btn-gold ca-btn-sm" onclick="nuevaActividad()"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <ul class="ca-list" id="lista-actividades"></ul>
+        </div>
+      </div>
+
+      <!-- Editor -->
+      <div class="ca-editor" id="editor-act">
+        <div class="ca-editor-head">
+          <h2 id="tit-act">Actividades</h2>
+          <button class="ca-btn ca-btn-red ca-btn-sm" id="btn-del-act" style="display:none" onclick="borrarActividad()">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <div class="ca-editor-empty" id="empty-act">
+          <i class="fa-solid fa-bolt"></i>
+          Selecciona o crea una actividad
+        </div>
+        <div id="form-act-wrap" style="display:none">
+          <div class="ca-editor-body">
+            <form class="ca-form" onsubmit="guardarActividad(event)">
+              <div class="ca-row">
+                <div>
+                  <label class="ca-label">Nombre *</label>
+                  <input class="ca-input" id="act-nombre" placeholder="Nombre de la actividad" required>
+                </div>
+                <div>
+                  <label class="ca-label">Tipo</label>
+                  <select class="ca-select" id="act-tipo" onchange="actualizarVistaPreviaAct()">
+                    <option value="gratis">Gratis</option>
+                    <option value="pago">De pago</option>
+                  </select>
+                </div>
+              </div>
+              <div class="ca-row">
+                <div>
+                  <label class="ca-label">Precio (si aplica)</label>
+                  <input class="ca-input" id="act-precio" placeholder="$5.000 COP">
+                </div>
+                <div>
+                  <label class="ca-label">Juego</label>
+                  <input class="ca-input" id="act-juego" placeholder="Free Fire, Valorant…">
+                </div>
+              </div>
+              <div>
+                <label class="ca-label">Descripción</label>
+                <textarea class="ca-textarea" id="act-desc" placeholder="Descripción corta de la actividad…"></textarea>
+              </div>
+              <div class="ca-row">
+                <div>
+                  <label class="ca-label">Ícono</label>
+                  <select class="ca-select" id="act-icono">
+                    <option value="gamepad">Gamepad</option>
+                    <option value="star">Estrella</option>
+                    <option value="users">Usuarios</option>
+                    <option value="crown">Corona</option>
+                    <option value="video">Video</option>
+                    <option value="arrow-trend-up">Ascenso</option>
+                    <option value="trophy">Trofeo</option>
+                    <option value="bolt">Rayo</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="ca-label">URL / Enlace</label>
+                  <input class="ca-input" id="act-link" placeholder="https://… o /torneos/">
+                </div>
+              </div>
+              <input type="hidden" id="act-id">
+              <div class="ca-btn-row">
+                <button type="submit" class="ca-btn ca-btn-pri">
+                  <i class="fa-solid fa-floppy-disk"></i> Guardar
+                </button>
+                <button type="button" class="ca-btn ca-btn-sm" onclick="resetFormAct()"
+                  style="background:rgba(20,20,38,.8);color:var(--ca-gray);border-color:var(--ca-line)">
+                  Cancelar
+                </button>
+              </div>
+              <div class="ca-status" id="status-act"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: CANALES ── -->
+  <div class="ca-panel" id="panel-canales">
+    <div class="ca-grid">
+      <!-- Lista -->
+      <div>
+        <div class="ca-list-panel">
+          <div class="ca-list-head">
+            <h3><i class="fa-solid fa-comments" style="margin-right:.3rem"></i>Canales</h3>
+            <button class="ca-btn ca-btn-gold ca-btn-sm" onclick="nuevoCanal()"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <ul class="ca-list" id="lista-canales"></ul>
+        </div>
+      </div>
+
+      <!-- Editor -->
+      <div class="ca-editor" id="editor-ch">
+        <div class="ca-editor-head">
+          <h2 id="tit-ch">Canales</h2>
+          <button class="ca-btn ca-btn-red ca-btn-sm" id="btn-del-ch" style="display:none" onclick="borrarCanal()">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <div class="ca-editor-empty" id="empty-ch">
+          <i class="fa-solid fa-comments"></i>
+          Selecciona o crea un canal
+        </div>
+        <div id="form-ch-wrap" style="display:none">
+          <div class="ca-editor-body">
+            <form class="ca-form" onsubmit="guardarCanal(event)">
+              <div class="ca-row">
+                <div>
+                  <label class="ca-label">Nombre *</label>
+                  <input class="ca-input" id="ch-nombre" placeholder="Discord Oficial" required>
+                </div>
+                <div>
+                  <label class="ca-label">Tipo</label>
+                  <select class="ca-select" id="ch-tipo">
+                    <option value="discord">Discord</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="telegram">Telegram</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="general">Otro</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="ca-label">Enlace</label>
+                <input class="ca-input" id="ch-link" placeholder="https://discord.gg/…">
+              </div>
+              <div>
+                <label class="ca-label">Descripción</label>
+                <input class="ca-input" id="ch-desc" placeholder="Descripción corta…">
+              </div>
+              <input type="hidden" id="ch-id">
+              <div class="ca-btn-row">
+                <button type="submit" class="ca-btn ca-btn-pri">
+                  <i class="fa-solid fa-floppy-disk"></i> Guardar
+                </button>
+                <button type="button" class="ca-btn ca-btn-sm" onclick="resetFormCh()"
+                  style="background:rgba(20,20,38,.8);color:var(--ca-gray);border-color:var(--ca-line)">
+                  Cancelar
+                </button>
+              </div>
+              <div class="ca-status" id="status-ch"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: CONFIGURACIÓN ── -->
+  <div class="ca-panel" id="panel-config">
+    <div style="max-width:600px">
+      <div class="ca-editor">
+        <div class="ca-editor-head">
+          <h2>Configuración general de Corp</h2>
+        </div>
+        <div class="ca-editor-body">
+          <form class="ca-form" onsubmit="guardarConfig(event)">
+            <div>
+              <label class="ca-label">Tagline / subtítulo</label>
+              <input class="ca-input" id="cfg-tagline" placeholder="Torneos · Actividades · Comunidad">
+            </div>
+            <div>
+              <label class="ca-label">URL banner del hero (opcional)</label>
+              <input class="ca-input" id="cfg-banner" placeholder="https://…">
+            </div>
+            <div class="ca-row">
+              <div>
+                <label class="ca-label">WhatsApp contacto principal</label>
+                <input class="ca-input" id="cfg-wa" placeholder="+57…">
+              </div>
+              <div>
+                <label class="ca-label">Link Discord principal</label>
+                <input class="ca-input" id="cfg-discord" placeholder="https://discord.gg/…">
+              </div>
+            </div>
+            <div>
+              <label class="ca-label">Anuncio / aviso especial (vacío = sin aviso)</label>
+              <textarea class="ca-textarea" id="cfg-aviso" placeholder="Próximo torneo el 15 de noviembre…"></textarea>
+            </div>
+            <div class="ca-btn-row">
+              <button type="submit" class="ca-btn ca-btn-pri">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar configuración
+              </button>
+            </div>
+            <div class="ca-status" id="status-cfg"></div>
+          </form>
+        </div>
+      </div>
+
+      <div style="margin-top:1.2rem;background:var(--ca-bg2);border:1px solid var(--ca-line);border-radius:10px;padding:1.2rem">
+        <div style="font-family:'Michroma',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ca-gray);margin-bottom:1rem">
+          <i class="fa-solid fa-database" style="margin-right:.4rem"></i>Datos almacenados
+        </div>
+        <p style="font-size:.8rem;color:var(--ca-gray);margin:0 0 .8rem">
+          Las actividades y canales se guardan en el navegador (localStorage). Para sincronizar entre dispositivos, exporta e importa el JSON.
+        </p>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="ca-btn ca-btn-sec ca-btn-sm" onclick="exportarDatos()">
+            <i class="fa-solid fa-file-export"></i> Exportar JSON
+          </button>
+          <button class="ca-btn ca-btn-sm" onclick="document.getElementById('import-file').click()"
+            style="background:rgba(74,111,255,.06);color:var(--ca-gray);border-color:var(--ca-line)">
+            <i class="fa-solid fa-file-import"></i> Importar JSON
+          </button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importarDatos(this.files)">
+          <button class="ca-btn ca-btn-red ca-btn-sm" onclick="resetDatos()">
+            <i class="fa-solid fa-rotate-left"></i> Restablecer predeterminados
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /ca-wrap -->
+</div><!-- /ca-app -->
+
+<script>
+(function () {
+  const P = window.PumasPortal;
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  const CORP_KEY_ACT = 'corp_actividades';
+  const CORP_KEY_CH  = 'corp_canales';
+  const CORP_KEY_CFG = 'corp_config';
+
+  const DEFAULT_ACTIVIDADES = [
+    { id:1, nombre:'Liga Semanal Free Fire', tipo:'gratis', descripcion:'Compite cada semana en las ligas abiertas de la comunidad PROYECTN.', juego:'Free Fire', icono:'gamepad', link:'/torneos/' },
+    { id:2, nombre:'Entrenamiento VIP', tipo:'pago', precio:'$5.000 COP', descripcion:'Sesiones de coaching con jugadores experimentados para mejorar tu nivel.', juego:'Call of Duty', icono:'star', link:'#' },
+    { id:3, nombre:'Torneo Comunidad', tipo:'gratis', descripcion:'Torneos abiertos sin costo de inscripción para todos los miembros.', juego:'Todos', icono:'users', link:'/torneos/' },
+    { id:4, nombre:'Copa PROYECTN Corp', tipo:'pago', precio:'$10.000 COP', descripcion:'Competencia premium con premios en efectivo y reconocimientos.', juego:'Free Fire', icono:'crown', link:'#' },
+    { id:5, nombre:'Clínica de Gameplay', tipo:'gratis', descripcion:'Revisión de partidas y consejos de mejora en transmisión en vivo.', juego:'Valorant', icono:'video', link:'#' },
+    { id:6, nombre:'Ruta de Ascenso', tipo:'pago', precio:'$8.000 COP', descripcion:'Programa estructurado para subir de rango con mentores certificados.', juego:'Free Fire', icono:'arrow-trend-up', link:'#' }
+  ];
+
+  const DEFAULT_CANALES = [
+    { id:1, nombre:'Discord Oficial', tipo:'discord', descripcion:'Servidor principal de la comunidad', link:'#' },
+    { id:2, nombre:'WhatsApp Free Fire', tipo:'whatsapp', descripcion:'Grupo oficial para jugadores de FF', link:'#' },
+    { id:3, nombre:'Instagram', tipo:'instagram', descripcion:'Noticias y resultados en tiempo real', link:'#' },
+    { id:4, nombre:'TikTok', tipo:'tiktok', descripcion:'Highlights y contenido de torneos', link:'#' },
+    { id:5, nombre:'Canal YouTube', tipo:'youtube', descripcion:'Transmisiones en vivo y replays', link:'#' },
+    { id:6, nombre:'Telegram Noticias', tipo:'telegram', descripcion:'Alertas de torneos y horarios', link:'#' }
+  ];
+
+  const DEFAULT_CONFIG = { tagline:'Torneos · Actividades · Comunidad', banner:'', wa:'', discord:'', aviso:'' };
+
+  function leer(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } }
+  function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+  let actividades = leer(CORP_KEY_ACT, DEFAULT_ACTIVIDADES);
+  let canales     = leer(CORP_KEY_CH,  DEFAULT_CANALES);
+  let config      = leer(CORP_KEY_CFG, DEFAULT_CONFIG);
+
+  let actActiva = null;
+  let chActivo  = null;
+
+  /* ─── Login ────────────────────────────────────────────────── */
+  async function tryAutoLogin() {
+    try { const ses = P.sesion(); if (!ses) return; await mostrarApp(); } catch {}
+  }
+
+  document.getElementById('btn-login').addEventListener('click', async () => {
+    const user = document.getElementById('login-user').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    const st   = document.getElementById('login-status');
+    if (!user || !pass) { showStatus(st,'err','Completa los campos'); return; }
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch ca-spin"></i> Entrando…';
+    try {
+      const ok = await P.login(user, pass);
+      if (!ok) throw new Error();
+      await mostrarApp();
+    } catch {
+      showStatus(st,'err','Usuario o contraseña incorrectos');
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+    }
+  });
+  document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('btn-login').click(); });
+
+  async function mostrarApp() {
+    document.getElementById('ca-login').style.display = 'none';
+    document.getElementById('ca-app').style.display   = '';
+    renderListaActividades();
+    renderListaCanales();
+    cargarConfig();
+  }
+
+  /* ─── Tabs ─────────────────────────────────────────────────── */
+  window.abrirTab = function(el) {
+    const tab = el.dataset.tab;
+    document.querySelectorAll('.ca-tab').forEach(t => t.classList.toggle('activo', t.dataset.tab === tab));
+    document.querySelectorAll('.ca-panel').forEach(p => p.classList.toggle('activo', p.id === 'panel-' + tab));
+  };
+
+  /* ─── ACTIVIDADES ──────────────────────────────────────────── */
+  function renderListaActividades() {
+    const ul = document.getElementById('lista-actividades');
+    if (!actividades.length) { ul.innerHTML = '<li class="ca-empty">Sin actividades. Crea una →</li>'; return; }
+    ul.innerHTML = actividades.map(a => `
+      <li onclick="selActiv(${a.id})" class="${actActiva===a.id?'activo':''}">
+        <span class="ca-li-text">${esc(a.nombre)}</span>
+        <span class="ca-li-tipo tipo-${a.tipo}">${a.tipo==='gratis'?'Gratis':'Pago'}</span>
+      </li>`).join('');
+  }
+
+  window.selActiv = function(id) {
+    actActiva = id;
+    const a = actividades.find(x => x.id === id);
+    if (!a) return;
+    renderListaActividades();
+    document.getElementById('empty-act').style.display    = 'none';
+    document.getElementById('form-act-wrap').style.display = '';
+    document.getElementById('btn-del-act').style.display   = '';
+    document.getElementById('tit-act').textContent = a.nombre;
+    document.getElementById('act-id').value     = a.id;
+    document.getElementById('act-nombre').value = a.nombre || '';
+    document.getElementById('act-tipo').value   = a.tipo || 'gratis';
+    document.getElementById('act-precio').value = a.precio || '';
+    document.getElementById('act-juego').value  = a.juego || '';
+    document.getElementById('act-desc').value   = a.descripcion || '';
+    document.getElementById('act-icono').value  = a.icono || 'gamepad';
+    document.getElementById('act-link').value   = a.link || '';
+    document.getElementById('status-act').className = 'ca-status';
+  };
+
+  window.nuevaActividad = function() {
+    actActiva = null;
+    renderListaActividades();
+    document.getElementById('empty-act').style.display    = 'none';
+    document.getElementById('form-act-wrap').style.display = '';
+    document.getElementById('btn-del-act').style.display   = 'none';
+    document.getElementById('tit-act').textContent = 'Nueva actividad';
+    document.getElementById('act-id').value = '';
+    ['act-nombre','act-precio','act-juego','act-desc','act-link'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('act-tipo').value  = 'gratis';
+    document.getElementById('act-icono').value = 'gamepad';
+    document.getElementById('status-act').className = 'ca-status';
+  };
+
+  window.guardarActividad = function(e) {
+    e.preventDefault();
+    const id   = document.getElementById('act-id').value;
+    const data = {
+      id:          id ? parseInt(id) : Date.now(),
+      nombre:      document.getElementById('act-nombre').value.trim(),
+      tipo:        document.getElementById('act-tipo').value,
+      precio:      document.getElementById('act-precio').value.trim() || undefined,
+      juego:       document.getElementById('act-juego').value.trim() || undefined,
+      descripcion: document.getElementById('act-desc').value.trim() || undefined,
+      icono:       document.getElementById('act-icono').value,
+      link:        document.getElementById('act-link').value.trim() || '#'
+    };
+    if (id) { actividades = actividades.map(a => a.id === data.id ? data : a); }
+    else    { actividades.push(data); actActiva = data.id; }
+    guardar(CORP_KEY_ACT, actividades);
+    renderListaActividades();
+    document.getElementById('act-id').value = data.id;
+    document.getElementById('tit-act').textContent = data.nombre;
+    document.getElementById('btn-del-act').style.display = '';
+    showStatus(document.getElementById('status-act'),'ok','Guardado correctamente');
+  };
+
+  window.borrarActividad = function() {
+    if (!actActiva) return;
+    const a = actividades.find(x => x.id === actActiva);
+    if (!a || !confirm(`¿Borrar actividad "${a.nombre}"?`)) return;
+    actividades = actividades.filter(x => x.id !== actActiva);
+    guardar(CORP_KEY_ACT, actividades);
+    actActiva = null;
+    renderListaActividades();
+    resetFormAct();
+  };
+
+  window.resetFormAct = function() {
+    actActiva = null;
+    renderListaActividades();
+    document.getElementById('empty-act').style.display    = '';
+    document.getElementById('form-act-wrap').style.display = 'none';
+    document.getElementById('btn-del-act').style.display   = 'none';
+    document.getElementById('tit-act').textContent = 'Actividades';
+  };
+
+  /* ─── CANALES ──────────────────────────────────────────────── */
+  function renderListaCanales() {
+    const TIPO_ICON = { discord:'fa-brands fa-discord', whatsapp:'fa-brands fa-whatsapp',
+      telegram:'fa-brands fa-telegram', instagram:'fa-brands fa-instagram',
+      tiktok:'fa-brands fa-tiktok', youtube:'fa-brands fa-youtube', general:'fa-solid fa-comments' };
+    const ul = document.getElementById('lista-canales');
+    if (!canales.length) { ul.innerHTML = '<li class="ca-empty">Sin canales. Crea uno →</li>'; return; }
+    ul.innerHTML = canales.map(c => `
+      <li onclick="selCanal(${c.id})" class="${chActivo===c.id?'activo':''}">
+        <i class="${TIPO_ICON[c.tipo]||'fa-solid fa-comments'}" style="color:var(--ca-blue);width:14px;text-align:center"></i>
+        <span class="ca-li-text">${esc(c.nombre)}</span>
+      </li>`).join('');
+  }
+
+  window.selCanal = function(id) {
+    chActivo = id;
+    const c = canales.find(x => x.id === id);
+    if (!c) return;
+    renderListaCanales();
+    document.getElementById('empty-ch').style.display    = 'none';
+    document.getElementById('form-ch-wrap').style.display = '';
+    document.getElementById('btn-del-ch').style.display   = '';
+    document.getElementById('tit-ch').textContent = c.nombre;
+    document.getElementById('ch-id').value     = c.id;
+    document.getElementById('ch-nombre').value = c.nombre || '';
+    document.getElementById('ch-tipo').value   = c.tipo || 'general';
+    document.getElementById('ch-link').value   = c.link || '';
+    document.getElementById('ch-desc').value   = c.descripcion || '';
+    document.getElementById('status-ch').className = 'ca-status';
+  };
+
+  window.nuevoCanal = function() {
+    chActivo = null;
+    renderListaCanales();
+    document.getElementById('empty-ch').style.display    = 'none';
+    document.getElementById('form-ch-wrap').style.display = '';
+    document.getElementById('btn-del-ch').style.display   = 'none';
+    document.getElementById('tit-ch').textContent = 'Nuevo canal';
+    document.getElementById('ch-id').value = '';
+    ['ch-nombre','ch-link','ch-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ch-tipo').value = 'general';
+    document.getElementById('status-ch').className = 'ca-status';
+  };
+
+  window.guardarCanal = function(e) {
+    e.preventDefault();
+    const id   = document.getElementById('ch-id').value;
+    const data = {
+      id:          id ? parseInt(id) : Date.now(),
+      nombre:      document.getElementById('ch-nombre').value.trim(),
+      tipo:        document.getElementById('ch-tipo').value,
+      link:        document.getElementById('ch-link').value.trim() || '#',
+      descripcion: document.getElementById('ch-desc').value.trim() || undefined
+    };
+    if (id) { canales = canales.map(c => c.id === data.id ? data : c); }
+    else    { canales.push(data); chActivo = data.id; }
+    guardar(CORP_KEY_CH, canales);
+    renderListaCanales();
+    document.getElementById('ch-id').value = data.id;
+    document.getElementById('tit-ch').textContent = data.nombre;
+    document.getElementById('btn-del-ch').style.display = '';
+    showStatus(document.getElementById('status-ch'),'ok','Guardado correctamente');
+  };
+
+  window.borrarCanal = function() {
+    if (!chActivo) return;
+    const c = canales.find(x => x.id === chActivo);
+    if (!c || !confirm(`¿Borrar canal "${c.nombre}"?`)) return;
+    canales = canales.filter(x => x.id !== chActivo);
+    guardar(CORP_KEY_CH, canales);
+    chActivo = null;
+    renderListaCanales();
+    resetFormCh();
+  };
+
+  window.resetFormCh = function() {
+    chActivo = null;
+    renderListaCanales();
+    document.getElementById('empty-ch').style.display    = '';
+    document.getElementById('form-ch-wrap').style.display = 'none';
+    document.getElementById('btn-del-ch').style.display   = 'none';
+    document.getElementById('tit-ch').textContent = 'Canales';
+  };
+
+  /* ─── CONFIG ───────────────────────────────────────────────── */
+  function cargarConfig() {
+    document.getElementById('cfg-tagline').value = config.tagline || '';
+    document.getElementById('cfg-banner').value  = config.banner  || '';
+    document.getElementById('cfg-wa').value      = config.wa      || '';
+    document.getElementById('cfg-discord').value = config.discord || '';
+    document.getElementById('cfg-aviso').value   = config.aviso   || '';
+  }
+
+  window.guardarConfig = function(e) {
+    e.preventDefault();
+    config = {
+      tagline: document.getElementById('cfg-tagline').value.trim() || 'Torneos · Actividades · Comunidad',
+      banner:  document.getElementById('cfg-banner').value.trim(),
+      wa:      document.getElementById('cfg-wa').value.trim(),
+      discord: document.getElementById('cfg-discord').value.trim(),
+      aviso:   document.getElementById('cfg-aviso').value.trim()
+    };
+    guardar(CORP_KEY_CFG, config);
+    showStatus(document.getElementById('status-cfg'),'ok','Configuración guardada');
+  };
+
+  /* ─── Exportar / Importar ──────────────────────────────────── */
+  window.exportarDatos = function() {
+    const datos = { actividades, canales, config, exportado: new Date().toISOString() };
+    const blob  = new Blob([JSON.stringify(datos, null, 2)], { type:'application/json' });
+    const a     = document.createElement('a');
+    a.href      = URL.createObjectURL(blob);
+    a.download  = `pumas-corp-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  };
+
+  window.importarDatos = function(files) {
+    if (!files.length) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const datos = JSON.parse(e.target.result);
+        if (datos.actividades) { actividades = datos.actividades; guardar(CORP_KEY_ACT, actividades); }
+        if (datos.canales)     { canales     = datos.canales;     guardar(CORP_KEY_CH, canales);     }
+        if (datos.config)      { config      = datos.config;      guardar(CORP_KEY_CFG, config);     }
+        renderListaActividades();
+        renderListaCanales();
+        cargarConfig();
+        alert('Datos importados correctamente.');
+      } catch { alert('Error: el archivo no es válido.'); }
+    };
+    reader.readAsText(files[0]);
+    document.getElementById('import-file').value = '';
+  };
+
+  window.resetDatos = function() {
+    if (!confirm('¿Restablecer actividades y canales a los valores predeterminados? Se perderán los cambios.')) return;
+    actividades = DEFAULT_ACTIVIDADES;
+    canales     = DEFAULT_CANALES;
+    guardar(CORP_KEY_ACT, actividades);
+    guardar(CORP_KEY_CH,  canales);
+    renderListaActividades();
+    renderListaCanales();
+    resetFormAct();
+    resetFormCh();
+    alert('Datos restablecidos.');
+  };
+
+  /* ─── Utilidades ───────────────────────────────────────────── */
+  function showStatus(el, tipo, msg) {
+    el.textContent = msg;
+    el.className = 'ca-status' + (tipo ? ' ' + tipo : '');
+    if (tipo === 'ok') setTimeout(() => { if(el.className.includes('ok')) el.className = 'ca-status'; }, 3000);
+  }
+
+  /* ─── Init ─────────────────────────────────────────────────── */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryAutoLogin);
+  else tryAutoLogin();
+})();
+</script>
+</body>
+</html>

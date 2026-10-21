@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pruebas by PROYECTN · Cupos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="../ascensos/style.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="pruebas" data-modo="publico" data-sin-sorteo></script>
+</head>
+<body data-tema="pruebas">
+
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="imagenes/pruebas.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='../imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">MÓDULO</span> <span class="t-b">PRUEBAS</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-trophy"></i> Resultados</a></li>
+                <li><a href="/">PROYECTN</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section>
+        <h2 class="section-title">Reserva tu cupo</h2>
+        <p class="tool-desc">Inscribe a tu equipo en las próximas jornadas de ascensos. Al confirmar se abre el grupo de coordinación.</p>
+        <div id="cuposPublicos"></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>PRUEBAS</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="../portal-kit/cupos.js?v=20261013e"></script>
+    <script>PumasCupos.montarPublico('cuposPublicos', PumasPortal.portal);</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+﻿/* ZMF · imagen descargable (4:5). Fuente genérica (Rajdhani) y colores por categoría:
+   mixto = rojo · femenino = rosa. Fondo: imagenes/fondozmf.png / imagenes/fondozmffem.png */
+.row-captura-container { --cap-a: #ff4136; --cap-a-rgb: 255, 65, 54; --cap-b: #ff9a8f; --cap-b-rgb: 255, 154, 143; }
+.row-captura-container.cat-zmffem { --cap-a: #ff4f9a; --cap-a-rgb: 255, 79, 154; --cap-b: #ffb3d4; --cap-b-rgb: 255, 179, 212; }
+
+/* Estilos de la imagen descargable (4:5). La apariencia de la página viene de ../../portal-kit/portal.css */
+
+/* La página usa otra letra e interlineado: dentro de la imagen se restablecen
+   (como estaba antes) para que entren todos los equipos y jugadores. */
+.row-captura-container { line-height: normal; letter-spacing: normal; }
+.row-captura-container :where(*) { margin: 0; padding: 0; line-height: normal; }
+.row-captura-container :where(:not(i, .fa-solid, .fa-regular, .fa-brands)) { font-family: 'Rajdhani', sans-serif; }
+
+/* --- CONTENEDOR PRINCIPAL DE LA CAPTURA (800x1000px) --- */
+.row-captura-container {
+    width: 800px;
+    height: 1000px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    font-family: 'Rajdhani', sans-serif;
+    color: #ffffff;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 2px solid rgba(var(--cap-a-rgb), 0.4);
+    border-radius: 12px;
+    background-color: #0a0506;
+}
+
+/* --- ENCABEZADO --- */
+.row-header {
+    text-align: center;
+    position: absolute;
+    top: 50px;
+    left: 40px;
+    right: 40px;
+}
+
+.row-titulo {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 3rem;
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 6px rgba(var(--cap-b-rgb), 0.9);
+}
+
+.row-subtitulo {
+    font-size: 1rem;
+    color: var(--cap-a);
+    margin-top: 3px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* --- ESTILO COMÚN DE LAS CAJAS (AZUL OSCURO, CELESTE Y PÚRPURA) --- */
+.row-box {
+    position: absolute;
+    left: 35px;
+    width: 730px;
+    background: rgba(14, 6, 8, 0.9);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--cap-b-rgb), 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.row-box-title {
+    color: var(--cap-a);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* --- POSICIONAMIENTO Y TABLA GENERAL --- */
+.row-tabla-general {
+    top: 180px;
+    max-height: 410px;
+    overflow: hidden;
+}
+
+.row-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    color: #ffffff;
+}
+
+.row-table th {
+    color: var(--cap-a);
+    border-bottom: 2px solid rgba(var(--cap-a-rgb), 0.4);
+    font-size: 0.78rem;
+    padding: 4px;
+}
+
+.row-table td {
+    padding: 3.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- CLASES DE COLOR PARA POSICIONES --- */
+.row-txt-white { color: #ffffff; }
+.row-txt-celeste { color: var(--cap-a); }
+.row-txt-purpura { color: var(--cap-b); }
+.row-td-bold { font-weight: bold; }
+
+/* --- SECCIÓN BOOYAH (POSICIONADA EN top: 520px) --- */
+.row-booyah-section {
+    top: 680px;
+}
+
+.row-booyah-grid {
+    display: FLEX;
+
+    gap: 6px;
+}
+
+.row-card-item {
+    font-size: 0.7rem;
+    background: rgba(24, 10, 13, 0.9);
+    padding: 5px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(var(--cap-b-rgb), 0.4);
+    text-align: center;
+        width: 100%;
+
+}
+
+.row-sala-title {
+    color: var(--cap-a);
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.row-equipo-name {
+    color: #ffffff;
+    font-weight: bold;
+    max-width: 95px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0 auto;
+}
+
+.row-card-info {
+    color: #94a3b8;
+    font-size: 0.65rem;
+    margin-top: 2px;
+}
+
+/* --- SECCIÓN TOP KILLERS (POSICIONADA EN top: 660px) --- */
+.row-killers-section {
+    top: 800px;
+}
+
+.row-killers-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.row-killer-item {
+    font-size: 0.7rem;
+    background: rgba(24, 10, 13, 0.9);
+    padding: 5px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(var(--cap-b-rgb), 0.4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

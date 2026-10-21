@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Motores de IA | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+    <style>
+        .motores { display: grid; gap: 12px; max-width: 760px; margin: 0 auto; }
+        .motor { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; padding: 16px 18px;
+            border: 1px solid rgba(var(--primary-rgb), .25); background: #121212; }
+        .motor.apagado { opacity: .55; }
+        .motor h3 { margin: 0 0 4px; color: var(--light); font-size: .9rem; }
+        .motor p { margin: 0; color: var(--gray); font-size: .85rem; }
+        .motor .estado { font: 700 .62rem var(--font-display); letter-spacing: .06em; }
+        .motor .si { color: #6ee7a8; } .motor .no { color: #ff8a8d; }
+        .interruptor { position: relative; width: 52px; height: 28px; }
+        .interruptor input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+        .interruptor span { position: absolute; inset: 0; border-radius: 20px; background: #333; transition: background .2s; }
+        .interruptor span::after { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; content: ""; background: #fff; transition: transform .2s; }
+        .interruptor input:checked + span { background: var(--primary); }
+        .interruptor input:checked + span::after { transform: translateX(24px); }
+        .interruptor input:disabled { cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo"><span class="t-a">PUMAS</span> ADMIN</div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><a href="/ascensos/admin.html"><i class="fa-solid fa-wand-magic-sparkles"></i> Ascensos AZA</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" id="btnSalir"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section>
+        <h2 class="section-title">Motores de IA</h2>
+        <p class="tool-desc">Elige qué motores puede usar la pestaña <b>Con IA</b> de Ascensos AZA y cuál sale por defecto.
+            Un motor solo se puede activar si ya tiene su clave en Supabase (ver <code>docs/IA_ASCENSOS.md</code>).</p>
+        <main id="raiz"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
+    </section>
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+
+    <script>
+    (async function () {
+        const P = PumasPortal, esc = P.escaparHtml;
+        const s = await P.guard('principal', 'login.html', 'gestionar');
+        if (!s) return;
+        document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+        document.getElementById('btnSalir').addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); });
+        const raiz = document.getElementById('raiz');
+        const SECRETOS = {
+            gemini: 'GEMINI_API_KEY (y opcional GEMINI_MODELO)',
+            privado: 'IA_PRIVADA_URL e IA_PRIVADA_MODELO (y opcional IA_PRIVADA_KEY, IA_PRIVADA_NOMBRE)',
+            claude: 'ANTHROPIC_API_KEY'
+        };
+
+        async function pintar(msg) {
+            let r, aviso = '';
+            try { r = await P.ia.motores(); }
+            catch (e) {
+                // Sin la función publicada igual se puede dejar elegido qué motores se usarán (se guarda en la base)
+                aviso = e.message + ' Igual puedes dejar elegidos los motores: se usarán cuando la publiques.';
+                const { data, error } = await P.db().from('sitio_config').select('valor').eq('clave', 'ia_motores').maybeSingle();
+                if (error) { raiz.innerHTML = `<p class="res-vacio">${esc(P.faltaSql(error) ? 'Falta correr sql/18_roles_ascensos_ia.sql en Supabase.' : error.message)}</p>`; return; }
+                const v = (data && data.valor) || {};
+                const activos = Array.isArray(v.activos) ? v.activos : [];
+                r = { defecto: v.defecto || null, todos: [['gemini', 'Gemini'], ['privado', 'Motor privado'], ['claude', 'Claude']]
+                    .map(([id, nombre]) => ({ id, nombre, configurado: null, activo: activos.includes(id) })) };
+            }
+            const todos = r.todos || [];
+            // configurado: true (tiene clave) · false (falta) · null (no se sabe: la función no está publicada)
+            const estado = m => m.configurado === true ? '<span class="estado si">● CLAVE CONFIGURADA</span>'
+                : m.configurado === false ? `<span class="estado no">● FALTA CONFIGURAR</span> · secretos: ${esc(SECRETOS[m.id] || '')}`
+                : `<span class="estado">● SIN VERIFICAR</span> · secretos: ${esc(SECRETOS[m.id] || '')}`;
+            raiz.innerHTML = `<div class="motores">
+                ${aviso ? `<p class="muted" style="padding:12px 14px;border:1px dashed rgba(255,213,74,.6);color:#FFE38A">${esc(aviso)}</p>` : ''}
+                ${todos.map(m => `
+                <article class="motor${m.configurado === false ? ' apagado' : ''}" data-id="${esc(m.id)}">
+                    <label class="interruptor" title="${m.configurado === false ? 'Falta su clave en Supabase' : 'Activar / desactivar'}">
+                        <input type="checkbox" data-activo ${m.activo ? 'checked' : ''} ${m.configurado === false ? 'disabled' : ''}><span></span></label>
+                    <div><h3>${esc(m.nombre)}</h3><p>${estado(m)}</p></div>
+                    <label class="chk"><input type="radio" name="defecto" value="${esc(m.id)}" ${m.id === r.defecto ? 'checked' : ''} ${m.configurado === false ? 'disabled' : ''}> Por defecto</label>
+                </article>`).join('')}
+                <div class="barra-guardar" style="margin-top:6px"><span class="muted" id="msg" role="status">${esc(msg || '')}</span>
+                    <button class="btn-access" id="guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar</button></div></div>`;
+            raiz.querySelector('#guardar').addEventListener('click', async () => {
+                const activos = [...raiz.querySelectorAll('[data-activo]:checked')].map(i => i.closest('[data-id]').dataset.id);
+                let defecto = (raiz.querySelector('input[name="defecto"]:checked') || {}).value || null;
+                if (defecto && !activos.includes(defecto)) defecto = activos[0] || null;
+                raiz.querySelector('#msg').textContent = 'Guardando...';
+                try {
+                    await P.ia.guardarMotores(activos, defecto);
+                    await pintar(activos.length ? '✔ Guardado. La herramienta ya usa estos motores.' : '✔ Guardado: la IA quedó apagada (ningún motor activo).');
+                } catch (e) { raiz.querySelector('#msg').textContent = e.message; }
+            });
+        }
+        pintar();
+    })();
+    </script>
+</body>
+</html>

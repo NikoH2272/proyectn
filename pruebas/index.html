@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pruebas by PROYECTN · Resultados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="../ascensos/style.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="pruebas" data-modo="publico"></script>
+</head>
+<body data-tema="pruebas">
+
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="imagenes/pruebas.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='../imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">MÓDULO</span> <span class="t-b">PRUEBAS</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#jornadas" onclick="closeMenu()">Jornadas</a></li>
+                <li><a href="#calendario" onclick="closeMenu()">Calendario</a></li>
+                <li><a href="#equipos" onclick="closeMenu()">Equipos</a></li>
+                <li><a href="#baneados" onclick="closeMenu()">Baneados</a></li>
+                <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="/">PROYECTN</a></li>
+                <li><a href="admin.html"><i class="fa-solid fa-lock"></i> Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="TEST">
+        <div class="hero-copy">
+            <div class="eyebrow">Módulo de pruebas · no afecta a los portales reales</div>
+            <h1><span class="t-a">Módulo</span> <span class="t-b">Pruebas</span><small>by <b>PUMAS</b></small></h1>
+            <div class="asc-carrusel" id="ascCarrusel" aria-label="Equipos de los ascensos"></div>
+            <p>Copia exacta de Ascensos para probar cosas nuevas: anota, guarda, banea, abre cupos y prueba sorteos sin tocar los datos reales.</p>
+            <div class="stat-row">
+                <div><b id="statJornadas">0</b><small>Jornadas</small></div>
+                <div><b id="statEquipos">0</b><small>Equipos</small></div>
+                <div><b id="statAscensos">0</b><small>Ascensos</small></div>
+                <div><b id="statCategorias">0</b><small>Categorías</small></div>
+            </div>
+            <div class="hero-actions">
+                <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Apartar cupo</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="imagenes/pruebas.png" alt="" onerror="this.onerror=null;this.src='../imagenes/proyectn.png'">
+            </div>
+            <!-- Mascota del portal: PNG vertical sin fondo. Si no existe, se oculta sola. -->
+            <img class="hero-mascota" src="imagenes/mascotapruebas.png" alt="Mascota" onerror="this.hidden=true">
+        </div>
+    </section>
+
+    <section id="jornadas">
+        <h2 class="section-title">Jornadas</h2>
+        <div class="asc-filtro" id="ascFiltro" role="group" aria-label="Filtrar por evento"></div>
+        <div class="asc-jornadas-layout">
+            <aside class="card-box asc-cal" id="calendario" aria-label="Calendario de ascensos">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-calendar-days"></i> Calendario</h3>
+                <div id="ascCalendario"><p class="res-vacio">Cargando...</p></div>
+            </aside>
+            <div class="asc-jornadas-col">
+                <div class="asc-dia" id="ascDia" hidden></div>
+                <div class="jornadas-grid" id="ascJornadas"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando jornadas...</p></div>
+                <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerMas" hidden>Ver más</button></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="equipos">
+        <h2 class="section-title">Equipos y eventos</h2>
+        <div class="card-box asc-eq-card">
+            <div class="asc-eq-top">
+                <p class="leyenda-tabla">Cada equipo con los eventos en que jugó (el número es cuántas veces), sus ascensos 👑 y el total de puntos. El filtro de eventos de arriba también aplica aquí.</p>
+                <input type="search" id="ascBuscar" placeholder="Buscar equipo o tag" aria-label="Buscar equipo o tag" autocomplete="off">
+            </div>
+            <div class="asc-equipos" id="ascEquipos"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</p></div>
+            <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerEquipos" hidden>Ver más</button></p>
+        </div>
+    </section>
+
+    <section id="cupos">
+        <div class="card-box asc-cupos-cta">
+            <div>
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-ticket"></i> Cupos para la próxima jornada</h3>
+                <p id="ascCuposInfo">Revisa los cupos disponibles.</p>
+            </div>
+            <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Ver cupos</a>
+        </div>
+    </section>
+
+    <section id="analisis" hidden data-stats-avanzadas>
+        <h2 class="section-title">Análisis de entrenos</h2>
+        <div class="card-box"><div id="prAnalisis"></div></div>
+    </section>
+
+    <section id="baneados">
+        <h2 class="section-title">Equipos baneados</h2>
+        <div class="card-box" id="ascBaneados"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></div>
+    </section>
+
+    <!-- Si el superadmin activa el sorteo de este portal, aparece aquí -->
+    <div id="pgSorteo" hidden></div>
+
+    <footer>
+        <p>&copy; 2026 <b>PRUEBAS</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+    </script>
+    <script src="../ascensos/categorias.js?v=20261013e"></script>
+    <script src="../portal-kit/baneados.js?v=20261013e"></script>
+    <script src="../ascensos/logos.js?v=20261013e"></script>
+    <script src="../ascensos/publico.js?v=20261013e"></script>
+    <script src="../portal-kit/completos.js?v=20261013e"></script>
+    <script>
+        // Análisis de entrenos: aparece (con su enlace en el menú) cuando hay análisis guardados
+        PumasCompletos.montarPublico('prAnalisis', 'pruebas').then(() => {
+            const sec = document.getElementById('analisis');
+            const ref = document.querySelector('.main-nav a[href="#baneados"]') || document.querySelector('.main-nav a[href="#equipos"]');
+            if (sec.hidden || !ref || document.querySelector('.main-nav a[href="#analisis"]')) return;
+            const li = ref.closest('li').cloneNode(true);
+            const a = li.querySelector('a');
+            a.href = '#analisis'; a.textContent = 'Análisis';
+            ref.closest('li').before(li);
+        });
+    </script>
+</body>
+</html>

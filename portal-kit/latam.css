@@ -1,0 +1,77 @@
+/* Entrenos LATAM · estilos compartidos (index principal y /entrenoslatam/) */
+
+/* Leyenda de colores por entreno */
+.latam-leyenda { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 18px; margin: 0 auto 18px; color: #c3bdae; font-size: .82rem; }
+.latam-leyenda span { display: inline-flex; align-items: center; gap: 7px; }
+.latam-leyenda i { display: inline-block; width: 14px; height: 14px; border-radius: 2px; }
+.latam-leyenda small { flex-basis: 100%; color: #8f897d; text-align: center; font-size: .74rem; }
+
+/* Filas tocables: al tocar se despliega el % de participación por entreno */
+.latam-row { cursor: pointer; transition: background .15s ease; }
+.latam-row:hover, .latam-row.abierta { background-color: rgba(216, 195, 149, .08) !important; }
+.latam-row:focus-visible { outline: 2px solid #D8C395; outline-offset: -2px; }
+.part-flecha { margin-left: 4px; color: #8f897d; font-size: .62rem; transition: transform .2s ease; }
+.latam-row.abierta .part-flecha { transform: rotate(180deg); }
+.part-det > td { padding: 0 !important; border-bottom: 1px solid rgba(216, 195, 149, .18); }
+.part-caja { margin: 2px 0 8px; padding: 10px 12px; border: 1px solid rgba(216, 195, 149, .2); border-radius: 2px; background: #0d0d0d; text-align: left; }
+.part-titulo { margin-bottom: 7px; color: #c3bdae; font-size: .74rem; font-weight: 700; }
+.part-barra { display: flex; height: 12px; overflow: hidden; border-radius: 6px; background: #222; }
+.part-barra i { display: block; height: 100%; }
+.part-lista { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: .78rem; color: #e9e3d3; }
+.part-lista span { display: inline-flex; align-items: center; gap: 6px; }
+.part-lista i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.part-lista small { color: #8f897d; }
+
+/* Tarjetas de cada entreno en el index principal */
+.latam-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.latam-cabecera { display: flex; justify-content: center; margin: -14px 0 6px; }
+.latam-cabecera[hidden] { display: none; }
+.latam-cabecera img { width: 110px; height: 110px; object-fit: contain; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .6)); }
+.latam-card { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; border-top: 3px solid var(--c) !important; }
+.latam-logo { display: grid; width: 92px; height: 92px; place-items: center; margin-bottom: 4px; }
+.latam-logo img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .6)); }
+.latam-card h3 { margin: 0; color: var(--c) !important; font-size: .9rem !important; }
+.latam-sub { margin: 0 0 4px !important; font-size: .78rem; }
+.latam-acciones { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: auto; }
+.latam-acciones .btn-access { min-height: 38px; padding: 7px 10px; font-size: .68rem; border-color: var(--c); background: var(--c); color: #0A0A0A; }
+.latam-acciones .btn-access:hover { background: transparent; color: var(--c); }
+.latam-acciones .btn-outline { background: transparent; color: var(--light, #F4EEDC); border-color: rgba(244, 238, 220, .3); }
+.latam-pronto { opacity: .5; cursor: default; pointer-events: none; }
+
+/* Destacados */
+.dest-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.dest-card { display: flex; flex-direction: column; gap: 6px; max-width: none !important; margin: 0 !important; }
+.dest-card .muted { margin: -6px 0 8px; }
+.dest-fila { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid rgba(216, 195, 149, .14); border-radius: 2px; background: rgba(14, 14, 14, .7); }
+.dest-nombre { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.dest-nombre small { display: block; color: #8f897d; font-weight: 400; font-size: .72rem; }
+.dest-fila em { color: var(--primary, #D8C395); font: normal .72rem "Michroma", sans-serif; white-space: nowrap; }
+.mvp { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; margin-bottom: 8px; padding: 14px; border: 1px solid var(--primary, #D8C395); border-radius: 2px; background: linear-gradient(135deg, rgba(var(--primary-rgb, 216, 195, 149), .16), rgba(14, 14, 14, .9)); }
+.mvp-icono { color: var(--primary, #D8C395); font-size: 2rem; }
+.mvp-nombre { display: block; overflow: hidden; color: #F4EEDC; font: 900 1rem "Michroma", sans-serif; text-overflow: ellipsis; white-space: nowrap; }
+.mvp small { color: #8f897d; }
+.mvp-datos { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.mvp-datos span { padding: 6px; border: 1px solid rgba(216, 195, 149, .2); color: #8f897d; font-size: .62rem; text-transform: uppercase; }
+.mvp-datos b { display: block; color: var(--primary, #D8C395); font: 900 1.15rem "Michroma", sans-serif; }
+
+/* Tablas individuales de cada entreno */
+.ind-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+.ind-card { max-width: none !important; margin: 0 !important; border-top: 3px solid var(--c) !important; }
+.ind-head { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-bottom: 12px; }
+.ind-head img { width: 46px; height: 46px; object-fit: contain; }
+.ind-head h3 { margin: 0; color: var(--c) !important; font-size: .9rem; }
+.ind-head small { color: #8f897d; }
+
+@media (max-width: 1200px) { .dest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px)  { .dest-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px)  { .latam-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Aire entre bloques (LATAM y portales de entrenos) */
+.ses-list, .latam-acciones, .res-lista { gap: 12px; }
+#latamTopEquipos, #latamTopKillers { gap: 12px; }
+
+/* Filas de entrenos en columnas angostas */
+.res-row { flex-wrap: wrap; }
+.res-row > div:first-child { flex: 1 1 180px; min-width: 0; overflow-wrap: anywhere; }
+.res-row .pg-ses-acc { flex: 0 0 auto; margin-left: auto; }
+.res-lista { overflow-x: hidden; }

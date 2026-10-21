@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PROYECTN | Match Day Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Emilys+Candy&family=Jersey+25&family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="portal-kit/portal.js?v=20261013e" data-modo="publico"></script>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <img src="imagenes/proyectn.png" alt="Logo PROYECTN" class="logo-img" onerror="this.src='https://via.placeholder.com/45'">
+        <div class="logo">PROYECTN</div>
+    </div>
+
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="./" onclick="closeMenu()">Portal Principal</a></li>
+            <li><a href="./#resultados" onclick="closeMenu()">Herramienta FF</a></li>
+            <li><a href="lista_sorteo.html" onclick="closeMenu()" style="color: var(--primary);"><i class="fa-solid fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section class="tool-section" style="padding-top: 40px; min-height: calc(100vh - 85px);">
+    <h2 class="section-title">Creador de Match Day - PROYECTN</h2>
+    <div class="tool-container">
+        <p class="tool-desc">
+            Configura los enfrentamientos o equipos invitados seleccionando el formato de cuadrícula (<strong>3x4</strong> o <strong>3x5</strong>), asignando nombres y escudos individuales para generar una gráfica profesional lista para redes sociales.
+        </p>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>TÍTULO DEL MATCH DAY / FASE</label>
+                <input type="text" id="matchDayTitle" value="GRUPOS OFICIALES - JORNADA 1" oninput="renderizarMatchDayLive()">
+            </div>
+            <div class="form-group">
+                <label>FORMATO DE CUADRÍCULA</label>
+                <select id="matchDayFormat" class="dropdown-select" onchange="actualizarInputsMatchDay()">
+                    <option value="3x4">3 x 4 (12 Equipos)</option>
+                    <option value="3x5">3 x 5 (15 Equipos)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 15px;">
+            <div class="form-group">
+                <label>LOGO GENERAL / PRINCIPAL (OPCIONAL)</label>
+                <input type="file" id="inputLogoPrincipal" class="file-input-custom" accept="image/*" onchange="cargarLogoPrincipal(event)">
+            </div>
+            <div class="form-group">
+                <label>FONDO PROPIO 4:5 (OPCIONAL)</label>
+                <input type="file" id="inputFondoMatch" class="file-input-custom" accept="image/*" onchange="cargarFondoMatch(event)">
+            </div>
+        </div>
+
+        <div style="margin-top: 25px;">
+            <h3 style="font-family: 'Michroma'; font-size: 1.1rem; color: var(--primary); margin-bottom: 15px;">Equipos y Escudos (Personalización Individual)</h3>
+            <div id="matchDaySlotsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 10px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px;">
+                <!-- Dinámico -->
+            </div>
+        </div>
+
+        <button class="btn-generar" onclick="renderizarMatchDayLive()" style="margin-top: 25px;">
+            <i class="fa-solid fa-arrows-rotate"></i> ACTUALIZAR VISTA PREVIA
+        </button>
+
+        <div class="results-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
+            <div id="outputMatchDay"></div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2026 PROYECTN. Todos los derechos reservados. Diseñado para alto rendimiento competitivo.</p>
+</footer>
+
+<script>
+    function toggleMenu() {
+        const nav = document.getElementById('mainNav');
+        nav.classList.toggle('is-active');
+    }
+    function closeMenu() {
+        const nav = document.getElementById('mainNav');
+        nav.classList.remove('is-active');
+    }
+</script>
+<script src="matchday.js"></script>
+</body>
+</html>

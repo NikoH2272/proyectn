@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Cupos VIP · Rusheo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="rusheo" data-modo="publico" data-sin-sorteo></script>
+</head>
+<body data-tema="rusheo">
+    <header class="site-header">
+        <a class="logo-container" href="./"><img src="imagenes/rusheo.png" alt="Logo Rusheo" class="logo-img" onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'"><div class="logo"><span class="t-a">RUSHEO</span><small>by PROYECTN</small></div></a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button>
+        <nav class="main-nav" id="mainNav"><ul><li><a href="./">Resultados</a></li><li><a href="cupos.html">Cupos públicos</a></li><li><a href="admin.html">Admin</a></li></ul></nav>
+    </header>
+    <section><h2 class="section-title">Cupos VIP · Rusheo</h2><p class="tool-desc">Inscripciones reservadas para equipos autorizados.</p><div id="cuposPublicos"><p class="res-vacio">Cargando cupos VIP...</p></div></section>
+    <script src="../../portal-kit/cupos.js?v=20261013e"></script>
+    <script>PumasCupos.montarPublico('cuposPublicos', PumasPortal.portal, { tipo: 'VIP' });</script>
+</body>
+</html>

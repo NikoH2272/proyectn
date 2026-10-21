@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Herramientas | PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css?v=20261021b">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261021b" data-portal="principal" data-modo="publico"></script>
+    <script src="../portal-kit/descargas.js?v=20261021b"></script>
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <style>
+        .tools-nav {
+            display: flex; gap: 4px; margin-bottom: 32px;
+            border-bottom: 1px solid var(--border, #30343B);
+            padding-bottom: 0;
+        }
+        .tools-nav a {
+            padding: 10px 18px; font: 500 .85rem var(--font-display, "Space Grotesk", sans-serif);
+            color: var(--text-muted, #A8ADB6); text-decoration: none;
+            border-bottom: 2px solid transparent; margin-bottom: -1px;
+            transition: color .15s, border-color .15s;
+        }
+        .tools-nav a.active { color: var(--primary, #B6FF00); border-bottom-color: var(--primary, #B6FF00); }
+        .tools-nav a:hover:not(.active) { color: var(--text, #F4F5F7); }
+        .tools-nav .badge-soon {
+            font: 500 .6rem var(--font-body, "Inter", sans-serif);
+            letter-spacing: .08em; text-transform: uppercase;
+            background: rgba(182,255,0,.08); color: rgba(182,255,0,.5);
+            padding: 2px 7px; border-radius: 2px; margin-left: 6px; vertical-align: middle;
+        }
+        .tool-panel { display: none; }
+        .tool-panel.active { display: block; }
+        .coming-soon {
+            text-align: center; padding: 80px 20px;
+            color: var(--text-muted, #A8ADB6);
+        }
+        .coming-soon i { font-size: 2.5rem; color: var(--primary, #B6FF00); opacity: .3; margin-bottom: 16px; display: block; }
+        .coming-soon h3 { font: 600 1.1rem var(--font-display, "Space Grotesk", sans-serif); margin: 0 0 8px; }
+        .coming-soon p { font-size: .88rem; margin: 0; }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+            <img src="/imagenes/proyectn.png" alt="PROYECTN" class="logo-img" onerror="this.style.display='none'">
+            <div class="logo">PROYECTN</div>
+        </a>
+    </div>
+
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="/portales/pumasgaming/" onclick="closeMenu()">Entrenamientos</a></li>
+            <li><a href="/entrenoslatam/" onclick="closeMenu()">LATAM</a></li>
+            <li><a href="/#rankings" onclick="closeMenu()">Rankings</a></li>
+            <li><a href="/herramienta/" class="btn-admin-nav" onclick="closeMenu()" style="color:var(--primary)"><i class="fa-solid fa-screwdriver-wrench"></i> Herramientas</a></li>
+            <li><a href="/admin/login.html" onclick="closeMenu()"><i class="fa-solid fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section style="padding: 48px 32px 80px; max-width: 1200px; margin: 0 auto;">
+    <h2 class="section-title">Herramientas</h2>
+
+    <nav class="tools-nav">
+        <a href="#resultados" class="active" onclick="showTool('resultados', this)">
+            <i class="fa-solid fa-table"></i> Resultados FF
+        </a>
+        <a href="#mapas" onclick="showTool('mapas', this)">
+            <i class="fa-solid fa-map"></i> Mapas
+            <span class="badge-soon">Próximo</span>
+        </a>
+        <a href="#plantillas" onclick="showTool('plantillas', this)">
+            <i class="fa-solid fa-layer-group"></i> Plantillas
+            <span class="badge-soon">Próximo</span>
+        </a>
+    </nav>
+
+    <!-- ── Resultados FF ── -->
+    <div id="panel-resultados" class="tool-panel active">
+        <div class="tool-container">
+            <p class="tool-desc">
+                Carga tus archivos <code>.log</code> o <code>.txt</code>, selecciona el modo de cálculo y ordenamiento, y genera tus tablas profesionales.
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>MODO DE CÁLCULO Y ORDENAMIENTO</label>
+                    <select id="selectModoCalculo" class="dropdown-select" onchange="renderizarResultadosFromState()">
+                        <option value="1">1. Normal (Score Total Estándar)</option>
+                        <option value="2">2. Solo Posición (RankScore)</option>
+                        <option value="3">3. Solo Kills (Puntos por Kill)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>MODERADOR / ADMIN</label>
+                    <input type="text" id="inputModerador" placeholder="Ej: Mod · PROYECTN">
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>LOGO PROPIO (SUBIR ARCHIVO)</label>
+                    <input type="file" id="inputLogoFile" class="file-input-custom" accept="image/*" onchange="cargarImagenLocal(event, 'logo')">
+                </div>
+                <div class="form-group">
+                    <label>FONDO PROPIO 4:5 (SUBIR ARCHIVO)</label>
+                    <input type="file" id="inputFondoFile" class="file-input-custom" accept="image/*" onchange="cargarImagenLocal(event, 'fondo')">
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>TÍTULO DEL TORNEO (GRANDE)</label>
+                    <input type="text" id="inputTituloTorneo" value="PROYECTN" oninput="renderizarResultadosFromState()">
+                </div>
+                <div class="form-group">
+                    <label>JORNADA</label>
+                    <input type="text" id="inputJornadaTorneo" value="JORNADA 1" oninput="renderizarResultadosFromState()">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>FECHA</label>
+                    <input type="text" id="inputFechaTorneo" value="03 SEP 2026" oninput="renderizarResultadosFromState()">
+                </div>
+                <div class="form-group">
+                    <label>COLOR DE FUENTE</label>
+                    <select id="selectColorFuente" class="dropdown-select" onchange="renderizarResultadosFromState()">
+                        <option value="#ffffff" selected>Blanco Estándar</option>
+                        <option value="#DCCC9C">Dorado Oficial (#DCCC9C)</option>
+                        <option value="#959595">Gris Suave (#959595)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <input type="file" id="fileInput" multiple accept=".txt,.log" onchange="prepararRenombradoEquipos()">
+                <div id="seccionRenombrar" style="display: none; margin-top: 20px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px;">
+                    <h3 style="color: var(--primary); margin-bottom: 10px; font-size: 1.1rem;">Editar Nombres de Equipos</h3>
+                    <div id="listaEquiposInputs" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;"></div>
+                    <button onclick="procesarConNombresPersonalizados()" class="btn-generar" style="margin-top: 15px; padding: 10px 20px;">
+                        CONFIRMAR NOMBRES Y GENERAR TABLA
+                    </button>
+                </div>
+            </div>
+
+            <div class="results-wrapper">
+                <div id="outputTablasLadoALado" class="result-box" style="margin-top: 25px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Mapas ── -->
+    <div id="panel-mapas" class="tool-panel">
+        <div class="coming-soon">
+            <i class="fa-solid fa-map"></i>
+            <h3>Mapas — Próximamente</h3>
+            <p>Herramienta para crear mapas tácticos y anotaciones de zona.</p>
+        </div>
+    </div>
+
+    <!-- ── Plantillas ── -->
+    <div id="panel-plantillas" class="tool-panel">
+        <div class="coming-soon">
+            <i class="fa-solid fa-layer-group"></i>
+            <h3>Plantillas — Próximamente</h3>
+            <p>Plantillas de imagen para resultados, anuncios y stories.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2026 PROYECTN. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('mainNav').classList.toggle('is-active');
+    }
+    function closeMenu() {
+        document.getElementById('mainNav').classList.remove('is-active');
+    }
+    function showTool(id, el) {
+        document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tools-nav a').forEach(a => a.classList.remove('active'));
+        document.getElementById('panel-' + id).classList.add('active');
+        el.classList.add('active');
+    }
+</script>
+<script src="../script.js"></script>
+</body>
+</html>

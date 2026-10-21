@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROYECTN | Portal Oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="imagenes/proyectn.png" alt="Logo PROYECTN" class="logo-img">
+            <div class="logo">
+                <a href="../index.html"> PROYECTN </a>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#resultados">Resultados FF</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Procesador de Resultados Free Fire (Por Salas)</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Sube los archivos (<strong>.log</strong> o <strong>.txt</strong>) o ingresa salas manuales que se sumarán a la tabla compuesta (excluyendo el top killer).
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>MODO DE CÁLCULO / TABLA</label>
+                    <select id="selectModoCalculo" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="normal" selected>NORMAL (Total Score)</option>
+                        <option value="top">SOLO TOP (Rank Score)</option>
+                        <option value="kill">SOLO KILL (Kill Score)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>TEMA / DISEÑO VISUAL</label>
+                    <select id="selectTemaVisual" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="dragonfest" selected>DRAGON FEST (Azul Rey)</option>
+                        <option value="dragonfestfem">DRAGON FEST FEM (Rosa)</option>
+                        <option value="fdquisqueya">FD QUISQUEYA (Celeste)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>MODERADOR / ADMIN</label>
+                    <input type="text" id="inputModerador" placeholder="Ej: Mod · PROYECTN" oninput="renderizarResultados()">
+                </div>
+                <div class="form-group">
+                    <label>SELECCIONAR FECHA Y HORA (LOCAL)</label>
+                    <input type="datetime-local" id="inputFechaHora" class="dropdown-select" onchange="renderizarResultados()">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>SUBIR ARCHIVOS LOGS DE SALA (.log, .txt) - SELECCIONA VARIOS A LA VEZ</label>
+                <input type="file" id="inputFileUpload" class="file-input-custom" multiple accept=".txt,.log" onchange="procesarArchivos()">
+            </div>
+
+            <!-- SECCIÓN DE SALA MANUAL MASIVA -->
+            <div class="manual-room-section">
+                <h3 style="color: var(--accent-yellow); font-size: 1.1rem; margin-bottom: 12px;">
+                    <i class="fa-solid fa-keyboard"></i> Agregar Nueva Sala Manual (Suma Puntaje, No Top Killer)
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--gray); margin-bottom: 10px;">
+                    Escribe o pega los equipos y sus puntajes en formato <strong>Equipo, Puntos</strong> (uno por línea):
+                </p>
+                <div class="form-group">
+                    <textarea id="textareaSalaManual" rows="6" class="dropdown-select" style="height: auto; white-space: pre-wrap; font-family: monospace;" placeholder="Equipo A, 20&#10;Equipo B, 15&#10;Equipo C, 10"></textarea>
+                </div>
+                <button class="btn-access" id="btnAgregarManual" onclick="agregarSalaManualMasiva()" style="margin-top: 15px; padding: 12px 30px; font-size: 1rem;">
+                    <i class="fa-solid fa-plus"></i> Sumar como Nueva Sala
+                </button>
+            </div>
+
+            <!-- SECCIÓN DE EDICIÓN DE NOMBRES Y LOGOS -->
+            <div id="contenedorEdicionEquipos" style="margin-top: 25px; display: none;">
+                <h3 style="color: var(--accent-yellow); font-size: 1.1rem; margin-bottom: 12px;">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Nombres y Logos de Equipos
+                </h3>
+                <div id="tablaEdicionEquipos" class="table-input-container"></div>
+            </div>
+
+            <div class="results-wrapper">
+                <div class="table-fixed-container">
+                    <div id="outputTablasLadoALado" class="result-box" style="margin-top: 30px;"></div>
+                </div>
+                
+                <div style="margin-top: 40px; text-align: center;">
+                    <button class="btn-access" id="btnDescargarImagen" onclick="descargarTablaReducida()" style="font-size: 1.1rem; padding: 15px 35px; margin-bottom: 20px; display: inline-block;">
+                        <i class="fa-solid fa-download"></i> Descargar Imagen Reducida (1280x720)
+                    </button>
+                </div>
+                <div id="outputTablaReducida" class="result-box" style="margin-top: 10px; display: flex; justify-content: center; overflow-x: auto;"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 PROYECTN. Todos los derechos reservados. Diseñado para alto rendimiento competitivo.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

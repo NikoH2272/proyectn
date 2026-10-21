@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-modo="login"></script>
+</head>
+<body class="auth-body">
+    <main class="auth-card">
+        <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+        <h1><span class="t-a">PROYECTN</span> Gaming</h1>
+        <p class="auth-sub">PANEL DE ADMINISTRACIÓN</p>
+        <form id="formLogin" data-destino="/admin/" autocomplete="on">
+            <div class="form-group">
+                <label for="usuario">Usuario</label>
+                <input id="usuario" name="usuario" type="text" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="adminpumas">
+            </div>
+            <div class="form-group">
+                <label for="clave">Contraseña</label>
+                <input id="clave" name="clave" type="password" required autocomplete="current-password" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-generar">Ingresar</button>
+            <p id="authMsg" class="auth-msg" role="alert"></p>
+        </form>
+        <a href="../" class="auth-back">← Volver al portal</a>
+    </main>
+    <script src="../portal-kit/login.js?v=20261013e"></script>
+</body>
+</html>

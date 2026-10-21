@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Registro VIP | Entrenamientos PROYECTN</title>
+    <!-- Página privada: no se enlaza en el sitio y no aparece en buscadores. Se entra con un código del admin. -->
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Emilys+Candy&family=Jersey+25&family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="entrenamientos" data-modo="publico" data-sin-sorteo></script>
+    <style>
+        .vip-caja { max-width: 620px; margin: 0 auto 60px; padding: clamp(20px, 4vw, 34px); background: var(--dark-card); border: 1px solid rgba(216,195,149,.25); border-top: 3px solid var(--primary); border-radius: 10px; }
+        .vip-caja label { display: block; margin: 0 0 6px; color: var(--primary); font-family: 'Michroma'; font-size: .72rem; letter-spacing: .06em; }
+        .vip-caja input, .vip-caja select { width: 100%; padding: 12px; margin-bottom: 18px; border: 1px solid rgba(216,195,149,.3); border-radius: 6px; color: #fff; background: #0a0b10; font-size: 16px; }
+        .vip-fila { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+        .vip-tel { display: grid; grid-template-columns: 112px 1fr; gap: 8px; }
+        .vip-horarios { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 22px; }
+        .vip-horarios label { position: relative; margin: 0; }
+        .vip-horarios input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+        .vip-horarios span { display: block; padding: 14px 4px; border: 1px solid rgba(216,195,149,.35); border-radius: 8px; color: #ddd; background: #0a0b10; font: 700 .9rem 'Michroma'; text-align: center; cursor: pointer; transition: .15s; }
+        .vip-horarios input:checked + span { border-color: var(--primary); color: #0a0a0a; background: var(--primary); }
+        .vip-horarios input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .vip-msg { min-height: 1.3em; margin: 12px 0 0; text-align: center; font-size: .95rem; }
+        .vip-msg.error { color: #ff6b6b; } .vip-msg.ok { color: #6ee7a8; }
+        .vip-listo { text-align: center; } .vip-listo i { font-size: 3rem; color: var(--primary); }
+        @media (max-width: 560px) { .vip-fila { grid-template-columns: 1fr; gap: 0; } .vip-horarios { grid-template-columns: repeat(3, 1fr); } }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <img src="imagenes/proyectn.png" alt="Logo PROYECTN" class="logo-img">
+        <div class="logo">PROYECTN</div>
+    </div>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="../"><i class="fa-solid fa-house"></i> Portal</a></li>
+            <li><a href="./"><i class="fa-solid fa-globe"></i> Resultados</a></li>
+            <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section class="hero" style="padding: 40px 20px;">
+    <h1>Registro <span>VIP</span></h1>
+    <p>Registra a tu equipo como VIP de los entrenamientos oficiales de PROYECTN y elige en qué horarios juegas.</p>
+</section>
+
+<main style="padding: 0 16px;">
+    <div class="vip-caja" id="vipCodigoCaja">
+        <form id="vipCodigoForm" autocomplete="off">
+            <p style="text-align:center;margin:0 0 16px"><i class="fa-solid fa-lock" style="font-size:2rem;color:var(--primary)"></i></p>
+            <label for="vipCodigo">CÓDIGO DE ACCESO</label>
+            <input id="vipCodigo" required maxlength="20" placeholder="VIP-XXXXXX" autocapitalize="characters" spellcheck="false" style="text-align:center;letter-spacing:.12em;font-family:'Michroma'">
+            <button type="submit" class="btn-access" style="width:100%; padding:14px; border:none; font-size:1rem; cursor:pointer;">
+                <i class="fa-solid fa-key"></i> CONTINUAR
+            </button>
+            <p class="vip-msg" id="vipCodigoMsg" role="alert"></p>
+            <p style="color:var(--gray);text-align:center;font-size:.85rem;margin:6px 0 0">El código te lo da el staff de PROYECTN.</p>
+        </form>
+    </div>
+
+    <div class="vip-caja" id="vipCaja" hidden>
+        <form id="vipForm" autocomplete="on">
+            <div class="vip-fila">
+                <div><label for="vipNombre">NOMBRE DEL EQUIPO</label><input id="vipNombre" required maxlength="60" placeholder="Ej: DCN ACD" autocapitalize="characters"></div>
+                <div><label for="vipTag">TAG</label><input id="vipTag" required maxlength="10" placeholder="DCN" autocapitalize="characters"></div>
+            </div>
+            <label for="vipTel">NÚMERO DEL REPRESENTANTE (WHATSAPP)</label>
+            <div class="vip-tel">
+                <select id="vipPais" aria-label="País">
+                    <option value="+57">🇨🇴 +57</option><option value="+52">🇲🇽 +52</option><option value="+54">🇦🇷 +54</option>
+                    <option value="+56">🇨🇱 +56</option><option value="+51">🇵🇪 +51</option><option value="+593">🇪🇨 +593</option>
+                    <option value="+58">🇻🇪 +58</option><option value="+591">🇧🇴 +591</option><option value="+595">🇵🇾 +595</option>
+                    <option value="+598">🇺🇾 +598</option><option value="+502">🇬🇹 +502</option><option value="+504">🇭🇳 +504</option>
+                    <option value="+503">🇸🇻 +503</option><option value="+505">🇳🇮 +505</option><option value="+506">🇨🇷 +506</option>
+                    <option value="+507">🇵🇦 +507</option><option value="+1">🇺🇸 +1</option>
+                </select>
+                <input id="vipTel" required inputmode="tel" maxlength="16" placeholder="Número sin espacios">
+            </div>
+            <label>HORARIOS EN QUE JUEGAN (hora México · elige uno o varios)</label>
+            <div class="vip-horarios" role="group" aria-label="Horarios">
+                <label><input type="checkbox" name="horario" value="10AM"><span>10 AM</span></label>
+                <label><input type="checkbox" name="horario" value="1PM"><span>1 PM</span></label>
+                <label><input type="checkbox" name="horario" value="4PM"><span>4 PM</span></label>
+                <label><input type="checkbox" name="horario" value="6PM"><span>6 PM</span></label>
+                <label><input type="checkbox" name="horario" value="8PM"><span>8 PM</span></label>
+            </div>
+            <button type="submit" class="btn-access" style="width:100%; padding:14px; border:none; font-size:1rem; cursor:pointer;">
+                <i class="fa-solid fa-crown"></i> REGISTRAR EQUIPO VIP
+            </button>
+            <p class="vip-msg" id="vipMsg" role="alert"></p>
+        </form>
+    </div>
+</main>
+
+<script>
+(function () {
+    const P = PumasPortal, esc = P.escaparHtml;
+    const form = document.getElementById('vipForm'), msg = document.getElementById('vipMsg');
+    let codigo = '';
+
+    // 1) El código de acceso (también puede venir en el link: vip.html?c=VIP-XXXXXX)
+    const fCod = document.getElementById('vipCodigoForm'), inCod = document.getElementById('vipCodigo'), msgCod = document.getElementById('vipCodigoMsg');
+    async function probarCodigo(valor) {
+        const c = String(valor || '').trim().toUpperCase();
+        if (!c) return;
+        const btn = fCod.querySelector('button');
+        btn.disabled = true; msgCod.className = 'vip-msg'; msgCod.textContent = 'Revisando código...';
+        try {
+            const r = await P.vip.validar(c);
+            if (!r || !r.ok) throw new Error('El código no es válido, ya se usó o venció. Pide uno nuevo al staff de Pumas.');
+            codigo = c;
+            document.getElementById('vipCodigoCaja').hidden = true;
+            document.getElementById('vipCaja').hidden = false;
+            document.getElementById('vipNombre').focus();
+        } catch (err) { msgCod.className = 'vip-msg error'; msgCod.textContent = err.message; }
+        finally { btn.disabled = false; }
+    }
+    fCod.addEventListener('submit', e => { e.preventDefault(); probarCodigo(inCod.value); });
+    const enLink = new URLSearchParams(location.search).get('c');
+    if (enLink) { inCod.value = enLink.toUpperCase(); history.replaceState(null, '', location.pathname); probarCodigo(enLink); }
+
+    // 2) El registro
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const horarios = [...form.querySelectorAll('input[name="horario"]:checked')].map(i => i.value);
+        const tel = document.getElementById('vipTel').value.replace(/[^\d]/g, '');
+        const d = {
+            codigo,
+            nombre: document.getElementById('vipNombre').value.trim().toUpperCase(),
+            tag: document.getElementById('vipTag').value.trim().toUpperCase(),
+            telefono: document.getElementById('vipPais').value + ' ' + tel,
+            horarios
+        };
+        msg.className = 'vip-msg error';
+        if (!d.nombre || !d.tag) { msg.textContent = 'Escribe el nombre del equipo y su tag.'; return; }
+        if (tel.length < 7) { msg.textContent = 'Escribe un número de WhatsApp válido.'; return; }
+        if (!horarios.length) { msg.textContent = 'Elige al menos un horario.'; return; }
+        const btn = form.querySelector('button');
+        btn.disabled = true; msg.className = 'vip-msg'; msg.textContent = 'Registrando...';
+        try {
+            await P.vip.registrar(d);
+            document.getElementById('vipCaja').innerHTML = `<div class="vip-listo"><i class="fa-solid fa-circle-check"></i>
+                <h2 style="color:var(--primary);font-family:'Michroma';margin:14px 0 8px">¡Registro enviado!</h2>
+                <p><b>${esc(d.nombre)}</b> (${esc(d.tag)}) · ${horarios.join(', ')}</p>
+                <p style="color:var(--gray)">El staff de Pumas revisa tu registro y te contacta por WhatsApp.</p>
+                <a href="cupos.html" class="btn-access" style="display:inline-block;margin-top:14px;padding:12px 22px">Ver cupos disponibles</a></div>`;
+        } catch (err) {
+            msg.className = 'vip-msg error'; msg.textContent = err.message; btn.disabled = false;
+        }
+    });
+})();
+</script>
+</body>
+</html>

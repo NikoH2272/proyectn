@@ -1,0 +1,431 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calibrar Caídas – PROYECTN</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0b10;color:#F4EEDC;font-family:'Segoe UI',sans-serif;padding:20px;font-size:14px}
+h1{font-family:Michroma,monospace;font-size:1rem;letter-spacing:.08em;color:#D8C395;margin-bottom:4px}
+.sub{color:#9a9a9a;font-size:.82rem;margin-bottom:16px}
+/* Top bar */
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px}
+.top label{font-size:.75rem;color:#9a9a9a;display:block;margin-bottom:3px}
+select,input[type=text]{background:#15161b;color:#F4EEDC;border:1px solid rgba(216,195,149,.3);border-radius:4px;padding:7px 11px;font-size:.88rem}
+select:focus,input[type=text]:focus{outline:none;border-color:#D8C395}
+/* Botones */
+.btn{background:rgba(216,195,149,.1);color:#F4EEDC;border:1px solid rgba(216,195,149,.3);border-radius:4px;padding:7px 13px;font-size:.75rem;font-family:Michroma,monospace;letter-spacing:.03em;cursor:pointer;transition:background .15s}
+.btn:hover{background:rgba(216,195,149,.22)}
+.btn.green{border-color:#4dff91;color:#4dff91}.btn.green:hover{background:rgba(77,255,145,.12)}
+.btn.red{border-color:#ff5555;color:#ff5555}.btn.red:hover{background:rgba(255,85,85,.12)}
+.btn.blue{border-color:#4da6ff;color:#4da6ff}.btn.blue:hover{background:rgba(77,166,255,.12)}
+/* Instrucciones */
+.instrucciones{background:#0d0e14;border:1px solid rgba(216,195,149,.1);border-radius:5px;padding:10px 14px;margin-bottom:14px;font-size:.8rem;line-height:1.7;color:#b0b0b0}
+.instrucciones b{color:#D8C395}
+/* Lista de caídas */
+.panel-caidas{background:#0d0e14;border:1px solid rgba(216,195,149,.15);border-radius:5px;padding:12px;margin-bottom:14px}
+.panel-caidas h3{font-family:Michroma,monospace;font-size:.68rem;letter-spacing:.06em;color:#D8C395;margin-bottom:10px}
+.caidas-lista{display:flex;flex-wrap:wrap;gap:5px;max-height:130px;overflow-y:auto;padding:2px}
+.caida-btn{padding:5px 9px;font-size:.73rem;border-radius:3px;cursor:pointer;border:1px solid rgba(216,195,149,.2);background:#15161b;color:#F4EEDC;transition:all .15s;display:flex;align-items:center;gap:5px}
+.caida-btn:hover{border-color:#D8C395}
+.caida-btn.seleccionada{background:rgba(216,195,149,.22);border-color:#D8C395;color:#D8C395;font-weight:700}
+.caida-btn.colocada{border-color:#4dff91;color:#4dff91}
+.caida-btn.seleccionada.colocada{background:rgba(77,255,145,.15)}
+.caida-btn .del{color:#ff5555;font-size:.8rem;line-height:1;padding:0 2px;opacity:.6}
+.caida-btn .del:hover{opacity:1}
+/* Agregar caída */
+.agregar-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.agregar-row input{flex:1;min-width:140px}
+/* Renombrar */
+.rename-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;padding:8px;background:rgba(255,183,77,.06);border:1px solid rgba(255,183,77,.2);border-radius:4px}
+.rename-row label{font-size:.75rem;color:#FFB74D;white-space:nowrap}
+.rename-row input{flex:1;min-width:140px;border-color:rgba(255,183,77,.4)}
+/* Mapa */
+.mapa-wrap{position:relative;display:inline-block;cursor:crosshair;border:1px solid rgba(216,195,149,.2);border-radius:4px;overflow:hidden;max-width:100%}
+.mapa-wrap img{display:block;max-width:700px;width:100%}
+.pin{position:absolute;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#000;background:#D8C395;box-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;z-index:10}
+.pin.seleccionado-pin{background:#FFD700;box-shadow:0 0 8px #FFD700}
+.pin-label{position:absolute;transform:translateX(-50%);font-size:8px;color:#fff;white-space:nowrap;text-shadow:0 1px 3px #000,0 1px 3px #000;pointer-events:none;z-index:11}
+/* Info */
+.info-bar{margin-top:8px;font-size:.8rem;color:#9a9a9a;min-height:1.3em}
+.info-bar span{color:#D8C395}
+.info-bar span.ok{color:#4dff91}
+/* Arsenal */
+.btn.arsenal-active{background:rgba(255,183,77,.18);border-color:#FFB74D;color:#FFB74D}
+.pin.arsenal-pin{background:#111;border:2px solid rgba(255,255,255,.6);border-radius:5px!important;font-size:12px;width:22px;height:22px;color:#fff}
+.pin.arsenal-pin.seleccionado-pin{box-shadow:0 0 8px #FFD700}
+.modo-label{font-size:.72rem;color:#9a9a9a;padding:4px 8px;background:rgba(216,195,149,.06);border:1px solid rgba(216,195,149,.15);border-radius:4px;white-space:nowrap}
+/* Output */
+.output{margin-top:18px;padding:14px;background:#0d0e14;border:1px solid rgba(216,195,149,.15);border-radius:5px}
+.output h3{font-family:Michroma,monospace;font-size:.68rem;letter-spacing:.06em;color:#D8C395;margin-bottom:10px}
+pre{background:#080910;padding:12px;border-radius:4px;font-size:.7rem;line-height:1.6;overflow-x:auto;color:#c8e6c9;max-height:260px;overflow-y:auto}
+.acciones{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.stats{font-size:.78rem;color:#9a9a9a;margin-top:8px}
+.stats b{color:#D8C395}
+</style>
+</head>
+<body>
+
+<h1>🗺️ CALIBRAR CAÍDAS — PROYECTN</h1>
+<p class="sub">Coloca cada caída en el mapa, edita nombres y agrega nuevas caídas. El código generado va en <b>caidas.js</b>.</p>
+
+<div class="instrucciones">
+    <b>Cómo usar:</b>
+    1. Selecciona el mapa · 2. Haz clic en el nombre de una caída · 3. Haz clic en el mapa para colocar el pin · 4. Para <b>agregar</b> una caída nueva escribe su nombre abajo y presiona Agregar · 5. Para <b>renombrar</b> una caída, selecciónala y haz clic en ✏️ · 6. Para <b>eliminar</b> haz clic en ✕ al lado del nombre · 7. Para marcar un <b>arsenal (🏰)</b>: activa "Modo Arsenal", selecciona una caída y haz clic en el mapa — el ícono de casita marca el arsenal de esa zona · 8. Cuando termines copia el código y reemplaza <b>COORDENADAS</b>, <b>CATALOGO</b> y <b>ARSENALES</b> en caidas.js
+</div>
+
+<div class="top">
+    <div>
+        <label>Mapa actual</label>
+        <select id="selMapa" onchange="cambiarMapa()">
+            <option value="BERMUDA">BERMUDA</option>
+            <option value="PURGATORIO">PURGATORIO</option>
+            <option value="NEXTERRA">NEXTERRA</option>
+            <option value="KALAHARI">KALAHARI</option>
+            <option value="SOLARA">SOLARA</option>
+        </select>
+    </div>
+    <button class="btn" onclick="borrarUltimo()">↩ Deshacer último</button>
+    <button class="btn red" onclick="borrarMapa()">🗑 Borrar pines del mapa</button>
+    <button id="btnArsenal" class="btn" onclick="toggleModoArsenal()" title="Alterna entre colocar caídas y colocar arsenales (🏰)">🏰 Modo Arsenal</button>
+    <button class="btn red" onclick="borrarArsenal()" title="Elimina el arsenal de la caída seleccionada">🏰🗑 Borrar arsenal</button>
+    <span class="modo-label" id="modoLabel">⚔️ Modo: Caída</span>
+    <button class="btn" onclick="guardarLocal()">💾 Guardar progreso</button>
+    <button class="btn blue" onclick="cargarLocal()">📂 Recuperar guardado</button>
+    <button class="btn green" onclick="copiarCodigo()">📋 Copiar código final</button>
+</div>
+
+<!-- Panel de caídas -->
+<div class="panel-caidas">
+    <h3>CAÍDAS DEL MAPA — haz clic para seleccionar, ✏️ para renombrar, ✕ para eliminar</h3>
+    <div id="caidas-lista" class="caidas-lista"></div>
+    <!-- Renombrar (se muestra solo cuando hay una seleccionada) -->
+    <div id="rename-row" class="rename-row" style="display:none">
+        <label>✏️ Renombrar:</label>
+        <input type="text" id="renombreInput" placeholder="Nuevo nombre">
+        <button class="btn green" onclick="aplicarRenombre()">Aplicar</button>
+        <button class="btn" onclick="cancelarRenombre()">Cancelar</button>
+    </div>
+    <!-- Agregar nueva caída -->
+    <div class="agregar-row">
+        <input type="text" id="nuevaCaida" placeholder="Nombre nueva caída (ej: PLATANAL)" onkeydown="if(event.key==='Enter')agregarCaida()">
+        <button class="btn blue" onclick="agregarCaida()">+ Agregar caída</button>
+    </div>
+</div>
+
+<div class="mapa-wrap" id="mapaWrap">
+    <img id="mapaImg" src="" alt="Mapa">
+    <div id="pinsLayer"></div>
+</div>
+<div class="info-bar" id="infoBar">Selecciona una caída de la lista y luego haz clic en el mapa.</div>
+
+<div class="output">
+    <h3>CÓDIGO GENERADO — copia en caidas.js (reemplaza los bloques COORDENADAS y CATALOGO)</h3>
+    <pre id="outputCode">// Completa al menos un mapa para ver el código...</pre>
+    <div id="stats" class="stats"></div>
+    <div class="acciones">
+        <button class="btn green" onclick="copiarCodigo()">📋 Copiar código al portapapeles</button>
+        <button class="btn green" onclick="copiarSoloCoordenadas()">📋 Copiar solo COORDENADAS</button>
+        <button class="btn green" onclick="copiarSoloCatalogo()">📋 Copiar solo CATALOGO</button>
+        <button class="btn green" onclick="copiarSoloArsenales()">📋 Copiar solo ARSENALES</button>
+    </div>
+</div>
+
+<script>
+const IMGS = {
+    BERMUDA:    '../../imagenes/mapas/bermuda.png',
+    PURGATORIO: '../../imagenes/mapas/purgatorio.png',
+    NEXTERRA:   '../../imagenes/mapas/nexterra.png',
+    KALAHARI:   '../../imagenes/mapas/kalahari.png',
+    SOLARA:     '../../imagenes/mapas/solara.png'
+};
+
+// Catálogo editable (nombres pueden modificarse)
+let catalogo = {
+    BERMUDA:    ['RIM NAM VILLA','OBSERVATORIO','HANGAR','GRAVEYARD','BULLSEYE','SHYRPIARD','KATULISTIWA','PLANTATION','BIMASAKTI','RIVERSIDE','MARS ELECTRIC','POCHINOK','PEAK','CLOCK TOWER','KOTA TUA','SENTOSA','CAPETOWN','KERATON','MILL'],
+    PURGATORIO: ['MOATHOUSE','CROSSROADS','MARBLEWORKS','QUARY','GOLF','MT. VILLA','CENTRAL','BOMBEROS','LUMBER MILL','CAMPSITE','FORGE','SKI LODGE','BRASILIA ALTA','BRASILIA BAJA','FIELS'],
+    NEXTERRA:   ['CENTRO DE INTELIGENCIA','PUENTES GEMELOS','CONSTRUCCION EN RUINAS','CUIDAD FANTASMA','PANTANAL','DECAGONO','GIMNASIO DE BOXEO','TIROLESA','PLAZARIA','GRATIVACION','INVERNADEROS','EOLICAS','MUSEO'],
+    KALAHARI:   ['ASENTAMIENTO','RUINAS','LABERINTO','C.ELEFANTE','REFINERIA','EL SUB','BAHIA','SANTUARIO','EL CONSEJO','RECLUSORIO','SANTA CATARINA','CANTO DE PIEDRA','PUESTO DE COMANDO'],
+    SOLARA:     ['MOLINO','ISLA DELTA','ACUARIO','BAHIA','PLANTA ECOLOGICA','FLORISTERIA','ESTUDIO','EL CENTRO','CASCADA','CENTRO HIPICO','FERIA','ARCOS','TORRE DE TV','CASA VISTA']
+};
+
+// Coordenadas: { MAPA: { 'NOMBRE': [x%, y%] } }
+let coords = { BERMUDA:{}, PURGATORIO:{}, NEXTERRA:{}, KALAHARI:{}, SOLARA:{} };
+
+let mapaActual = 'BERMUDA';
+let caidaSeleccionada = null;
+let arsenales = { BERMUDA:{}, PURGATORIO:{}, NEXTERRA:{}, KALAHARI:{}, SOLARA:{} };
+let modoArsenal = false;
+
+// ── Inicializar ──────────────────────────────────────────────
+function cambiarMapa() {
+    mapaActual = document.getElementById('selMapa').value;
+    caidaSeleccionada = null;
+    document.getElementById('mapaImg').src = IMGS[mapaActual];
+    document.getElementById('rename-row').style.display = 'none';
+    renderCaidas(); renderPins(); actualizarCodigo();
+    document.getElementById('infoBar').innerHTML = `Mapa: <span>${mapaActual}</span> — selecciona una caída.`;
+}
+
+// ── Lista de caídas ──────────────────────────────────────────
+function renderCaidas() {
+    const lista = catalogo[mapaActual] || [];
+    const placed = coords[mapaActual] || {};
+    document.getElementById('caidas-lista').innerHTML = lista.map((c, idx) => {
+        const esPlaced = placed[c] !== undefined;
+        const esSel = c === caidaSeleccionada;
+        const cls = ['caida-btn', esSel?'seleccionada':'', esPlaced?'colocada':''].filter(Boolean).join(' ');
+        return `<div class="${cls}">
+            <span onclick="selCaida('${esc(c)}')">${c}${esPlaced?' ✓':''}</span>
+            <span class="del" onclick="iniciarRenombre('${esc(c)}')" title="Renombrar">✏️</span>
+            <span class="del" onclick="eliminarCaida('${esc(c)}')" title="Eliminar">✕</span>
+        </div>`;
+    }).join('');
+}
+function esc(s){ return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function selCaida(nombre) {
+    if (caidaSeleccionada === nombre) { caidaSeleccionada = null; document.getElementById('rename-row').style.display='none'; renderCaidas(); return; }
+    caidaSeleccionada = nombre;
+    document.getElementById('rename-row').style.display = 'none';
+    renderCaidas();
+    const placed = coords[mapaActual] || {};
+    document.getElementById('infoBar').innerHTML = placed[nombre]
+        ? `Caída: <span>${nombre}</span> — haz clic en el mapa para mover su pin.`
+        : `Caída: <span>${nombre}</span> — haz clic en el mapa para colocar el pin.`;
+}
+
+// ── Agregar caída ────────────────────────────────────────────
+function agregarCaida() {
+    const inp = document.getElementById('nuevaCaida');
+    const nombre = inp.value.trim().toUpperCase();
+    if (!nombre) return;
+    if (!catalogo[mapaActual]) catalogo[mapaActual] = [];
+    if (catalogo[mapaActual].includes(nombre)) { alert('Esa caída ya existe.'); return; }
+    catalogo[mapaActual].push(nombre);
+    inp.value = '';
+    caidaSeleccionada = nombre;
+    renderCaidas(); actualizarCodigo();
+    document.getElementById('infoBar').innerHTML = `Nueva caída agregada: <span>${nombre}</span> — haz clic en el mapa para colocarla.`;
+}
+
+// ── Eliminar caída ───────────────────────────────────────────
+function eliminarCaida(nombre) {
+    if (!confirm(`¿Eliminar la caída "${nombre}" de ${mapaActual}?`)) return;
+    catalogo[mapaActual] = catalogo[mapaActual].filter(c => c !== nombre);
+    delete (coords[mapaActual] || {})[nombre];
+    if (caidaSeleccionada === nombre) caidaSeleccionada = null;
+    renderCaidas(); renderPins(); actualizarCodigo();
+}
+
+// ── Renombrar caída ──────────────────────────────────────────
+let renombrando = null;
+function iniciarRenombre(nombre) {
+    renombrando = nombre;
+    caidaSeleccionada = nombre;
+    document.getElementById('renombreInput').value = nombre;
+    document.getElementById('rename-row').style.display = 'flex';
+    document.getElementById('renombreInput').focus();
+    renderCaidas();
+}
+function aplicarRenombre() {
+    const nuevo = document.getElementById('renombreInput').value.trim().toUpperCase();
+    if (!nuevo || !renombrando) return;
+    if (nuevo === renombrando) { cancelarRenombre(); return; }
+    if (catalogo[mapaActual].includes(nuevo)) { alert('Ya existe una caída con ese nombre.'); return; }
+    const idx = catalogo[mapaActual].indexOf(renombrando);
+    if (idx !== -1) catalogo[mapaActual][idx] = nuevo;
+    // Mover coordenadas al nuevo nombre
+    const placed = coords[mapaActual] || {};
+    if (placed[renombrando]) { placed[nuevo] = placed[renombrando]; delete placed[renombrando]; }
+    if (caidaSeleccionada === renombrando) caidaSeleccionada = nuevo;
+    renombrando = null;
+    document.getElementById('rename-row').style.display = 'none';
+    renderCaidas(); renderPins(); actualizarCodigo();
+}
+function cancelarRenombre() {
+    renombrando = null;
+    document.getElementById('rename-row').style.display = 'none';
+}
+document.getElementById('renombreInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') aplicarRenombre();
+    if (e.key === 'Escape') cancelarRenombre();
+});
+
+// ── Arsenal: toggle modo y borrar ────────────────────────────
+function toggleModoArsenal() {
+    modoArsenal = !modoArsenal;
+    document.getElementById('btnArsenal').className = 'btn' + (modoArsenal ? ' arsenal-active' : '');
+    document.getElementById('btnArsenal').textContent = modoArsenal ? '⚔️ Modo Caída' : '🏰 Modo Arsenal';
+    document.getElementById('modoLabel').textContent = modoArsenal ? '🏰 Modo: Arsenal' : '⚔️ Modo: Caída';
+    document.getElementById('mapaWrap').style.cursor = modoArsenal ? 'cell' : 'crosshair';
+    document.getElementById('infoBar').innerHTML = modoArsenal
+        ? 'Modo Arsenal: selecciona una caída y haz clic en el mapa para marcar dónde está su arsenal (🏰).'
+        : 'Modo Caída: selecciona una caída y haz clic para colocar su pin.';
+}
+function borrarArsenal() {
+    if (!caidaSeleccionada) { alert('Selecciona una caída primero.'); return; }
+    const arsen = arsenales[mapaActual] || {};
+    if (!arsen[caidaSeleccionada]) { alert('Esa caída no tiene arsenal registrado.'); return; }
+    if (!confirm(`¿Eliminar el arsenal de "${caidaSeleccionada}"?`)) return;
+    delete arsen[caidaSeleccionada];
+    renderPins(); actualizarCodigo();
+    document.getElementById('infoBar').innerHTML = `Arsenal de <span>${caidaSeleccionada}</span> eliminado.`;
+}
+
+// ── Click en mapa ────────────────────────────────────────────
+document.getElementById('mapaWrap').addEventListener('click', function(e) {
+    if (!caidaSeleccionada) { document.getElementById('infoBar').innerHTML = '⚠ Primero selecciona una caída de la lista.'; return; }
+    const rect = this.getBoundingClientRect();
+    const x = parseFloat(((e.clientX - rect.left) / rect.width * 100).toFixed(1));
+    const y = parseFloat(((e.clientY - rect.top)  / rect.height * 100).toFixed(1));
+
+    if (modoArsenal) {
+        if (!arsenales[mapaActual]) arsenales[mapaActual] = {};
+        arsenales[mapaActual][caidaSeleccionada] = [x, y];
+        renderPins(); actualizarCodigo();
+        document.getElementById('infoBar').innerHTML = `<span class="ok">🏰 Arsenal de ${caidaSeleccionada} colocado.</span> Selecciona otra caída o haz clic para moverlo.`;
+        return;
+    }
+
+    if (!coords[mapaActual]) coords[mapaActual] = {};
+    coords[mapaActual][caidaSeleccionada] = [x, y];
+
+    // Avanzar automáticamente a la siguiente sin pin
+    const lista = catalogo[mapaActual] || [];
+    const placed = coords[mapaActual];
+    const idx = lista.indexOf(caidaSeleccionada);
+    const siguiente = lista.slice(idx + 1).find(c => !placed[c]) || null;
+    const prevSel = caidaSeleccionada;
+    caidaSeleccionada = siguiente;
+
+    renderCaidas(); renderPins(); actualizarCodigo();
+    const total = lista.length, colocadas = Object.keys(placed).length;
+    document.getElementById('infoBar').innerHTML = siguiente
+        ? `<span class="ok">✓ ${prevSel} colocada.</span> Siguiente sin pin: <span>${siguiente}</span>`
+        : `<span class="ok">✓ ¡${mapaActual} completo! ${colocadas}/${total} caídas colocadas.</span>`;
+});
+
+// ── Pines ────────────────────────────────────────────────────
+function renderPins() {
+    const placed = coords[mapaActual] || {};
+    const arsen  = arsenales[mapaActual] || {};
+    const lista  = catalogo[mapaActual] || [];
+
+    const dropPins = Object.entries(placed).map(([nombre, [x, y]]) => {
+        const num   = lista.indexOf(nombre) + 1;
+        const esSel = nombre === caidaSeleccionada;
+        return `<div class="pin${esSel?' seleccionado-pin':''}" style="left:${x}%;top:${y}%">${num}</div>
+                <div class="pin-label" style="left:${x}%;top:calc(${y}% + 13px)">${nombre}</div>`;
+    }).join('');
+
+    const arsenPins = Object.entries(arsen).map(([nombre, [x, y]]) => {
+        const esSel = nombre === caidaSeleccionada;
+        return `<div class="pin arsenal-pin${esSel?' seleccionado-pin':''}" style="left:${x}%;top:${y}%" title="${nombre} — Arsenal">🏰</div>
+                <div class="pin-label" style="left:${x}%;top:calc(${y}% + 12px);font-size:7px;color:#FFB74D">⚡${nombre}</div>`;
+    }).join('');
+
+    document.getElementById('pinsLayer').innerHTML = dropPins + arsenPins;
+}
+
+// ── Deshacer / Borrar ────────────────────────────────────────
+function borrarUltimo() {
+    const placed = coords[mapaActual];
+    if (!placed) return;
+    const keys = Object.keys(placed);
+    if (!keys.length) return;
+    const ultimo = keys[keys.length - 1];
+    delete placed[ultimo];
+    caidaSeleccionada = ultimo;
+    renderCaidas(); renderPins(); actualizarCodigo();
+}
+function borrarMapa() {
+    if (!confirm(`¿Borrar todos los pines de ${mapaActual}?`)) return;
+    coords[mapaActual] = {};
+    caidaSeleccionada = null;
+    renderCaidas(); renderPins(); actualizarCodigo();
+}
+
+// ── Código generado ──────────────────────────────────────────
+function generarCoordenadas() {
+    const bloques = Object.entries(coords).map(([mapa, places]) => {
+        const entries = Object.entries(places);
+        if (!entries.length) return `        ${mapa}: {}`;
+        const maxLen = Math.max(...entries.map(([k]) => k.length));
+        const items = entries.map(([k, [x, y]]) =>
+            `            '${k}':${' '.repeat(maxLen - k.length + 1)}[${x}, ${y}]`
+        ).join(',\n');
+        return `        ${mapa}: {\n${items}\n        }`;
+    });
+    return `    const COORDENADAS = {\n${bloques.join(',\n')}\n    };`;
+}
+function generarCatalogo() {
+    const bloques = Object.entries(catalogo).map(([mapa, lista]) =>
+        `        ${mapa}: ${JSON.stringify(lista)}`
+    );
+    return `    const CATALOGO = {\n${bloques.join(',\n')}\n    };`;
+}
+function generarArsenales() {
+    const bloques = Object.entries(arsenales).map(([mapa, places]) => {
+        const entries = Object.entries(places);
+        if (!entries.length) return `        ${mapa}: {}`;
+        const maxLen = Math.max(...entries.map(([k]) => k.length));
+        const items = entries.map(([k, [x, y]]) =>
+            `            '${k}':${' '.repeat(maxLen - k.length + 1)}[${x}, ${y}]`
+        ).join(',\n');
+        return `        ${mapa}: {\n${items}\n        }`;
+    });
+    return `    const ARSENALES = {\n${bloques.join(',\n')}\n    };`;
+}
+function generarCodigo() {
+    return generarCoordenadas() + '\n\n' + generarCatalogo() + '\n\n' + generarArsenales();
+}
+function actualizarCodigo() {
+    document.getElementById('outputCode').textContent = generarCodigo();
+    // Stats
+    const lineas = Object.entries(coords).map(([m, p]) => {
+        const total = (catalogo[m]||[]).length;
+        const colocadas = Object.keys(p).length;
+        return `<b>${m}</b>: ${colocadas}/${total}`;
+    });
+    document.getElementById('stats').innerHTML = 'Progreso — ' + lineas.join(' · ');
+}
+
+// ── Portapapeles ─────────────────────────────────────────────
+async function copiarTexto(txt, etiqueta) {
+    try { await navigator.clipboard.writeText(txt); alert(`✔ ${etiqueta} copiado al portapapeles.`); }
+    catch(e) { prompt(`Copia esto (${etiqueta}):`, txt); }
+}
+function copiarCodigo()            { copiarTexto(generarCodigo(),       'Código completo'); }
+function copiarSoloCoordenadas()   { copiarTexto(generarCoordenadas(),  'COORDENADAS'); }
+function copiarSoloCatalogo()      { copiarTexto(generarCatalogo(),     'CATALOGO'); }
+function copiarSoloArsenales()     { copiarTexto(generarArsenales(),    'ARSENALES'); }
+
+// ── Guardar / Cargar ─────────────────────────────────────────
+function guardarLocal() {
+    try {
+        localStorage.setItem('pg_calib_coords',    JSON.stringify(coords));
+        localStorage.setItem('pg_calib_catalogo',  JSON.stringify(catalogo));
+        localStorage.setItem('pg_calib_arsenales', JSON.stringify(arsenales));
+        alert('✔ Progreso guardado en este navegador.');
+    } catch(e) { alert('No se pudo guardar.'); }
+}
+function cargarLocal() {
+    try {
+        const c = localStorage.getItem('pg_calib_coords');
+        const k = localStorage.getItem('pg_calib_catalogo');
+        const a = localStorage.getItem('pg_calib_arsenales');
+        if (c) coords    = JSON.parse(c);
+        if (k) catalogo  = JSON.parse(k);
+        if (a) arsenales = JSON.parse(a);
+        if (c || k || a) { renderCaidas(); renderPins(); actualizarCodigo(); alert('✔ Progreso recuperado.'); }
+        else alert('No hay progreso guardado.');
+    } catch(e) { alert('No se pudo cargar.'); }
+}
+
+// ── Inicializar ──────────────────────────────────────────────
+cambiarMapa();
+</script>
+</body>
+</html>

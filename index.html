@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PROYECTN | Portal Gamer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="stylesheet" href="portal-kit/latam.css?v=20261013e">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="portal-kit/portal.js?v=20261013e" data-portal="principal" data-modo="publico"></script>
+    <script src="portal-kit/descargas.js?v=20261013e"></script>
+    <link rel="icon" type="image/x-icon" href="imagenes/proyectn.png">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="logo-container">
+        <img src="imagenes/proyectn.png" alt="PROYECTN" class="logo-img" onerror="this.style.display='none'">
+        <div class="logo">PROYECTN</div>
+    </div>
+
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="/portales/pumasgaming/" onclick="closeMenu()">Entrenamientos</a></li>
+            <li><a href="/entrenoslatam/" onclick="closeMenu()">LATAM</a></li>
+            <li><a href="#rankings" onclick="closeMenu()">Rankings</a></li>
+            <li><a href="/herramienta/" onclick="closeMenu()"><i class="fa-solid fa-screwdriver-wrench"></i> Herramientas</a></li>
+            <li><a href="/admin/login.html" class="btn-admin-nav" onclick="closeMenu()" style="color: var(--primary);"><i class="fa-solid fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+</header>
+
+ <section class="portal-hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+            <div class="eyebrow">Comunidad competitiva · Free Fire</div>
+            <h1 id="hero-title">Nacidos para <span>competir.</span></h1>
+            <p>PROYECTN reúne a equipos que juegan con carácter. Entrena, sigue la competencia y crea tus resultados desde un solo lugar.</p>
+            <div class="hero-actions">
+                <a href="#latam" class="btn-access">Ver portales</a>
+                <a href="#comunidad" class="btn-access btn-outline">Entrar a la comunidad</a>
+                <a href="/portales/pumasgaming/juegos.html" class="btn-access btn-outline"><i class="fa-solid fa-gamepad"></i> Juegos</a>
+                <a href="/portales/pumasgaming/dinamicas.html" class="btn-access btn-outline"><i class="fa-solid fa-bolt"></i> Dinámicas</a>
+            </div>
+        </div>
+        <div class="hero-mark" aria-hidden="true">
+            <img src="/imagenes/proyectn.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="mark-fallback">PN</span>
+        </div>
+    </section>
+
+<section id="latam">
+    <div class="latam-cabecera"><img src="entrenoslatam/imagenes/latam.png" alt="Entrenos LATAM" onerror="this.parentElement.hidden=true"></div>
+    <h2 class="section-title">Entrenos LATAM</h2>
+    <p class="latam-intro">PROYECTN y sus ligas aliadas: entrena en cualquiera. Cada una tiene su portal de resultados y su grupo.</p>
+
+    <div class="latam-layout">
+        <!-- Cuadrícula de portales -->
+        <div class="latam-portales-col">
+            <div class="latam-grid" id="latamPortales"></div>
+            <div class="latam-resultados-cta">
+                <a href="entrenoslatam/" class="btn-access btn-outline latam-resultados-btn">
+                    <i class="fa-solid fa-chart-bar"></i> Resultados Entrenos LATAM
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Rankings al lado -->
+        <aside class="latam-rankings-col">
+            <div id="latamLeyenda"></div>
+            <div class="card-box latam-rank-card">
+                <div class="rank-head"><i class="fa-solid fa-earth-americas"></i><h3 id="latamTituloEq">Top 10 Equipos LATAM · Semana</h3></div>
+                <div id="latamTopEquipos" class="rank-list"><p>Cargando equipos...</p></div>
+            </div>
+            <div class="card-box latam-rank-card" style="margin-top:16px">
+                <div class="rank-head"><i class="fa-solid fa-skull"></i><h3 id="latamTituloKill">Top 10 Killers LATAM · Semana</h3></div>
+                <div id="latamTopKillers" class="rank-list"><p>Cargando killers...</p></div>
+            </div>
+            <p class="train-more" style="margin-top:12px"><a href="entrenoslatam/#historico">Ver ranking histórico LATAM <i class="fa-solid fa-arrow-right"></i></a></p>
+        </aside>
+    </div>
+</section>
+
+    <section id="noticias">
+        <h2 class="section-title">Comunidad &amp; Noticias</h2>
+
+        <div class="discord-cta">
+            <div class="discord-info">
+                <i class="fa-brands fa-discord"></i>
+                <div>
+                    <strong>PROYECTN en Discord</strong>
+                    <span>Anuncios, torneos, dinámicas y comunidad en tiempo real.</span>
+                </div>
+            </div>
+            <a href="https://discord.gg/PROYECTN" class="btn-access btn-discord" target="_blank" rel="noopener">
+                <i class="fa-brands fa-discord"></i> Unirse al servidor
+            </a>
+        </div>
+
+        <div class="noticias-grid">
+            <div class="noticia-col">
+                <h3><i class="fa-solid fa-rotate-right"></i> Actualizaciones</h3>
+                <ul class="noticia-lista" id="noticias-actualizacion">
+                    <li><span class="noticia-fecha">—</span><p style="opacity:.4">Cargando...</p></li>
+                </ul>
+            </div>
+            <div class="noticia-col">
+                <h3><i class="fa-solid fa-earth-americas"></i> Noticias FFWS</h3>
+                <ul class="noticia-lista" id="noticias-ffws">
+                    <li><span class="noticia-fecha">—</span><p style="opacity:.4">Cargando...</p></li>
+                </ul>
+            </div>
+            <div class="noticia-col">
+                <h3><i class="fa-solid fa-lightbulb"></i> Recomendaciones</h3>
+                <ul class="noticia-lista" id="noticias-recomendacion">
+                    <li><span class="noticia-fecha">—</span><p style="opacity:.4">Cargando...</p></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const nav = document.getElementById('mainNav');
+            nav.classList.toggle('is-active');
+        }
+        function closeMenu() {
+            const nav = document.getElementById('mainNav');
+            nav.classList.remove('is-active');
+        }
+    </script>
+    <script src="script.js"></script>
+    <script src="entrenamientos.js?v=20261013e"></script>
+    <script src="portal-kit/latam.js?v=20261013e"></script>
+    <script>Latam.iniciarIndex();</script>
+    <script src="portal-kit/aliados.js?v=20261013e"></script>
+    <script src="portal-kit/juegos.js?v=20261014a"></script>
+    <script>
+    // ── Noticias dinámicas ──────────────────────────────────────────
+    (async function cargarNoticias() {
+        const sb = PumasPortal.supabase;
+        const tipos = ['actualizacion', 'ffws', 'recomendacion'];
+        const vacio = { actualizacion: 'Sin actualizaciones recientes.', ffws: 'Noticias FFWS próximamente.', recomendacion: 'Sin recomendaciones por ahora.' };
+        for (const tipo of tipos) {
+            const el = document.getElementById('noticias-' + tipo);
+            if (!el) continue;
+            try {
+                const { data, error } = await sb.from('noticias')
+                    .select('fecha_display, contenido, url')
+                    .eq('tipo', tipo).eq('activo', true)
+                    .order('orden').order('created_at', { ascending: false })
+                    .limit(5);
+                if (error || !data.length) {
+                    el.innerHTML = `<li><span class="noticia-fecha">—</span><p style="opacity:.4">${vacio[tipo]}</p></li>`;
+                } else {
+                    el.innerHTML = data.map(n => {
+                        const urlHtml = n.url ? ` <a href="${n.url}" target="_blank" rel="noopener">${n.url}</a>` : '';
+                        return `<li><span class="noticia-fecha">${n.fecha_display}</span><p>${n.contenido}${urlHtml}</p></li>`;
+                    }).join('');
+                }
+            } catch {
+                el.innerHTML = `<li><span class="noticia-fecha">—</span><p style="opacity:.4">${vacio[tipo]}</p></li>`;
+            }
+        }
+    })();
+    </script>
+</body>
+</html>

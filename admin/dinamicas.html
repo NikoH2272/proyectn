@@ -1,0 +1,2576 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C79JND219Y');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dinámicas | PROYECTN</title>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+<link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+<style>
+/* ── Selector de portal ── */
+.din-portal-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:rgba(216,195,149,.06);border:1px solid rgba(216,195,149,.2);border-radius:8px}
+.din-portal-bar label{font:700 .72rem 'Michroma',sans-serif;letter-spacing:.1em;color:#D8C395;text-transform:uppercase;white-space:nowrap}
+.din-portal-bar select{background:#0c0c0c;border:1px solid rgba(216,195,149,.3);color:#F4EEDC;border-radius:5px;padding:7px 12px;font:inherit;font-size:.88rem;outline:none;min-width:200px}
+/* ── Layout ── */
+.din-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:4px}
+@media(max-width:860px){.din-grid{grid-template-columns:1fr}}
+.din-card{background:rgba(255,255,255,.04);border:1px solid rgba(216,195,149,.22);border-radius:10px;overflow:hidden}
+/* Juego 2 columnas: probar | leaderboard */
+.din-juego-2col{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;margin-top:10px}
+@media(max-width:900px){.din-juego-2col{grid-template-columns:1fr}}
+/* Deadline row */
+.din-deadline-row{display:flex;align-items:center;gap:8px;margin:8px 0 6px;flex-wrap:wrap}
+.din-deadline-row label{font-size:.73rem;color:#999;white-space:nowrap}
+.din-deadline-row input[type=datetime-local]{background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#F4EEDC;border-radius:5px;padding:6px 9px;font:inherit;font-size:.82rem;outline:none;flex:1;min-width:0}
+.din-deadline-row input[type=datetime-local]:focus{border-color:#D8C395}
+.din-card-head{display:flex;align-items:center;gap:12px;padding:16px 18px;background:rgba(216,195,149,.06);border-bottom:1px solid rgba(216,195,149,.14)}
+.din-card-head h3{flex:1;margin:0;font:700 .92rem 'Michroma',sans-serif;letter-spacing:.06em;color:#D8C395}
+.din-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.din-card-body{padding:16px 18px}
+/* Toggle switch */
+.din-toggle-wrap{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.din-toggle{position:relative;width:46px;height:26px;flex-shrink:0}
+.din-toggle input{opacity:0;width:0;height:0}
+.din-toggle-track{position:absolute;inset:0;border-radius:13px;background:rgba(255,255,255,.12);cursor:pointer;transition:background .25s}
+.din-toggle input:checked~.din-toggle-track{background:#4dff91}
+.din-toggle-track::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;top:3px;left:3px;background:#fff;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.din-toggle input:checked~.din-toggle-track::after{transform:translateX(20px)}
+.din-toggle input:disabled~.din-toggle-track{opacity:.4;cursor:not-allowed}
+.din-badge{font:600 .72rem 'Michroma',sans-serif;letter-spacing:.07em;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.1);color:#888}
+.din-badge.activo{background:rgba(77,255,145,.15);color:#4dff91}
+/* Form inputs inside cards */
+.din-form{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.din-form input,.din-form select,.din-form textarea{background:rgba(255,255,255,.07);border:1px solid rgba(216,195,149,.3);border-radius:6px;color:#F4EEDC;font:inherit;font-size:.88rem;padding:8px 10px;outline:none;width:100%;box-sizing:border-box}
+.din-form input:focus,.din-form select:focus,.din-form textarea:focus{border-color:#D8C395}
+.din-form textarea{resize:vertical;min-height:60px}
+.din-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.din-opt-row{display:flex;gap:6px;align-items:center}
+.din-opt-row input{flex:1}
+.din-opt-row button{flex-shrink:0;background:rgba(255,77,77,.15);border:1px solid rgba(255,77,77,.3);color:#ff7070;border-radius:5px;padding:6px 10px;cursor:pointer;font-size:.8rem}
+.din-opt-row button:hover{background:rgba(255,77,77,.3)}
+/* Table */
+.din-table{width:100%;border-collapse:collapse;font-size:.83rem;margin-top:8px}
+.din-table th{color:#D8C395;font:600 .75rem 'Michroma',sans-serif;letter-spacing:.06em;padding:7px 8px;border-bottom:1px solid rgba(216,195,149,.25);text-align:left;white-space:nowrap}
+.din-table td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06);color:#F4EEDC;vertical-align:middle}
+.din-table td .del-btn{background:none;border:none;color:#ff7070;cursor:pointer;font-size:.85rem;padding:2px 5px;opacity:.7;border-radius:4px}
+.din-table td .del-btn:hover{opacity:1;background:rgba(255,77,77,.15)}
+.din-table-wrap{max-height:320px;overflow-y:auto;border:1px solid rgba(216,195,149,.14);border-radius:6px}
+.din-table-wrap.tall{max-height:480px}
+/* Poll results */
+.poll-opt-bar{margin:6px 0}
+.poll-opt-label{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:3px;color:#D8C395}
+.poll-bar-track{height:8px;border-radius:4px;background:rgba(255,255,255,.1)}
+.poll-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#D8C395,#FFD54A);transition:width .5s}
+.poll-timer{font:700 1.6rem 'Michroma',sans-serif;color:#FFD54A;text-align:center;letter-spacing:.08em;margin:8px 0}
+.poll-timer.urgente{color:#ff4d4d;animation:titilar .6s infinite alternate}
+@keyframes titilar{to{opacity:.4}}
+/* Game canvas */
+#snakeCanvas{border:2px solid rgba(216,195,149,.35);border-radius:6px;display:block;margin:0 auto;background:#050508}
+.game-controls{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.game-hud{display:flex;justify-content:space-between;font:700 .85rem 'Michroma',sans-serif;color:#D8C395;letter-spacing:.07em;margin-bottom:6px}
+.score-rank{display:flex;align-items:center;gap:6px}
+.score-rank .pos{width:24px;height:24px;border-radius:50%;background:rgba(216,195,149,.15);display:flex;align-items:center;justify-content:center;font:700 .72rem 'Michroma',sans-serif;color:#D8C395;flex-shrink:0}
+.score-rank .pos.gold{background:rgba(255,213,74,.25);color:#FFD54A}
+.score-rank .pos.silver{background:rgba(192,192,192,.2);color:#ccc}
+.score-rank .pos.bronze{background:rgba(205,127,50,.2);color:#cd7f32}
+/* URL box */
+.din-url-box{background:rgba(255,255,255,.06);border:1px solid rgba(216,195,149,.2);border-radius:6px;padding:10px 12px;font-size:.8rem;color:#D8C395;word-break:break-all;display:flex;align-items:center;gap:8px;margin-top:10px}
+.din-url-box button{flex-shrink:0;background:rgba(216,195,149,.12);border:1px solid rgba(216,195,149,.3);color:#D8C395;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:.78rem}
+.din-url-box button:hover{background:rgba(216,195,149,.25)}
+/* Section separator */
+.din-section-label{font:700 .72rem 'Michroma',sans-serif;letter-spacing:.12em;color:#888;text-transform:uppercase;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(216,195,149,.14)}
+/* Empty state */
+.din-empty{text-align:center;color:#666;font-size:.85rem;padding:18px 0}
+/* Status message */
+.din-status{font-size:.8rem;color:#888;min-height:1.2em;margin:4px 0}
+.din-status.ok{color:#4dff91}
+.din-status.err{color:#ff7070}
+@media(max-width:500px){.din-form-row{grid-template-columns:1fr}}
+/* ── Banner Ganador ── */
+.ban-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media(max-width:700px){.ban-wrap{grid-template-columns:1fr}}
+.ban-canvas-wrap{position:relative}
+#banAdminCv{width:100%;aspect-ratio:1;border-radius:8px;border:1px solid rgba(216,195,149,.25);display:block;background:#07080d}
+.ban-fields{display:flex;flex-direction:column;gap:8px}
+.ban-label{font:700 .68rem 'Michroma',sans-serif;letter-spacing:.08em;color:#D8C395;text-transform:uppercase;display:block;margin-bottom:3px}
+.ban-input{width:100%;padding:8px 10px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#F4EEDC;border-radius:5px;font:inherit;font-size:.88rem;box-sizing:border-box}
+.ban-input:focus{outline:none;border-color:#D8C395}
+.ban-file-drop{border:2px dashed rgba(216,195,149,.25);border-radius:7px;padding:14px;text-align:center;cursor:pointer;color:#666;font-size:.8rem;position:relative;transition:border-color .2s}
+.ban-file-drop:hover,.ban-file-drop.over{border-color:#D8C395;color:#aaa}
+.ban-file-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0;border:none}
+.ban-prev-img{width:48px;height:48px;object-fit:cover;border-radius:5px;border:1px solid rgba(216,195,149,.2);display:none;margin:0 auto 4px}
+</style>
+</head>
+<body>
+<header class="site-header">
+    <a class="logo-container" href="./">
+        <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+        <div class="logo"><span class="t-a">PUMAS</span> DINÁMICAS</div>
+    </a>
+    <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="main-nav" id="mainNav">
+        <ul>
+            <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+            <li><a href="sorteo.html"><i class="fa-solid fa-dice"></i> Sorteos</a></li>
+            <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+            <li><a href="#" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h2 class="section-title">Dinámicas</h2>
+    <p class="tool-desc">Activa y gestiona dinámicas para tus eventos: registro de equipos, encuestas, sorteos y juego retro. Cada dinámica se activa de forma independiente por portal.</p>
+
+    <!-- Selector de portal -->
+    <div class="din-portal-bar">
+        <label for="selPortal"><i class="fa-solid fa-sitemap"></i> Portal:</label>
+        <select id="selPortal"></select>
+        <span id="msgPortal" style="font-size:.82rem;color:#888"></span>
+    </div>
+
+    <div class="din-grid">
+
+        <!-- ═══ REGISTRO DE EQUIPOS ═══ -->
+        <div class="din-card" id="card-registro" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(77,163,255,.15);color:#4da6ff"><i class="fa-solid fa-clipboard-list"></i></div>
+                <h3>Registro de equipos</h3>
+                <span class="din-badge" id="badge-registro">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div class="din-toggle-wrap">
+                    <label class="din-toggle"><input type="checkbox" id="toggle-registro"><span class="din-toggle-track"></span></label>
+                    <span style="font-size:.83rem;color:#aaa">Activar registro público</span>
+                </div>
+                <!-- Tiempos -->
+                <div class="din-form" style="margin-bottom:8px">
+                    <div class="din-form-row">
+                        <div>
+                            <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">Hora de inicio (opcional)</label>
+                            <input type="datetime-local" id="reg-inicio">
+                        </div>
+                        <div style="display:flex;align-items:flex-end;gap:6px">
+                            <button class="btn-mini" id="btn-reg-inicio" style="flex:1"><i class="fa-solid fa-clock"></i> Guardar</button>
+                            <button class="btn-mini" id="btn-reg-noinicio" title="Quitar hora de inicio" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                    <div class="din-form-row">
+                        <div>
+                            <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">Hora límite (opcional)</label>
+                            <input type="datetime-local" id="reg-deadline">
+                        </div>
+                        <div style="display:flex;align-items:flex-end;gap:6px">
+                            <button class="btn-mini" id="btn-reg-deadline" style="flex:1"><i class="fa-solid fa-clock"></i> Guardar</button>
+                            <button class="btn-mini" id="btn-reg-nodeadline" title="Quitar límite de tiempo" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Límite de jugadores -->
+                <div class="din-form" style="margin-bottom:10px">
+                    <div class="din-form-row">
+                        <div>
+                            <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">Límite de jugadores</label>
+                            <input type="number" id="reg-limite" min="1" max="5000" placeholder="Sin límite (máx 5000)">
+                        </div>
+                        <div style="display:flex;align-items:flex-end;gap:6px">
+                            <button class="btn-mini" id="btn-reg-limite" style="flex:1"><i class="fa-solid fa-users"></i> Guardar</button>
+                            <button class="btn-mini" id="btn-reg-nolimite" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                    <p style="font-size:.73rem;color:#666;margin:2px 0 0" id="reg-limite-info"></p>
+                </div>
+                <!-- Manual add (admin only) -->
+                <details style="margin-bottom:10px">
+                    <summary style="font-size:.8rem;color:#888;cursor:pointer;margin-bottom:6px"><i class="fa-solid fa-user-plus"></i> Agregar equipo manualmente</summary>
+                    <div class="din-form" style="margin-top:8px">
+                        <input type="text" id="reg-nombre" placeholder="Nombre del equipo *" maxlength="80">
+                        <input type="text" id="reg-rep" placeholder="Nombre del representante" maxlength="80">
+                        <div class="din-form-row">
+                            <input type="text" id="reg-ig" placeholder="IG del equipo (@)" maxlength="60">
+                            <input type="text" id="reg-numero" placeholder="WhatsApp (con código país)" maxlength="20">
+                        </div>
+                        <button class="btn-mini" id="btn-reg-add"><i class="fa-solid fa-plus"></i> Agregar</button>
+                    </div>
+                </details>
+                <p class="din-status" id="status-registro"></p>
+                <div class="din-table-wrap tall">
+                    <table class="din-table">
+                        <thead><tr><th>#</th><th>Equipo</th><th>Representante</th><th>Nº</th><th>IG</th><th></th></tr></thead>
+                        <tbody id="tbody-registro"><tr><td colspan="6" class="din-empty">Selecciona un portal</td></tr></tbody>
+                    </table>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                    <button class="btn-mini" id="btn-reg-wa"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+                    <button class="btn-mini" id="btn-reg-csv"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                    <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" id="btn-reg-clear"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                </div>
+                <div class="din-url-box" id="url-registro" style="display:none">
+                    <i class="fa-solid fa-link"></i>
+                    <span id="url-registro-txt"></span>
+                    <button onclick="copiarUrl('registro')">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ ENCUESTAS (multi) ═══ -->
+        <div class="din-card" id="card-encuestas" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(255,184,77,.15);color:#ffb84d"><i class="fa-solid fa-square-poll-vertical"></i></div>
+                <h3>Encuestas</h3>
+                <span class="din-badge" id="badge-encuestas">0 activas</span>
+            </div>
+            <div class="din-card-body">
+
+                <button class="btn-mini" id="btn-nueva-enc" style="margin-bottom:14px"><i class="fa-solid fa-plus"></i> Nueva encuesta</button>
+
+                <!-- Formulario crear/editar -->
+                <div id="panel-form-enc" style="display:none;border:1px solid rgba(255,184,77,.25);border-radius:6px;padding:14px;margin-bottom:16px;background:rgba(255,184,77,.04)">
+                    <p style="font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ffb84d;margin:0 0 10px" id="enc-form-titulo-lbl">Nueva encuesta</p>
+                    <div class="din-form">
+                        <input type="text" id="enc-f-titulo" placeholder="Título (opcional)" maxlength="80">
+                        <textarea id="enc-f-pregunta" placeholder="¿Cuál es tu pregunta?" rows="2" maxlength="200"></textarea>
+
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px">
+                            <button class="btn-mini" id="btn-enc-f-equipos" style="font-size:.78rem;padding:5px 10px">
+                                <i class="fa-solid fa-clipboard-list"></i> Usar equipos
+                            </button>
+                            <label class="btn-mini" style="font-size:.78rem;padding:5px 10px;cursor:pointer">
+                                <i class="fa-solid fa-file-csv"></i> CSV
+                                <input type="file" id="enc-f-csv" accept=".csv,text/csv,text/plain" style="display:none">
+                            </label>
+                        </div>
+                        <p class="din-status" id="status-enc-f-cargar" style="margin:0 0 2px"></p>
+                        <div id="enc-f-opciones">
+                            <div class="din-opt-row"><input type="text" class="enc-f-opt" placeholder="Opción 1" maxlength="80"><button onclick="borrarEncFOpt(this)"><i class="fa-solid fa-xmark"></i></button></div>
+                            <div class="din-opt-row"><input type="text" class="enc-f-opt" placeholder="Opción 2" maxlength="80"><button onclick="borrarEncFOpt(this)"><i class="fa-solid fa-xmark"></i></button></div>
+                        </div>
+                        <button class="btn-mini" id="btn-enc-f-addopt" style="align-self:flex-start"><i class="fa-solid fa-plus"></i> Opción</button>
+
+                        <div>
+                            <label style="font-size:.78rem;color:#999;display:block;margin-bottom:4px">Imagen (URL, opcional)</label>
+                            <input type="url" id="enc-f-imagen" placeholder="https://..." style="width:100%;box-sizing:border-box">
+                        </div>
+                        <div>
+                            <label style="font-size:.78rem;color:#999;display:block;margin-bottom:4px">Cierre</label>
+                            <div style="display:flex;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+                                <label style="display:flex;align-items:center;gap:4px;font-size:.78rem;color:#aaa;cursor:pointer;text-transform:none;font-weight:normal;letter-spacing:0">
+                                    <input type="radio" name="enc-f-limite" value="duracion" checked> Duración
+                                </label>
+                                <label style="display:flex;align-items:center;gap:4px;font-size:.78rem;color:#aaa;cursor:pointer;text-transform:none;font-weight:normal;letter-spacing:0">
+                                    <input type="radio" name="enc-f-limite" value="fecha"> Fecha específica
+                                </label>
+                                <label style="display:flex;align-items:center;gap:4px;font-size:.78rem;color:#aaa;cursor:pointer;text-transform:none;font-weight:normal;letter-spacing:0">
+                                    <input type="radio" name="enc-f-limite" value="ninguno"> Sin límite
+                                </label>
+                            </div>
+                            <div id="enc-f-dur-wrap">
+                                <select id="enc-f-duracion">
+                                    <option value="300">5 minutos</option>
+                                    <option value="600" selected>10 minutos</option>
+                                    <option value="900">15 minutos</option>
+                                    <option value="1800">30 minutos</option>
+                                    <option value="3600">1 hora</option>
+                                    <option value="7200">2 horas</option>
+                                </select>
+                            </div>
+                            <div id="enc-f-fecha-wrap" style="display:none">
+                                <input type="datetime-local" id="enc-f-fecha-fin">
+                            </div>
+                        </div>
+                        <div class="din-form-row">
+                            <div>
+                                <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">Ganadores a mostrar</label>
+                                <input type="number" id="enc-f-ganadores" min="1" max="20" value="1" style="width:100%;box-sizing:border-box">
+                            </div>
+                            <div style="display:flex;flex-direction:column;justify-content:flex-end">
+                                <small style="font-size:.73rem;color:#666;line-height:1.3">Top N opciones destacadas como ganadoras en resultados</small>
+                            </div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:#aaa;cursor:pointer;text-transform:none;font-weight:normal;letter-spacing:0">
+                            <input type="checkbox" id="enc-f-activo"> Activar al crear
+                        </label>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn-mini" id="btn-enc-f-guardar" style="flex:1"><i class="fa-solid fa-check"></i> <span id="enc-f-btn-lbl">Crear</span></button>
+                            <button class="btn-mini" id="btn-enc-f-cancelar" style="background:transparent;border-color:rgba(255,255,255,.2);color:#999"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <p class="din-status" id="status-enc-form"></p>
+                    </div>
+                </div>
+
+                <!-- Acciones masivas -->
+                <div id="panel-enc-masivo" style="display:none;border:1px solid rgba(255,184,77,.2);border-radius:6px;padding:12px;margin-bottom:14px;background:rgba(255,184,77,.03)">
+                    <p style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ffb84d;margin:0 0 10px">Hora masiva</p>
+                    <div class="din-form">
+                        <div class="din-form-row">
+                            <div>
+                                <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">Tipo</label>
+                                <select id="enc-m-tipo">
+                                    <option value="duracion">Duración desde ahora</option>
+                                    <option value="fecha">Fecha específica</option>
+                                    <option value="quitar">Quitar cierre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="enc-m-dur-wrap">
+                            <select id="enc-m-duracion">
+                                <option value="300">5 minutos</option>
+                                <option value="600" selected>10 minutos</option>
+                                <option value="900">15 minutos</option>
+                                <option value="1800">30 minutos</option>
+                                <option value="3600">1 hora</option>
+                                <option value="7200">2 horas</option>
+                            </select>
+                        </div>
+                        <div id="enc-m-fecha-wrap" style="display:none">
+                            <input type="datetime-local" id="enc-m-fecha">
+                        </div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn-mini" id="btn-enc-m-aplicar" style="flex:1"><i class="fa-solid fa-clock"></i> Aplicar a todas</button>
+                            <button class="btn-mini" id="btn-enc-m-cancelar" style="background:transparent;border-color:rgba(255,255,255,.2);color:#999"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <p class="din-status" id="status-enc-masivo"></p>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+                    <button class="btn-mini" id="btn-enc-hora-masiva" style="font-size:.78rem;padding:5px 10px"><i class="fa-solid fa-clock"></i> Hora masiva</button>
+                    <button class="btn-mini" id="btn-enc-grupos-wa" style="font-size:.78rem;padding:5px 10px"><i class="fa-brands fa-whatsapp"></i> Grupos → WA</button>
+                    <button class="btn-mini" id="btn-enc-clasificados" style="font-size:.78rem;padding:5px 10px;background:rgba(255,213,74,.1);border-color:rgba(255,213,74,.4);color:#FFD54A"><i class="fa-solid fa-trophy"></i> Clasificados</button>
+                    <span style="display:inline-flex;align-items:center;gap:4px">
+                        <button class="btn-mini" id="btn-enc-imagen" style="font-size:.78rem;padding:5px 10px"><i class="fa-solid fa-image"></i> Imagen</button>
+                        <select id="enc-img-cols" style="background:#111;border:1px solid rgba(216,195,149,.3);color:#D8C395;border-radius:5px;padding:4px 6px;font-size:.75rem;height:28px">
+                            <option value="1">1 col</option>
+                            <option value="2">2 col</option>
+                            <option value="3" selected>3 col</option>
+                            <option value="4">4 col</option>
+                        </select>
+                    </span>
+                    <button class="btn-mini" id="btn-enc-restablecer-todas" style="font-size:.78rem;padding:5px 10px"><i class="fa-solid fa-rotate-right"></i> Restablecer todas</button>
+                    <button class="btn-mini" id="btn-enc-borrar-todas" style="font-size:.78rem;padding:5px 10px;background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-trash"></i> Borrar todas</button>
+                </div>
+
+                <!-- Panel clasificados -->
+                <div id="panel-clasificados" style="display:none;border:1px solid rgba(255,213,74,.3);border-radius:6px;padding:14px;margin-bottom:14px;background:rgba(255,213,74,.04)">
+                    <p style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FFD54A;margin:0 0 12px"><i class="fa-solid fa-trophy"></i> Clasificados a la siguiente ronda</p>
+
+                    <div class="din-form" style="margin-bottom:12px">
+                        <div class="din-form-row">
+                            <div>
+                                <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">¿Cuántos pasan por grupo?</label>
+                                <input type="number" id="enc-cuantos-pasan" min="1" max="20" value="1" style="width:100%;box-sizing:border-box">
+                            </div>
+                            <div style="display:flex;flex-direction:column;justify-content:flex-end">
+                                <small style="font-size:.73rem;color:#666;line-height:1.3">Top N de cada encuesta que avanzan</small>
+                            </div>
+                        </div>
+                        <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px">Premio final</label>
+                        <input type="text" id="enc-premio-final" placeholder="Ej: Skin de Diamante + Gift Card $500" maxlength="200">
+                        <label style="font-size:.75rem;color:#999;display:block;margin-bottom:4px;margin-top:6px">Nombre de la ronda / fase</label>
+                        <input type="text" id="enc-nombre-ronda" placeholder="Ej: Semifinal, Gran Final, Ronda 2..." maxlength="80">
+                    </div>
+
+                    <div id="clasificados-lista" style="margin-bottom:12px"></div>
+
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn-mini" id="btn-clasificados-wa" style="font-size:.78rem;padding:5px 10px"><i class="fa-brands fa-whatsapp"></i> Copiar para WA</button>
+                        <button class="btn-mini" id="btn-clasificados-nueva-ronda" style="font-size:.78rem;padding:5px 10px;background:rgba(77,255,145,.1);border-color:rgba(77,255,145,.4);color:#4dff91"><i class="fa-solid fa-arrow-right"></i> Crear nueva ronda</button>
+                        <button class="btn-mini" id="btn-clasificados-cerrar" style="font-size:.78rem;padding:5px 10px;background:transparent;border-color:rgba(255,255,255,.2);color:#999"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <p class="din-status" id="status-clasificados"></p>
+                </div>
+
+                <!-- Nav rápida entre encuestas -->
+                <div id="enc-nav" style="display:none;overflow-x:auto;gap:6px;margin-bottom:10px;padding-bottom:4px;scrollbar-width:thin;flex-wrap:nowrap"></div>
+
+                <!-- Lista de encuestas -->
+                <div id="enc-lista"></div>
+                <p class="din-status" id="status-encuestas"></p>
+
+                <div class="din-url-box" id="url-encuesta" style="display:none">
+                    <i class="fa-solid fa-link"></i>
+                    <span id="url-encuesta-txt"></span>
+                    <button onclick="copiarUrl('encuesta')">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SORTEOS ═══ -->
+        <div class="din-card" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(255,213,74,.15);color:#FFD54A"><i class="fa-solid fa-dice"></i></div>
+                <h3>Sorteos</h3>
+                <a class="btn-mini" href="sorteo.html" style="margin-left:auto;font-size:.72rem;padding:5px 12px"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir sorteos</a>
+            </div>
+            <div class="din-card-body">
+                <p style="font-size:.8rem;color:#666;margin:0 0 14px">Acceso rápido al sorteo de cada portal. Abre directamente o gestiona desde la sección completa.</p>
+                <div id="sorteos-portales" style="display:flex;flex-wrap:wrap;gap:8px">
+                    <span style="color:#555;font-size:.82rem">Selecciona un portal para ver los accesos...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ JUEGOS RETRO ═══ -->
+        <!-- SNAKE -->
+        <div class="din-card" id="card-juego" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(77,255,145,.15);color:#4dff91"><i class="fa-solid fa-gamepad"></i></div>
+                <h3>🐍 Snake</h3>
+                <span class="din-badge" id="badge-juego">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div class="din-toggle-wrap">
+                    <label class="din-toggle"><input type="checkbox" id="toggle-juego"><span class="din-toggle-track"></span></label>
+                    <span style="font-size:.83rem;color:#aaa">Activar Snake público</span>
+                </div>
+                <div class="din-deadline-row">
+                    <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                    <input type="datetime-local" id="juego-deadline">
+                    <button class="btn-mini" id="btn-juego-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                    <button class="btn-mini" id="btn-juego-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div style="display:flex;gap:8px;margin:6px 0 10px;align-items:center">
+                    <input type="url" id="juego-fondo" placeholder="URL del fondo (opcional)" style="flex:1;padding:8px 10px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego-fondo-save"><i class="fa-solid fa-image"></i> Fondo</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+                    <div>
+                        <div class="game-hud">
+                            <span>PUNTUACIÓN: <span id="game-score">0</span></span>
+                            <span>RECORD: <span id="game-best">0</span></span>
+                        </div>
+                        <canvas id="snakeCanvas" width="320" height="320"></canvas>
+                        <div class="game-controls">
+                            <button class="btn-mini" id="btn-start-game"><i class="fa-solid fa-play"></i> Iniciar</button>
+                            <button class="btn-mini" id="btn-pause-game" disabled><i class="fa-solid fa-pause"></i> Pausar</button>
+                        </div>
+                        <div id="game-reg-form" style="margin-top:12px;display:none">
+                            <p style="font-size:.83rem;color:#D8C395;margin-bottom:8px"><i class="fa-solid fa-user-plus"></i> Regístrate para guardar tu puntuación:</p>
+                            <div class="din-form">
+                                <div class="din-form-row">
+                                    <input type="text" id="game-reg-nombre" placeholder="Tu nombre" maxlength="40">
+                                    <input type="text" id="game-reg-num" placeholder="ID Free Fire" maxlength="20">
+                                </div>
+                                <button class="btn-mini" id="btn-game-reg-save"><i class="fa-solid fa-check"></i> Guardar y jugar</button>
+                            </div>
+                        </div>
+                        <p class="din-status" id="status-juego"></p>
+                        <p style="font-size:.78rem;color:#555;margin-top:8px;text-align:center">↑ ↓ ← → o WASD · Espacio = Pausa</p>
+                    </div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="din-url-box" id="url-juego" style="display:none">
+                    <i class="fa-solid fa-link"></i><span id="url-juego-txt"></span>
+                    <button onclick="copiarUrl('juego')">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TETRIS -->
+        <div class="din-card" id="card-juego_tetris" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(0,229,255,.15);color:#00E5FF"><i class="fa-solid fa-th"></i></div>
+                <h3>🟦 Tetris</h3>
+                <span class="din-badge" id="badge-juego_tetris">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_tetris"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_tetris-deadline">
+                        <button class="btn-mini" id="btn-juego_tetris-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_tetris-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_tetris-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_tetris-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_tetris" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_tetris"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_tetris"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_tetris"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_tetris"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_tetris"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_tetris"></p>
+                        <div class="din-url-box" id="url-juego_tetris" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_tetris-txt"></span>
+                            <button onclick="copiarUrl('juego_tetris')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 EN LÍNEA -->
+        <div class="din-card" id="card-juego_3lineas" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(216,195,149,.15);color:#D8C395"><i class="fa-solid fa-hashtag"></i></div>
+                <h3>✕○ 3 en Línea</h3>
+                <span class="din-badge" id="badge-juego_3lineas">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_3lineas"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_3lineas-deadline">
+                        <button class="btn-mini" id="btn-juego_3lineas-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_3lineas-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_3lineas-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_3lineas-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_3lineas" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_3lineas"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_3lineas"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_3lineas"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_3lineas"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_3lineas"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_3lineas"></p>
+                        <div class="din-url-box" id="url-juego_3lineas" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_3lineas-txt"></span>
+                            <button onclick="copiarUrl('juego_3lineas')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAC-MAN -->
+        <div class="din-card" id="card-juego_pacman" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(255,213,74,.15);color:#FFD54A"><i class="fa-solid fa-ghost"></i></div>
+                <h3>🟡 Pac-Man</h3>
+                <span class="din-badge" id="badge-juego_pacman">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_pacman"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_pacman-deadline">
+                        <button class="btn-mini" id="btn-juego_pacman-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_pacman-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_pacman-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_pacman-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_pacman" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_pacman"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_pacman"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_pacman"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_pacman"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_pacman"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_pacman"></p>
+                        <div class="din-url-box" id="url-juego_pacman" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_pacman-txt"></span>
+                            <button onclick="copiarUrl('juego_pacman')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BREAKOUT -->
+        <div class="din-card" id="card-juego_breakout" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(255,107,53,.15);color:#FF6B35"><i class="fa-solid fa-table-cells-large"></i></div>
+                <h3>🧱 Breakout</h3>
+                <span class="din-badge" id="badge-juego_breakout">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_breakout"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_breakout-deadline">
+                        <button class="btn-mini" id="btn-juego_breakout-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_breakout-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_breakout-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_breakout-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_breakout" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_breakout"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_breakout"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_breakout"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_breakout"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_breakout"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_breakout"></p>
+                        <div class="din-url-box" id="url-juego_breakout" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_breakout-txt"></span>
+                            <button onclick="copiarUrl('juego_breakout')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOMBERMAN -->
+        <div class="din-card" id="card-juego_bomberman" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(229,72,77,.15);color:#ff8a8d"><i class="fa-solid fa-bomb"></i></div>
+                <h3>💣 Bomberman</h3>
+                <span class="din-badge" id="badge-juego_bomberman">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_bomberman"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_bomberman-deadline">
+                        <button class="btn-mini" id="btn-juego_bomberman-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_bomberman-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_bomberman-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_bomberman-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_bomberman" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_bomberman"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_bomberman"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_bomberman"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_bomberman"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_bomberman"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_bomberman"></p>
+                        <div class="din-url-box" id="url-juego_bomberman" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_bomberman-txt"></span>
+                            <button onclick="copiarUrl('juego_bomberman')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPACE INVADERS -->
+        <div class="din-card" id="card-juego_invaders" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(100,220,255,.15);color:#64dcff"><i class="fa-solid fa-rocket"></i></div>
+                <h3>🚀 Space Invaders</h3>
+                <span class="din-badge" id="badge-juego_invaders">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_invaders"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_invaders-deadline">
+                        <button class="btn-mini" id="btn-juego_invaders-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_invaders-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_invaders-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_invaders-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_invaders" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_invaders"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_invaders"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_invaders"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_invaders"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_invaders"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_invaders"></p>
+                        <div class="din-url-box" id="url-juego_invaders" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_invaders-txt"></span>
+                            <button onclick="copiarUrl('juego_invaders')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLAPPY BIRD -->
+        <div class="din-card" id="card-juego_flappy" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(255,193,7,.15);color:#ffc107"><i class="fa-solid fa-dove"></i></div>
+                <h3>🐦 Flappy Bird</h3>
+                <span class="din-badge" id="badge-juego_flappy">Inactivo</span>
+            </div>
+            <div class="din-card-body">
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px">
+                    <div class="din-toggle-wrap" style="margin-bottom:0">
+                        <label class="din-toggle"><input type="checkbox" id="toggle-juego_flappy"><span class="din-toggle-track"></span></label>
+                        <span style="font-size:.83rem;color:#aaa">Activar público</span>
+                    </div>
+                    <div class="din-deadline-row" style="margin:0;flex:1">
+                        <label><i class="fa-solid fa-clock"></i> Cierra:</label>
+                        <input type="datetime-local" id="juego_flappy-deadline">
+                        <button class="btn-mini" id="btn-juego_flappy-deadline" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button class="btn-mini" id="btn-juego_flappy-nodeadline" title="Quitar límite" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <input type="url" id="juego_flappy-fondo" placeholder="URL fondo (opcional)" style="width:200px;padding:7px 9px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;font-size:.82rem">
+                    <button class="btn-mini" id="btn-juego_flappy-fondo-save"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini" id="btn-probar-juego_flappy" style="white-space:nowrap"><i class="fa-solid fa-play"></i> Probar</button>
+                </div>
+                <div class="din-juego-2col">
+                    <div id="probar-juego_flappy"></div>
+                    <div>
+                        <p class="din-section-label" style="margin-top:0"><i class="fa-solid fa-trophy"></i> Tabla de líderes</p>
+                        <div class="din-table-wrap">
+                            <table class="din-table">
+                                <thead><tr><th>#</th><th>Jugador</th><th>ID</th><th>Pts</th><th></th></tr></thead>
+                                <tbody id="tbody-lb-juego_flappy"><tr><td colspan="5" class="din-empty">Selecciona un portal</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                            <button class="btn-mini" data-lb-wa="juego_flappy"><i class="fa-brands fa-whatsapp"></i> WA</button>
+                            <button class="btn-mini" data-lb-csv="juego_flappy"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                            <button class="btn-mini" style="background:rgba(255,77,77,.15);border-color:rgba(255,77,77,.4);color:#ff7070" data-lb-clear="juego_flappy"><i class="fa-solid fa-trash"></i> Limpiar</button>
+                        </div>
+                        <p class="din-status" id="status-juego_flappy"></p>
+                        <div class="din-url-box" id="url-juego_flappy" style="display:none">
+                            <i class="fa-solid fa-link"></i><span id="url-juego_flappy-txt"></span>
+                            <button onclick="copiarUrl('juego_flappy')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GANADOR DEL EVENTO -->
+        <div class="din-card" id="card-ganador" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(255,213,74,.15);color:#FFD54A"><i class="fa-solid fa-crown"></i></div>
+                <h3>Ganador del Evento</h3>
+            </div>
+            <div class="din-card-body">
+                <p style="font-size:.83rem;color:#aaa;margin:0 0 12px">Registra quién ganó el premio para tener el historial.</p>
+                <div style="display:grid;grid-template-columns:160px 1fr 140px auto;gap:10px;align-items:end;flex-wrap:wrap">
+                    <div>
+                        <label style="display:block;font-size:.72rem;color:#D8C395;font-family:Michroma,sans-serif;margin-bottom:4px">JUEGO</label>
+                        <select id="gan-juego" style="width:100%;padding:8px 10px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px">
+                            <option value="juego">Snake</option>
+                            <option value="juego_tetris">Tetris</option>
+                            <option value="juego_3lineas">3 en Línea</option>
+                            <option value="juego_pacman">Pac-Man</option>
+                            <option value="juego_breakout">Breakout</option>
+                            <option value="juego_bomberman">Bomberman</option>
+                            <option value="juego_invaders">Space Invaders</option>
+                            <option value="juego_flappy">Flappy Bird</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:.72rem;color:#D8C395;font-family:Michroma,sans-serif;margin-bottom:4px">NOMBRE DEL GANADOR</label>
+                        <input type="text" id="gan-nombre" placeholder="Nombre del jugador" maxlength="80" style="width:100%;padding:8px 10px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;box-sizing:border-box">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:.72rem;color:#D8C395;font-family:Michroma,sans-serif;margin-bottom:4px">PUNTUACIÓN</label>
+                        <input type="number" id="gan-puntos" placeholder="0" min="0" style="width:100%;padding:8px 10px;background:#0a0b10;border:1px solid rgba(216,195,149,.3);color:#fff;border-radius:4px;box-sizing:border-box">
+                    </div>
+                    <button class="btn-mini" id="btn-guardar-ganador" style="white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                </div>
+                <div id="ganador-actual" style="margin-top:14px;font-size:.85rem;color:#aaa"></div>
+                <p class="din-status" id="status-ganador"></p>
+            </div>
+        </div>
+
+        <!-- BANNER DEL GANADOR -->
+        <div class="din-card" id="card-banner" style="grid-column:1/-1">
+            <div class="din-card-head">
+                <div class="din-icon" style="background:rgba(216,195,149,.12);color:#D8C395"><i class="fa-solid fa-image"></i></div>
+                <h3>🖼 Banner del Ganador</h3>
+            </div>
+            <div class="din-card-body">
+                <p style="font-size:.83rem;color:#aaa;margin:0 0 14px">Genera un banner 1:1 (1080×1080 px) para publicar en redes.</p>
+                <button class="btn-mini" id="btn-ban-desde-ganador" style="margin-bottom:14px"><i class="fa-solid fa-arrow-down"></i> Usar datos del ganador guardado</button>
+                <div class="ban-wrap">
+                    <!-- Campos -->
+                    <div class="ban-fields">
+                        <div>
+                            <label class="ban-label">Juego</label>
+                            <select class="ban-input" id="ban-juego">
+                                <option value="snake">🐍 Snake</option>
+                                <option value="tetris">🧱 Tetris</option>
+                                <option value="treslineas">✕○ Tres en Línea</option>
+                                <option value="mvp">⭐ MVP Entrenos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="ban-label" id="ban-label-pts">Puntuación</label>
+                            <input class="ban-input" type="number" id="ban-puntos" placeholder="Ej: 3500" min="0">
+                        </div>
+                        <div>
+                            <label class="ban-label">Nombre del Ganador</label>
+                            <input class="ban-input" type="text" id="ban-nombre" placeholder="Ej: ProGamer99" maxlength="30" autocomplete="off">
+                        </div>
+                        <div>
+                            <label class="ban-label">ID de Free Fire</label>
+                            <input class="ban-input" type="text" id="ban-idff" placeholder="Ej: 123456789" maxlength="20" autocomplete="off" inputmode="numeric">
+                        </div>
+                        <div>
+                            <label class="ban-label">Torneo / Evento (opcional)</label>
+                            <input class="ban-input" type="text" id="ban-torneo" placeholder="Ej: Liga Semanal #12" maxlength="40">
+                        </div>
+                        <div>
+                            <label class="ban-label">Imagen de fondo</label>
+                            <div class="ban-file-drop" id="ban-drop">
+                                <img class="ban-prev-img" id="ban-prev-img">
+                                <p id="ban-drop-txt">📁 Clic o arrastra una imagen</p>
+                                <input type="file" id="ban-fondo-file" accept="image/*">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="ban-label">URL de fondo alternativa</label>
+                            <input class="ban-input" type="url" id="ban-fondo-url" placeholder="https://...">
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                            <button class="btn-mini" id="btn-ban-limpiar-fondo">↺ Limpiar fondo</button>
+                            <button class="btn-mini" id="btn-ban-descargar" style="background:rgba(216,195,149,.15);border-color:rgba(216,195,149,.5);color:#D8C395"><i class="fa-solid fa-download"></i> Descargar PNG</button>
+                        </div>
+                    </div>
+                    <!-- Preview canvas -->
+                    <div class="ban-canvas-wrap">
+                        <canvas id="banAdminCv" width="1080" height="1080"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /din-grid -->
+</section>
+
+<footer><p>&copy; 2026 <b>PROYECTN</b> · Dinámicas</p></footer>
+
+<script>
+(async function () {
+    const P = PumasPortal;
+    const s = await P.validar();
+    if (!s) { location.replace('login.html?next=' + encodeURIComponent('/admin/dinamicas.html')); return; }
+    document.documentElement.classList.remove('pg-verificando');
+    document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+    document.querySelectorAll('[data-pg-salir]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); }));
+
+    const esc = P.escaparHtml;
+
+    /* ── Portal selector ── */
+    const selPortal = document.getElementById('selPortal');
+    const portalesDisponibles = Object.entries(P.PORTALES)
+        .filter(([k]) => P.puede(s, k) && k !== 'principal')
+        .map(([k, p]) => ({ id: k, nombre: p.nombre || k }));
+
+    if (!portalesDisponibles.length) {
+        selPortal.innerHTML = '<option>Sin portales disponibles</option>';
+        return;
+    }
+    portalesDisponibles.forEach(p => {
+        const op = document.createElement('option');
+        op.value = p.id; op.textContent = p.nombre;
+        selPortal.appendChild(op);
+    });
+
+    let portalActual = portalesDisponibles[0].id;
+    selPortal.value = portalActual;
+    selPortal.addEventListener('change', () => {
+        portalActual = selPortal.value;
+        cargarTodo();
+        actualizarSorteoPortales();
+    });
+
+    /* ── URL pública base ── */
+    function urlPublica(tipo) {
+        // La página del portal incluye dinamicas.js y auto-monta la dinámica activa.
+        // Si el portal tiene varias dinámicas se puede forzar con ?din=tipo.
+        const base = location.origin + location.pathname.replace(/admin\/dinamicas\.html.*/, '');
+        return base + portalActual + '/';
+    }
+
+    const JUEGO_TIPOS = ['juego','juego_tetris','juego_3lineas','juego_pacman','juego_breakout','juego_bomberman','juego_invaders','juego_flappy'];
+    const JUEGO_NOMBRES = { juego: 'Snake', juego_tetris: 'Tetris', juego_3lineas: '3 en Línea', juego_pacman: 'Pac-Man', juego_breakout: 'Breakout', juego_bomberman: 'Bomberman', juego_invaders: 'Space Invaders', juego_flappy: 'Flappy Bird' };
+
+    function actualizarUrls() {
+        ['registro','encuesta','juego','juego_tetris','juego_3lineas','juego_pacman','juego_breakout','juego_bomberman'].forEach(t => {
+            const box = document.getElementById('url-' + t);
+            const txt = document.getElementById('url-' + t + '-txt');
+            if (txt) txt.textContent = urlPublica(t);
+        });
+    }
+
+    window.copiarUrl = function(tipo) {
+        const txt = document.getElementById('url-' + tipo + '-txt').textContent;
+        navigator.clipboard.writeText(txt).then(() => alert('URL copiada.')).catch(() => alert(txt));
+    };
+
+    /* ── Estado por tipo ── */
+    // sesiones[tipo] = { activo, titulo, config, deadline, cerrado }
+    // entradas[tipo] = [{ id, nombre, numero, ig, metadata, creado }]
+    const sesiones = {};
+    const entradas = {};
+    let encInterval = null;
+
+    /* ── Cargar todo ── */
+    async function cargarTodo() {
+        actualizarUrls();
+        actualizarSorteoPortales();
+        await Promise.all([
+            cargarDinamica('registro'),
+            cargarDinamica('juego'),
+            cargarDinamica('juego_tetris'),
+            cargarDinamica('juego_3lineas'),
+            cargarDinamica('juego_pacman'),
+            cargarDinamica('juego_breakout'),
+            cargarDinamica('juego_bomberman'),
+            cargarDinamica('juego_invaders'),
+            cargarDinamica('juego_flappy'),
+            cargarEncuestas(),
+        ]);
+    }
+
+    async function cargarDinamica(tipo) {
+        try {
+            const data = await P.dinamica.listar(portalActual, tipo);
+            sesiones[tipo] = data.sesion ? {
+                activo:   data.sesion.activo,
+                titulo:   data.sesion.titulo,
+                config:   data.sesion.config || {},
+                deadline: data.sesion.deadline,
+                inicio:   data.sesion.inicio,
+            } : { activo: false, titulo: null, config: {}, deadline: null, inicio: null };
+            entradas[tipo] = data.entradas || [];
+        } catch(e) {
+            // sql/33 no está corrido o sin acceso
+            sesiones[tipo] = { activo: false, titulo: null, config: {}, deadline: null };
+            entradas[tipo] = [];
+        }
+        if (tipo === 'registro') renderRegistro();
+        if (tipo === 'encuesta') renderEncuesta();
+        if (JUEGO_TIPOS.includes(tipo)) renderLeaderboard(tipo);
+    }
+
+    /* ── Config helper ── */
+    async function config(tipo, cambios, statusId) {
+        const msg = statusId ? document.getElementById(statusId) : null;
+        try {
+            await P.dinamica.config(portalActual, tipo, cambios);
+            await cargarDinamica(tipo);
+            if (msg) { msg.textContent = '✔ Guardado'; msg.className = 'din-status ok'; setTimeout(() => msg.textContent = '', 2500); }
+        } catch(e) {
+            if (msg) { msg.textContent = e.message || 'Error al guardar'; msg.className = 'din-status err'; }
+        }
+    }
+
+    /* ══════════════════════════════════════
+       REGISTRO DE EQUIPOS
+    ══════════════════════════════════════ */
+    function renderRegistro() {
+        const ses = sesiones.registro || {};
+        const lista = entradas.registro || [];
+
+        const toggleReg = document.getElementById('toggle-registro');
+        const badgeReg  = document.getElementById('badge-registro');
+        const urlBox    = document.getElementById('url-registro');
+
+        toggleReg.checked = !!ses.activo;
+        const nReg    = lista.length;
+        const limReg  = ses.config && ses.config.limite ? parseInt(ses.config.limite) : null;
+        badgeReg.textContent = ses.activo
+            ? (limReg ? `Activo · ${nReg}/${limReg}` : `Activo · ${nReg}`)
+            : 'Inactivo';
+        badgeReg.className = 'din-badge' + (ses.activo ? ' activo' : '');
+        urlBox.style.display = ses.activo ? 'flex' : 'none';
+
+        // Límite
+        document.getElementById('reg-limite').value = limReg || '';
+        document.getElementById('reg-limite-info').textContent = limReg
+            ? `${nReg} de ${limReg} jugadores registrados`
+            : `${nReg} jugador${nReg !== 1 ? 'es' : ''} registrado${nReg !== 1 ? 's':''} · sin límite`;
+
+        // Inicio + Deadline inputs
+        const toLocal = iso => iso ? new Date(new Date(iso).getTime() - new Date(iso).getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
+        document.getElementById('reg-inicio').value   = toLocal(ses.inicio);
+        document.getElementById('reg-deadline').value = toLocal(ses.deadline);
+
+        const tb = document.getElementById('tbody-registro');
+        if (!lista.length) {
+            tb.innerHTML = '<tr><td colspan="6" class="din-empty">Sin equipos anotados</td></tr>';
+            return;
+        }
+        tb.innerHTML = lista.map((r, i) => {
+            const rep = r.metadata && r.metadata.representante ? esc(r.metadata.representante) : '—';
+            return `<tr>
+                <td>${i + 1}</td>
+                <td>${esc(r.nombre)}</td>
+                <td>${rep}</td>
+                <td>${r.numero ? esc(r.numero) : '—'}</td>
+                <td>${r.ig ? '<a href="https://instagram.com/'+esc(r.ig)+'" target="_blank" style="color:#D8C395">@'+esc(r.ig)+'</a>' : '—'}</td>
+                <td><button class="del-btn" onclick="borrarEntrada('registro',${r.id})"><i class="fa-solid fa-xmark"></i></button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    document.getElementById('toggle-registro').addEventListener('change', function() {
+        config('registro', { activo: this.checked }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-inicio').addEventListener('click', () => {
+        const val = document.getElementById('reg-inicio').value;
+        if (!val) { alert('Selecciona una fecha y hora de inicio.'); return; }
+        config('registro', { inicio: new Date(val).toISOString() }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-noinicio').addEventListener('click', () => {
+        if (!confirm('¿Quitar la hora de inicio?')) return;
+        config('registro', { quitarInicio: true }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-deadline').addEventListener('click', () => {
+        const val = document.getElementById('reg-deadline').value;
+        if (!val) { alert('Selecciona una fecha y hora.'); return; }
+        const iso = new Date(val).toISOString();
+        config('registro', { deadline: iso }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-nodeadline').addEventListener('click', () => {
+        if (!confirm('¿Quitar el límite de tiempo?')) return;
+        config('registro', { quitarDeadline: true }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-limite').addEventListener('click', () => {
+        const val = parseInt(document.getElementById('reg-limite').value);
+        if (!val || val < 1) { alert('Ingresa un número válido (mínimo 1).'); return; }
+        const cfg = Object.assign({}, (sesiones.registro || {}).config || {}, { limite: val });
+        config('registro', { config: cfg }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-nolimite').addEventListener('click', () => {
+        if (!confirm('¿Quitar el límite de jugadores?')) return;
+        const cfg = Object.assign({}, (sesiones.registro || {}).config || {});
+        delete cfg.limite;
+        config('registro', { config: cfg }, 'status-registro');
+    });
+
+    document.getElementById('btn-reg-add').addEventListener('click', async () => {
+        const nombre        = document.getElementById('reg-nombre').value.trim();
+        const representante = document.getElementById('reg-rep').value.trim();
+        const numero        = document.getElementById('reg-numero').value.trim();
+        const ig            = document.getElementById('reg-ig').value.trim().replace(/^@/, '');
+        if (!nombre) { alert('Escribe el nombre del equipo.'); return; }
+        const st = document.getElementById('status-registro');
+        st.textContent = 'Agregando...'; st.className = 'din-status';
+        try {
+            await P.dinamica.registrar(portalActual, 'registro', { nombre, numero, ig, metadata: { representante } });
+            document.getElementById('reg-nombre').value = '';
+            document.getElementById('reg-rep').value    = '';
+            document.getElementById('reg-numero').value = '';
+            document.getElementById('reg-ig').value = '';
+            await cargarDinamica('registro');
+            st.textContent = '✔ Equipo agregado'; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 2500);
+        } catch(e) {
+            st.textContent = e.message || 'Error'; st.className = 'din-status err';
+        }
+    });
+
+    document.getElementById('btn-reg-wa').addEventListener('click', () => {
+        const lista = entradas.registro || [];
+        if (!lista.length) { alert('No hay equipos registrados.'); return; }
+        const portal = (P.PORTALES[portalActual] || {}).nombre || portalActual;
+        const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' });
+        let txt = `*Equipos registrados — ${portal} · ${fecha}*\n\n`;
+        lista.forEach((r, i) => {
+            txt += `${i + 1}. ${r.nombre}\n`;
+        });
+        txt += `\n_Total: ${lista.length} equipo${lista.length !== 1 ? 's' : ''}_`;
+        navigator.clipboard.writeText(txt).then(() => alert('Texto copiado para WhatsApp.')).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+            alert('Texto copiado.');
+        });
+    });
+
+    document.getElementById('btn-reg-csv').addEventListener('click', () => {
+        const lista = entradas.registro || [];
+        if (!lista.length) { alert('No hay equipos registrados.'); return; }
+        const rows = ['#,Equipo,Representante,WhatsApp,Instagram,Registrado'].concat(
+            lista.map((r, i) => {
+                const rep = r.metadata && r.metadata.representante ? r.metadata.representante : '';
+                return `${i+1},"${(r.nombre||'').replace(/"/g,'""')}","${rep.replace(/"/g,'""')}","${(r.numero||'').replace(/"/g,'""')}","${(r.ig||'').replace(/"/g,'""')}","${r.creado ? new Date(r.creado).toLocaleString('es-MX') : ''}"`;
+            })
+        ).join('\n');
+        descargar('registro_equipos_pumas.csv', rows, 'text/csv');
+    });
+
+    document.getElementById('btn-reg-clear').addEventListener('click', async () => {
+        if (!confirm('¿Borrar TODOS los equipos registrados?')) return;
+        const st = document.getElementById('status-registro');
+        st.textContent = 'Limpiando...'; st.className = 'din-status';
+        try {
+            await P.dinamica.vaciar(portalActual, 'registro');
+            await cargarDinamica('registro');
+            st.textContent = '✔ Lista limpiada'; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 2500);
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+
+    /* ══════════════════════════════════════
+       ENCUESTAS MULTI (sql/41)
+    ══════════════════════════════════════ */
+    let encuestas = [];      // lista local de encuestas del portal
+    let encEditId = null;    // id de encuesta en edición (null = crear nueva)
+
+    async function cargarEncuestas() {
+        const st = document.getElementById('status-encuestas');
+        try {
+            encuestas = await P.enc.listar(portalActual) || [];
+        } catch(e) { encuestas = []; }
+        renderEncLista();
+        // Badge de activas
+        const nActivas = encuestas.filter(e => e.activo && !e.cerrado).length;
+        const badge = document.getElementById('badge-encuestas');
+        badge.textContent = nActivas ? nActivas + ' activa' + (nActivas !== 1 ? 's' : '') : '0 activas';
+        badge.className = 'din-badge' + (nActivas ? ' activo' : '');
+        // URL box visible si hay alguna activa
+        document.getElementById('url-encuesta').style.display = nActivas ? 'flex' : 'none';
+    }
+
+    function renderEncLista() {
+        const cont = document.getElementById('enc-lista');
+        const nav  = document.getElementById('enc-nav');
+
+        if (!encuestas.length) {
+            cont.innerHTML = '<p style="color:#666;font-size:.85rem;margin:0 0 10px">No hay encuestas. Crea la primera.</p>';
+            nav.style.display = 'none';
+            return;
+        }
+
+        // Barra de navegación rápida
+        if (encuestas.length > 1) {
+            nav.style.display = 'flex';
+            nav.innerHTML = encuestas.map((enc, i) => {
+                const label = enc.titulo || `#${i + 1}`;
+                const color = !enc.activo ? 'rgba(255,255,255,.12)' : enc.cerrado ? 'rgba(255,138,141,.2)' : 'rgba(77,255,145,.2)';
+                const border = !enc.activo ? 'rgba(255,255,255,.18)' : enc.cerrado ? 'rgba(255,138,141,.4)' : 'rgba(77,255,145,.4)';
+                return `<button onclick="document.getElementById('enc-item-${enc.id}').scrollIntoView({behavior:'smooth',block:'nearest'})"
+                    style="flex-shrink:0;padding:4px 10px;border-radius:20px;border:1px solid ${border};background:${color};color:#F4EEDC;font-size:.75rem;cursor:pointer;white-space:nowrap;font-family:inherit">
+                    ${esc(label)}
+                </button>`;
+            }).join('');
+        } else {
+            nav.style.display = 'none';
+        }
+
+        cont.innerHTML = encuestas.map(enc => {
+            const opciones = enc.opciones || [];
+            const total = parseInt(enc.total_votos || 0);
+            const cerrado = enc.cerrado;
+            const statusLabel = !enc.activo ? 'Inactiva' : cerrado ? 'Cerrada' : 'Activa';
+            const statusCls = !enc.activo ? '' : cerrado ? 'din-badge' : 'din-badge activo';
+            const titulo = enc.titulo || enc.pregunta || 'Encuesta #' + enc.id;
+            const timerTxt = enc.deadline && !cerrado
+                ? `<small style="color:#888;font-size:.75rem">Cierra: ${new Date(enc.deadline).toLocaleString('es-MX', {dateStyle:'short',timeStyle:'short'})}</small>`
+                : cerrado ? `<small style="color:#ff8a8d;font-size:.75rem">Cerrada</small>` : '';
+
+            const votos = enc.votos || {};
+            const vArr = opciones.map((_, i) => parseInt(votos[i] || 0));
+            const totalV = vArr.reduce((a,b) => a+b, 0) || 1;
+            const nGan   = Math.max(1, parseInt(enc.n_ganadores || 1));
+            // Orden de los índices por votos descendente (para marcar ganadores)
+            const ordenIdx = [...vArr.keys()].sort((a,b) => vArr[b] - vArr[a]);
+            const ganadores = new Set(ordenIdx.slice(0, nGan).filter(i => vArr[i] > 0));
+            const medallas  = ['🥇','🥈','🥉'];
+            const barras = opciones.map((op, i) => {
+                const v = vArr[i], pct = Math.round((v/totalV)*100);
+                const posGan = ganadores.has(i) ? ordenIdx.indexOf(i) : -1;
+                const esGan  = posGan >= 0;
+                const medal  = esGan && total > 0 ? (medallas[posGan] || '🏅') + ' ' : '';
+                return `<div style="margin:4px 0">
+                    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:${esGan && total > 0 ? '#FFD54A':'#ccc'};margin-bottom:2px;font-weight:${esGan && total > 0 ? '700':'normal'}">
+                        <span>${medal}${esc(op)}</span><span>${v}v · ${pct}%</span>
+                    </div>
+                    <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.1)">
+                        <div style="height:100%;border-radius:3px;width:${pct}%;background:${esGan && total > 0 ? 'linear-gradient(90deg,#FFD54A,#ffa000)':'linear-gradient(90deg,#D8C395,#FFD54A)'}"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const ganBadge = nGan > 1 ? `<span class="din-badge" style="margin-left:6px;font-size:.7rem">Top ${nGan}</span>` : '';
+
+            return `<div id="enc-item-${enc.id}" style="border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.02)">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+                    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+                        <b style="font-size:.9rem;color:#F4EEDC">${esc(titulo)}</b>${ganBadge}
+                        ${enc.pregunta && enc.titulo ? `<div style="font-size:.8rem;color:#999;margin-top:1px;width:100%">${esc(enc.pregunta)}</div>` : ''}
+                    </div>
+                    <span class="${statusCls || 'din-badge'}" style="flex-shrink:0">${statusLabel}</span>
+                </div>
+                <div style="margin-bottom:8px">${timerTxt}</div>
+                ${total > 0 ? barras : '<p style="color:#555;font-size:.8rem;margin:4px 0">Sin votos aún</p>'}
+                <p style="font-size:.78rem;color:#777;margin:6px 0 10px">Total: <b style="color:#aaa">${total}</b> voto${total !== 1 ? 's' : ''}</p>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    ${!cerrado ? `<button class="btn-mini" style="font-size:.75rem;padding:4px 9px;${enc.activo ? 'background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.4);color:#ff7070' : ''}"
+                        onclick="encToggle(${enc.id},${!enc.activo})">${enc.activo ? 'Desactivar' : 'Activar'}</button>` : ''}
+                    <button class="btn-mini" style="font-size:.75rem;padding:4px 9px" onclick="encRestablecer(${enc.id})"><i class="fa-solid fa-rotate-right"></i> Restablecer</button>
+                    <button class="btn-mini" style="font-size:.75rem;padding:4px 9px" onclick="encEditar(${enc.id})"><i class="fa-solid fa-pen"></i> Editar</button>
+                    <button class="btn-mini" style="font-size:.75rem;padding:4px 9px;background:rgba(255,77,77,.08);border-color:rgba(255,77,77,.35);color:#ff7070" onclick="encBorrar(${enc.id})"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn-mini" style="font-size:.75rem;padding:4px 9px" onclick="encExportWa(${enc.id})"><i class="fa-brands fa-whatsapp"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.encToggle = async function(id, activo) {
+        const st = document.getElementById('status-encuestas');
+        st.textContent = activo ? 'Activando...' : 'Desactivando...'; st.className = 'din-status';
+        try {
+            await P.enc.editar(id, { activo });
+            await cargarEncuestas();
+            st.textContent = ''; st.className = 'din-status';
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    };
+
+    window.encRestablecer = async function(id) {
+        if (!confirm('¿Restablecer votos? Los participantes podrán votar nuevamente.')) return;
+        const st = document.getElementById('status-encuestas');
+        st.textContent = 'Restableciendo...'; st.className = 'din-status';
+        try {
+            await P.enc.restablecer(id);
+            await cargarEncuestas();
+            st.textContent = ''; st.className = 'din-status';
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    };
+
+    window.encEditar = function(id) {
+        const enc = encuestas.find(e => e.id === id);
+        if (!enc) return;
+        encEditId = id;
+        document.getElementById('enc-form-titulo-lbl').textContent = 'Editar encuesta';
+        document.getElementById('enc-f-btn-lbl').textContent = 'Guardar';
+        document.getElementById('enc-f-titulo').value = enc.titulo || '';
+        document.getElementById('enc-f-pregunta').value = enc.pregunta || '';
+        document.getElementById('enc-f-imagen').value = enc.imagen || '';
+        document.getElementById('enc-f-activo').checked = !!enc.activo;
+        document.getElementById('enc-f-ganadores').value = enc.n_ganadores || 1;
+        // Poblar opciones
+        const opciones = enc.opciones || [];
+        poblarEncFOpts(opciones);
+        // Deadline
+        if (enc.deadline && !enc.cerrado) {
+            document.querySelector('[name="enc-f-limite"][value="fecha"]').checked = true;
+            document.getElementById('enc-f-dur-wrap').style.display = 'none';
+            document.getElementById('enc-f-fecha-wrap').style.display = '';
+            const d = new Date(enc.deadline);
+            document.getElementById('enc-f-fecha-fin').value = d.toISOString().slice(0,16);
+        } else {
+            document.querySelector('[name="enc-f-limite"][value="ninguno"]').checked = true;
+            document.getElementById('enc-f-dur-wrap').style.display = 'none';
+            document.getElementById('enc-f-fecha-wrap').style.display = 'none';
+        }
+        document.getElementById('panel-form-enc').style.display = '';
+        document.getElementById('panel-form-enc').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.encBorrar = async function(id) {
+        if (!confirm('¿Borrar esta encuesta y todos sus votos?')) return;
+        const st = document.getElementById('status-encuestas');
+        st.textContent = 'Borrando...'; st.className = 'din-status';
+        try {
+            await P.enc.borrar(id);
+            await cargarEncuestas();
+            st.textContent = ''; st.className = 'din-status';
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    };
+
+    window.encExportWa = function(id) {
+        const enc = encuestas.find(e => e.id === id);
+        if (!enc) return;
+        const opciones = enc.opciones || [];
+        const votos = enc.votos || {};
+        const total = parseInt(enc.total_votos || 0) || 1;
+        const portal = (P.PORTALES[portalActual] || {}).nombre || portalActual;
+        let txt = `*${enc.titulo || 'Encuesta'} — ${portal}*\n\n`;
+        if (enc.pregunta) txt += `❓ ${enc.pregunta}\n\n`;
+        opciones.forEach((op, i) => {
+            const v = parseInt(votos[i] || 0), pct = Math.round((v / total) * 100);
+            const bar = '▓'.repeat(Math.round(pct / 10)) + '░'.repeat(10 - Math.round(pct / 10));
+            txt += `${bar} ${pct}% — ${op} (${v} voto${v !== 1 ? 's' : ''})\n`;
+        });
+        txt += `\n_Total: ${parseInt(enc.total_votos || 0)} voto${enc.total_votos !== 1 ? 's' : ''}_`;
+        navigator.clipboard.writeText(txt).then(() => alert('Texto copiado para WhatsApp.')).catch(() => alert(txt));
+    };
+
+    /* ── Formulario ── */
+    document.getElementById('btn-nueva-enc').addEventListener('click', () => {
+        encEditId = null;
+        document.getElementById('enc-form-titulo-lbl').textContent = 'Nueva encuesta';
+        document.getElementById('enc-f-btn-lbl').textContent = 'Crear';
+        document.getElementById('enc-f-titulo').value = '';
+        document.getElementById('enc-f-pregunta').value = '';
+        document.getElementById('enc-f-imagen').value = '';
+        document.getElementById('enc-f-activo').checked = true;
+        poblarEncFOpts(['', '']);
+        document.querySelector('[name="enc-f-limite"][value="duracion"]').checked = true;
+        document.getElementById('enc-f-dur-wrap').style.display = '';
+        document.getElementById('enc-f-fecha-wrap').style.display = 'none';
+        document.getElementById('status-enc-form').textContent = '';
+        const panel = document.getElementById('panel-form-enc');
+        panel.style.display = panel.style.display === 'none' ? '' : 'none';
+    });
+
+    document.getElementById('btn-enc-f-cancelar').addEventListener('click', () => {
+        document.getElementById('panel-form-enc').style.display = 'none';
+        encEditId = null;
+    });
+
+    /* ── Hora masiva ── */
+    document.getElementById('btn-enc-hora-masiva').addEventListener('click', () => {
+        const panel = document.getElementById('panel-enc-masivo');
+        panel.style.display = panel.style.display === 'none' ? '' : 'none';
+    });
+
+    document.getElementById('btn-enc-m-cancelar').addEventListener('click', () => {
+        document.getElementById('panel-enc-masivo').style.display = 'none';
+    });
+
+    document.getElementById('enc-m-tipo').addEventListener('change', function() {
+        document.getElementById('enc-m-dur-wrap').style.display   = this.value === 'duracion' ? '' : 'none';
+        document.getElementById('enc-m-fecha-wrap').style.display = this.value === 'fecha'    ? '' : 'none';
+    });
+
+    document.getElementById('btn-enc-m-aplicar').addEventListener('click', async () => {
+        if (!encuestas.length) { alert('No hay encuestas.'); return; }
+        const tipo = document.getElementById('enc-m-tipo').value;
+        let deadline = null;
+        let quitarDeadline = false;
+        if (tipo === 'duracion') {
+            const dur = parseInt(document.getElementById('enc-m-duracion').value);
+            deadline = new Date(Date.now() + dur * 1000).toISOString();
+        } else if (tipo === 'fecha') {
+            const fv = document.getElementById('enc-m-fecha').value;
+            if (!fv) { alert('Selecciona la fecha.'); return; }
+            const fd = new Date(fv);
+            if (fd <= new Date()) { alert('La fecha debe ser en el futuro.'); return; }
+            deadline = fd.toISOString();
+        } else {
+            quitarDeadline = true;
+        }
+        const accion = quitarDeadline ? 'Quitando cierre de' : 'Aplicando hora a';
+        if (!confirm(`${accion} ${encuestas.length} encuesta${encuestas.length !== 1 ? 's' : ''}. ¿Continuar?`)) return;
+        const st = document.getElementById('status-enc-masivo');
+        st.textContent = 'Aplicando...'; st.className = 'din-status';
+        try {
+            await Promise.all(encuestas.map(e => P.enc.editar(e.id, { deadline, quitarDeadline })));
+            await cargarEncuestas();
+            st.textContent = `✔ Aplicado a ${encuestas.length} encuesta${encuestas.length !== 1 ? 's' : ''}.`; st.className = 'din-status ok';
+            setTimeout(() => { st.textContent = ''; document.getElementById('panel-enc-masivo').style.display = 'none'; }, 2500);
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+    /* ── Imagen de resultados (grilla N columnas) ── */
+    document.getElementById('btn-enc-imagen').addEventListener('click', () => {
+        if (!encuestas.length) { alert('No hay encuestas.'); return; }
+
+        const COLS    = Math.max(1, parseInt(document.getElementById('enc-img-cols').value) || 3);
+        const MEDALLAS= ['🥇','🥈','🥉','4°','5°','6°','7°','8°'];
+        const W       = Math.max(800, COLS * 340);
+        const PAD     = 28;         // padding exterior
+        const GAP     = 14;         // gap entre tarjetas
+        const HEAD_H  = 72;
+        const FOOT_H  = 36;
+        const BAR_H   = 18;
+        const BAR_GAP = 7;
+        const OPT_ROW = BAR_H + BAR_GAP;
+        const TITLE_H = 40;         // altura del header de cada tarjeta
+        const CARD_PAD= 10;         // padding interno tarjeta
+
+        // Precalcular datos
+        const datos = encuestas.map(enc => {
+            const opciones = enc.opciones || [];
+            const votos    = enc.votos || {};
+            const nGan     = Math.max(1, parseInt(enc.n_ganadores || 1));
+            const vArr     = opciones.map((_, i) => parseInt(votos[i] || 0));
+            const totalV   = vArr.reduce((a,b)=>a+b,0);
+            const ordenIdx = [...vArr.keys()].sort((a,b) => vArr[b]-vArr[a]);
+            const ganSet   = new Set(ordenIdx.slice(0, nGan).filter(i => vArr[i] > 0));
+            return { enc, opciones, vArr, totalV, ganSet, ordenIdx };
+        });
+
+        // Altura de cada tarjeta (uniforme = máx opciones de la columna)
+        const ROWS      = Math.ceil(datos.length / COLS);
+        const CARD_W    = Math.floor((W - PAD*2 - GAP*(COLS-1)) / COLS);
+        // Calcular altura por fila (max opciones en esa fila)
+        const rowH = [];
+        for (let r = 0; r < ROWS; r++) {
+            let maxOpts = 0;
+            for (let c = 0; c < COLS; c++) {
+                const d = datos[r*COLS + c];
+                if (d) maxOpts = Math.max(maxOpts, d.opciones.length);
+            }
+            rowH.push(TITLE_H + maxOpts * OPT_ROW + CARD_PAD*2);
+        }
+        const totalH = HEAD_H + rowH.reduce((s,h) => s+h+GAP, 0) + FOOT_H;
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = W;
+        canvas.height = totalH;
+        const ctx     = canvas.getContext('2d');
+
+        // Fondo
+        ctx.fillStyle = '#0c0c0c';
+        ctx.fillRect(0, 0, W, totalH);
+        ctx.fillStyle = '#D8C395';
+        ctx.fillRect(0, 0, W, 4);
+
+        // Header
+        const portal = (P.PORTALES[portalActual] || {}).nombre || portalActual;
+        const fecha  = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' });
+        ctx.fillStyle = '#D8C395';
+        ctx.font = `bold ${COLS <= 2 ? 22 : 18}px Michroma, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`${portal.toUpperCase()} · ENCUESTAS`, W/2, 34);
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = '#777';
+        ctx.fillText(fecha, W/2, 54);
+
+        function rRect(x, yy, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x+r,yy); ctx.lineTo(x+w-r,yy); ctx.arcTo(x+w,yy,x+w,yy+r,r);
+            ctx.lineTo(x+w,yy+h-r); ctx.arcTo(x+w,yy+h,x+w-r,yy+h,r);
+            ctx.lineTo(x+r,yy+h); ctx.arcTo(x,yy+h,x,yy+h-r,r);
+            ctx.lineTo(x,yy+r); ctx.arcTo(x,yy,x+r,yy,r);
+            ctx.closePath();
+        }
+
+        // Calcular font sizes según ancho de tarjeta
+        const fTitle = Math.max(9, Math.min(13, Math.floor(CARD_W / 22)));
+        const fLabel = Math.max(8, Math.min(11, Math.floor(CARD_W / 26)));
+        const fPct   = Math.max(8, Math.min(10, Math.floor(CARD_W / 30)));
+        const LABEL_W= Math.floor(CARD_W * 0.42);
+        const PCT_W  = 32;
+        const BAR_X  = CARD_PAD + LABEL_W + 4;
+        const BAR_W  = CARD_W - BAR_X - PCT_W - 4;
+
+        let startY = HEAD_H;
+
+        for (let r = 0; r < ROWS; r++) {
+            const cardH = rowH[r];
+            for (let c = 0; c < COLS; c++) {
+                const idx = r*COLS + c;
+                if (idx >= datos.length) break;
+                const { enc, opciones, vArr, totalV, ganSet, ordenIdx } = datos[idx];
+                const cx = PAD + c*(CARD_W + GAP);
+                const cy = startY;
+                const titulo = enc.titulo || enc.pregunta || `Encuesta #${enc.id}`;
+                const totalVD = vArr.reduce((a,b)=>a+b,0);
+
+                // Card bg + border
+                ctx.fillStyle = 'rgba(255,255,255,0.035)';
+                rRect(cx, cy, CARD_W, cardH, 8); ctx.fill();
+                ctx.strokeStyle = 'rgba(216,195,149,0.22)';
+                ctx.lineWidth = 1; ctx.stroke();
+
+                // Header tarjeta
+                ctx.fillStyle = 'rgba(216,195,149,0.08)';
+                rRect(cx, cy, CARD_W, TITLE_H, 8); ctx.fill();
+                // Solo redondear arriba: sobreescribir mitad inferior del header
+                ctx.fillStyle = 'rgba(216,195,149,0.08)';
+                ctx.fillRect(cx, cy + TITLE_H/2, CARD_W, TITLE_H/2);
+
+                // Título
+                ctx.fillStyle = '#D8C395';
+                ctx.font = `bold ${fTitle}px Michroma, sans-serif`;
+                ctx.textAlign = 'left';
+                const maxCh = Math.floor(CARD_W / (fTitle * 0.65));
+                ctx.fillText(titulo.length > maxCh ? titulo.slice(0,maxCh-1)+'…' : titulo, cx+CARD_PAD, cy+17);
+
+                // Total votos
+                ctx.fillStyle = '#555';
+                ctx.font = `${fPct}px sans-serif`;
+                ctx.textAlign = 'right';
+                ctx.fillText(`${totalVD}v`, cx+CARD_W-CARD_PAD, cy+TITLE_H-8);
+
+                // Separador bajo el título
+                ctx.strokeStyle = 'rgba(216,195,149,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx+4, cy+TITLE_H); ctx.lineTo(cx+CARD_W-4, cy+TITLE_H);
+                ctx.stroke();
+
+                // Opciones
+                let oy = cy + TITLE_H + CARD_PAD;
+                opciones.forEach((op, i) => {
+                    const v    = vArr[i];
+                    const pct  = totalV > 0 ? Math.round((v/totalV)*100) : 0;
+                    const esGan= ganSet.has(i);
+                    const pos  = ordenIdx.indexOf(i);
+                    const fill = (pct/100) * BAR_W;
+
+                    // Barra track
+                    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+                    rRect(cx+BAR_X, oy+2, BAR_W, BAR_H-4, 3); ctx.fill();
+
+                    // Barra fill
+                    if (fill > 1) {
+                        const g = ctx.createLinearGradient(cx+BAR_X,0,cx+BAR_X+fill,0);
+                        if (esGan){ g.addColorStop(0,'#FFD54A'); g.addColorStop(1,'#ffa000'); }
+                        else      { g.addColorStop(0,'#3a3a3a'); g.addColorStop(1,'#555'); }
+                        ctx.fillStyle = g;
+                        rRect(cx+BAR_X, oy+2, Math.max(fill,3), BAR_H-4, 3); ctx.fill();
+                    }
+
+                    // Label
+                    ctx.font = `${esGan?'bold ':''}${fLabel}px sans-serif`;
+                    ctx.fillStyle = esGan ? '#FFD54A' : '#bbb';
+                    ctx.textAlign = 'right';
+                    const medal = esGan ? (MEDALLAS[pos]||'🏅')+' ' : '';
+                    const maxL  = Math.floor(LABEL_W / (fLabel * 0.6));
+                    ctx.fillText(medal+(op.length>maxL?op.slice(0,maxL-1)+'…':op), cx+CARD_PAD+LABEL_W, oy+BAR_H/2+4);
+
+                    // Pct
+                    ctx.font = `bold ${fPct}px sans-serif`;
+                    ctx.fillStyle = esGan ? '#FFD54A' : '#666';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`${pct}%`, cx+BAR_X+BAR_W+4, oy+BAR_H/2+4);
+
+                    oy += OPT_ROW;
+                });
+            }
+            startY += cardH + GAP;
+        }
+
+        // Footer
+        ctx.fillStyle = '#D8C395';
+        ctx.fillRect(0, totalH-4, W, 4);
+        ctx.font = '10px sans-serif';
+        ctx.fillStyle = '#333';
+        ctx.textAlign = 'center';
+        ctx.fillText('PROYECTN', W/2, totalH-14);
+
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `encuestas_${portalActual}_${Date.now()}.png`;
+        a.click();
+    });
+
+    /* ── Restablecer todas ── */
+    document.getElementById('btn-enc-restablecer-todas').addEventListener('click', async () => {
+        if (!encuestas.length) { alert('No hay encuestas.'); return; }
+        if (!confirm(`¿Restablecer votos de ${encuestas.length} encuesta${encuestas.length !== 1 ? 's' : ''}? Los participantes podrán votar nuevamente.`)) return;
+        const st = document.getElementById('status-encuestas');
+        st.textContent = 'Restableciendo...'; st.className = 'din-status';
+        try {
+            await Promise.all(encuestas.map(e => P.enc.restablecer(e.id)));
+            await cargarEncuestas();
+            st.textContent = `✔ ${encuestas.length} encuesta${encuestas.length !== 1 ? 's' : ''} restablecida${encuestas.length !== 1 ? 's' : ''}.`; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 2500);
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+    /* ── Borrar todas ── */
+    document.getElementById('btn-enc-borrar-todas').addEventListener('click', async () => {
+        if (!encuestas.length) { alert('No hay encuestas.'); return; }
+        if (!confirm(`¿Borrar las ${encuestas.length} encuesta${encuestas.length !== 1 ? 's' : ''} y todos sus votos? Esta acción no se puede deshacer.`)) return;
+        const st = document.getElementById('status-encuestas');
+        st.textContent = 'Borrando...'; st.className = 'din-status';
+        try {
+            await Promise.all(encuestas.map(e => P.enc.borrar(e.id)));
+            await cargarEncuestas();
+            st.textContent = '✔ Todas borradas.'; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 2500);
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+    /* ── Grupos → WhatsApp ── */
+    document.getElementById('btn-enc-grupos-wa').addEventListener('click', () => {
+        if (!encuestas.length) { alert('No hay encuestas.'); return; }
+        const portal = (P.PORTALES[portalActual] || {}).nombre || portalActual;
+        const fecha  = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' });
+        let txt = `*Grupos — ${portal} · ${fecha}*\n\n`;
+        encuestas.forEach(enc => {
+            const nombre = enc.titulo || enc.pregunta || `Encuesta #${enc.id}`;
+            const opciones = enc.opciones || [];
+            txt += `*${nombre}*\n`;
+            opciones.forEach((op, i) => { txt += `  ${i + 1}. ${op}\n`; });
+            txt += '\n';
+        });
+        navigator.clipboard.writeText(txt)
+            .then(() => alert('Texto de grupos copiado para WhatsApp.'))
+            .catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+                alert('Texto copiado.');
+            });
+    });
+
+    /* ── Clasificados ── */
+    function calcClasificados() {
+        const nGanGlobal = Math.max(1, parseInt(document.getElementById('enc-cuantos-pasan').value) || 1);
+        return encuestas.map(enc => {
+            const opciones = enc.opciones || [];
+            const votos    = enc.votos || {};
+            const vArr     = opciones.map((_, i) => parseInt(votos[i] || 0));
+            const ordenIdx = [...vArr.keys()].sort((a, b) => vArr[b] - vArr[a]);
+            const clasificados = ordenIdx.slice(0, nGanGlobal).filter(i => vArr[i] > 0).map(i => opciones[i]);
+            return { titulo: enc.titulo || enc.pregunta || `Encuesta #${enc.id}`, clasificados, nGan: nGanGlobal };
+        }).filter(g => g.clasificados.length > 0);
+    }
+
+    function renderClasificados() {
+        const grupos = calcClasificados();
+        const cont   = document.getElementById('clasificados-lista');
+        const medallas = ['🥇','🥈','🥉'];
+        if (!grupos.length) {
+            cont.innerHTML = '<p style="color:#666;font-size:.85rem">Sin votos registrados aún.</p>';
+            return;
+        }
+        const total = grupos.reduce((s, g) => s + g.clasificados.length, 0);
+        cont.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;border-radius:6px;background:rgba(255,213,74,.1);border:1px solid rgba(255,213,74,.3)">
+                <i class="fa-solid fa-users" style="color:#FFD54A"></i>
+                <span style="font-size:.88rem;color:#FFD54A;font-weight:700">${total} equipo${total !== 1 ? 's' : ''} clasificado${total !== 1 ? 's' : ''}</span>
+                <span style="font-size:.78rem;color:#888;margin-left:auto">${grupos.length} grupo${grupos.length !== 1 ? 's' : ''}</span>
+            </div>
+            ${grupos.map(g => `
+            <div style="margin-bottom:10px;padding:10px 12px;border-radius:6px;background:rgba(255,213,74,.06);border:1px solid rgba(255,213,74,.18)">
+                <div style="font-size:.78rem;font-weight:700;color:#FFD54A;letter-spacing:.08em;margin-bottom:6px">${esc(g.titulo)}</div>
+                ${g.clasificados.map((eq, i) => `
+                    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem;color:#F4EEDC">
+                        <span style="font-size:1rem">${medallas[i] || '🏅'}</span>
+                        <span style="flex:1">${esc(eq)}</span>
+                    </div>`).join('')}
+            </div>`).join('')}`;
+    }
+
+    document.getElementById('btn-enc-clasificados').addEventListener('click', () => {
+        const panel = document.getElementById('panel-clasificados');
+        const visible = panel.style.display !== 'none';
+        panel.style.display = visible ? 'none' : '';
+        if (!visible) renderClasificados();
+    });
+
+    document.getElementById('enc-cuantos-pasan').addEventListener('input', () => {
+        if (document.getElementById('panel-clasificados').style.display !== 'none') renderClasificados();
+    });
+
+    document.getElementById('btn-clasificados-cerrar').addEventListener('click', () => {
+        document.getElementById('panel-clasificados').style.display = 'none';
+    });
+
+    document.getElementById('btn-clasificados-wa').addEventListener('click', () => {
+        const grupos  = calcClasificados();
+        if (!grupos.length) { alert('Sin clasificados aún.'); return; }
+        const portal  = (P.PORTALES[portalActual] || {}).nombre || portalActual;
+        const fecha   = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' });
+        const ronda   = document.getElementById('enc-nombre-ronda').value.trim();
+        const premio  = document.getElementById('enc-premio-final').value.trim();
+        const medallas = ['🥇','🥈','🥉'];
+        let txt = `*${ronda ? ronda + ' — ' : ''}Clasificados · ${portal} · ${fecha}*\n\n`;
+        grupos.forEach(g => {
+            txt += `*${g.titulo}*\n`;
+            g.clasificados.forEach((eq, i) => { txt += `  ${medallas[i] || '🏅'} ${eq}\n`; });
+            txt += '\n';
+        });
+        const total = grupos.reduce((s, g) => s + g.clasificados.length, 0);
+        txt += `_${total} equipo${total !== 1 ? 's' : ''} clasificado${total !== 1 ? 's' : ''}_`;
+        if (premio) txt += `\n\n🏆 *Premio final:* ${premio}`;
+        navigator.clipboard.writeText(txt)
+            .then(() => alert('Clasificados copiados para WhatsApp.'))
+            .catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+                alert('Texto copiado.');
+            });
+    });
+
+    document.getElementById('btn-clasificados-nueva-ronda').addEventListener('click', async () => {
+        const grupos = calcClasificados();
+        if (!grupos.length) { alert('Sin clasificados aún.'); return; }
+        const todos  = grupos.flatMap(g => g.clasificados);
+        const ronda  = document.getElementById('enc-nombre-ronda').value.trim() || 'Siguiente ronda';
+        const premio = document.getElementById('enc-premio-final').value.trim();
+        if (!confirm(`¿Crear encuesta "${ronda}" con ${todos.length} equipos clasificados?`)) return;
+        const st = document.getElementById('status-clasificados');
+        st.textContent = 'Creando...'; st.className = 'din-status';
+        try {
+            await P.enc.crear(portalActual, {
+                titulo:     ronda,
+                pregunta:   premio ? `¿Quién gana el ${premio}?` : '¿Quién avanza a la final?',
+                opciones:   todos,
+                activo:     false,
+                nGanadores: 1,
+            });
+            await cargarEncuestas();
+            renderClasificados();
+            st.textContent = '✔ Encuesta(s) de nueva ronda creadas.'; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 3000);
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+    document.querySelectorAll('[name="enc-f-limite"]').forEach(r => {
+        r.addEventListener('change', function() {
+            document.getElementById('enc-f-dur-wrap').style.display    = this.value === 'duracion' ? '' : 'none';
+            document.getElementById('enc-f-fecha-wrap').style.display = this.value === 'fecha'    ? '' : 'none';
+        });
+    });
+
+    document.getElementById('btn-enc-f-addopt').addEventListener('click', () => {
+        const cont = document.getElementById('enc-f-opciones');
+        if (cont.children.length >= 8) { alert('Máximo 8 opciones.'); return; }
+        const n = cont.children.length + 1;
+        const row = document.createElement('div'); row.className = 'din-opt-row';
+        row.innerHTML = `<input type="text" class="enc-f-opt" placeholder="Opción ${n}" maxlength="80"><button onclick="borrarEncFOpt(this)"><i class="fa-solid fa-xmark"></i></button>`;
+        cont.appendChild(row);
+    });
+
+    window.borrarEncFOpt = function(btn) {
+        const cont = document.getElementById('enc-f-opciones');
+        if (cont.children.length <= 2) { alert('Mínimo 2 opciones.'); return; }
+        btn.closest('.din-opt-row').remove();
+    };
+
+    function poblarEncFOpts(vals) {
+        const cont = document.getElementById('enc-f-opciones');
+        cont.innerHTML = '';
+        vals.forEach((v, i) => {
+            const row = document.createElement('div'); row.className = 'din-opt-row';
+            row.innerHTML = `<input type="text" class="enc-f-opt" placeholder="Opción ${i+1}" maxlength="80" value="${esc(v)}"><button onclick="borrarEncFOpt(this)"><i class="fa-solid fa-xmark"></i></button>`;
+            cont.appendChild(row);
+        });
+        while (cont.children.length < 2) {
+            const n = cont.children.length + 1;
+            const row = document.createElement('div'); row.className = 'din-opt-row';
+            row.innerHTML = `<input type="text" class="enc-f-opt" placeholder="Opción ${n}" maxlength="80"><button onclick="borrarEncFOpt(this)"><i class="fa-solid fa-xmark"></i></button>`;
+            cont.appendChild(row);
+        }
+    }
+
+    /* ── Cargar equipos registrados — con opción de dividir ── */
+    document.getElementById('btn-enc-f-equipos').addEventListener('click', async () => {
+        const st = document.getElementById('status-enc-f-cargar');
+        st.textContent = 'Cargando equipos...'; st.className = 'din-status';
+        try {
+            const data = await P.dinamica.listar(portalActual, 'registro');
+            const equipos = (data.entradas || []).map(e => e.nombre).filter(Boolean);
+            if (!equipos.length) { st.textContent = 'No hay equipos registrados.'; st.className = 'din-status err'; return; }
+
+            const MAX_OPT = 6;
+            if (equipos.length > MAX_OPT) {
+                const nGrupos = Math.ceil(equipos.length / MAX_OPT);
+                const resp = confirm(
+                    `Hay ${equipos.length} equipos registrados.\n\n` +
+                    `Con ${MAX_OPT} opciones por encuesta necesitas ${nGrupos} encuestas.\n\n` +
+                    `¿Crear ${nGrupos} encuestas automáticamente (${Math.ceil(equipos.length / nGrupos)} equipos por grupo)?\n\n` +
+                    `OK = Crear todas automáticamente\nCancelar = Cargar solo los primeros ${MAX_OPT}`
+                );
+                if (resp) {
+                    st.textContent = `Creando ${nGrupos} encuestas...`; st.className = 'din-status';
+                    // Calcular deadline
+                    let deadline = null;
+                    const tipoLim = document.querySelector('[name="enc-f-limite"]:checked').value;
+                    if (tipoLim === 'duracion') {
+                        const dur = parseInt(document.getElementById('enc-f-duracion').value);
+                        deadline = dur > 0 ? new Date(Date.now() + dur * 1000).toISOString() : null;
+                    } else if (tipoLim === 'fecha') {
+                        const fv = document.getElementById('enc-f-fecha-fin').value;
+                        deadline = fv ? new Date(fv).toISOString() : null;
+                    }
+                    const preguntaBase  = document.getElementById('enc-f-pregunta').value.trim() || '¿Quién pasa a la siguiente ronda?';
+                    const imagen        = document.getElementById('enc-f-imagen').value.trim();
+                    const activo        = document.getElementById('enc-f-activo').checked;
+                    const nGanadores    = Math.max(1, parseInt(document.getElementById('enc-f-ganadores').value) || 1);
+                    const tamGrupo = Math.ceil(equipos.length / nGrupos);
+                    for (let g = 0; g < nGrupos; g++) {
+                        const grupo = equipos.slice(g * tamGrupo, (g + 1) * tamGrupo);
+                        const titulo = `Grupo ${String.fromCharCode(65 + g)}`; // Grupo A, B, C...
+                        await P.enc.crear(portalActual, {
+                            titulo,
+                            pregunta: preguntaBase,
+                            opciones: grupo,
+                            imagen: imagen || null,
+                            deadline,
+                            activo,
+                            nGanadores,
+                        });
+                    }
+                    await cargarEncuestas();
+                    document.getElementById('panel-form-enc').style.display = 'none';
+                    st.textContent = `✔ ${nGrupos} encuestas creadas con ${equipos.length} equipos.`; st.className = 'din-status ok';
+                    setTimeout(() => st.textContent = '', 4000);
+                    return;
+                }
+            }
+            // Caso normal: cargar primeros MAX_OPT en el formulario
+            poblarEncFOpts(equipos.slice(0, MAX_OPT));
+            st.textContent = `✔ ${Math.min(equipos.length, MAX_OPT)} equipo${equipos.length !== 1 ? 's' : ''} cargado${equipos.length !== 1 ? 's' : ''}.`; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 3000);
+        } catch(e) { st.textContent = e.message || 'Error al cargar equipos.'; st.className = 'din-status err'; }
+    });
+
+    /* ── CSV ── */
+    document.getElementById('enc-f-csv').addEventListener('change', function() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const st = document.getElementById('status-enc-f-cargar');
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const lineas = (ev.target.result || '').split(/\r?\n/).map(l => l.split(',')[0].replace(/^["'\s]+|["'\s]+$/g, '')).filter(Boolean);
+            if (!lineas.length) { st.textContent = 'CSV vacío.'; st.className = 'din-status err'; return; }
+            poblarEncFOpts(lineas.slice(0, 8));
+            st.textContent = `✔ ${lineas.length} opción${lineas.length !== 1 ? 'es' : ''} cargada${lineas.length !== 1 ? 's' : ''}.`; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 3000);
+        };
+        reader.readAsText(file, 'UTF-8');
+        this.value = '';
+    });
+
+    /* ── Guardar (crear o editar) ── */
+    document.getElementById('btn-enc-f-guardar').addEventListener('click', async () => {
+        const pregunta = document.getElementById('enc-f-pregunta').value.trim();
+        const opciones = Array.from(document.querySelectorAll('.enc-f-opt')).map(i => i.value.trim()).filter(Boolean);
+        if (opciones.length < 2) { alert('Necesitas al menos 2 opciones válidas.'); return; }
+
+        let deadline = null;
+        const tipoLim = document.querySelector('[name="enc-f-limite"]:checked').value;
+        if (tipoLim === 'duracion') {
+            const dur = parseInt(document.getElementById('enc-f-duracion').value);
+            deadline = dur > 0 ? new Date(Date.now() + dur * 1000).toISOString() : null;
+        } else if (tipoLim === 'fecha') {
+            const fv = document.getElementById('enc-f-fecha-fin').value;
+            if (!fv) { alert('Selecciona la fecha de finalización.'); return; }
+            const fd = new Date(fv);
+            if (fd <= new Date()) { alert('La fecha debe ser en el futuro.'); return; }
+            deadline = fd.toISOString();
+        }
+
+        const d = {
+            titulo:     document.getElementById('enc-f-titulo').value.trim() || null,
+            pregunta:   pregunta || null,
+            opciones,
+            imagen:     document.getElementById('enc-f-imagen').value.trim() || null,
+            deadline,
+            activo:     document.getElementById('enc-f-activo').checked,
+            nGanadores: Math.max(1, parseInt(document.getElementById('enc-f-ganadores').value) || 1),
+        };
+
+        const st = document.getElementById('status-enc-form');
+        st.textContent = encEditId ? 'Guardando...' : 'Creando...'; st.className = 'din-status';
+        try {
+            if (encEditId) {
+                await P.enc.editar(encEditId, { ...d, quitarDeadline: !deadline });
+            } else {
+                await P.enc.crear(portalActual, d);
+            }
+            await cargarEncuestas();
+            document.getElementById('panel-form-enc').style.display = 'none';
+            encEditId = null;
+            st.textContent = ''; st.className = 'din-status';
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+    /* ─── ENCUESTA LEGADA: placeholder para cargarDinamica ─── */
+    function renderEncuesta() { /* migrado a sistema multi-enc */ }
+
+
+
+    /* ══════════════════════════════════════
+       LEADERBOARD DE JUEGOS (genérico)
+    ══════════════════════════════════════ */
+    function renderLeaderboard(tipo) {
+        const ses   = sesiones[tipo] || {};
+        const lista = (entradas[tipo] || []).slice(0, 20);
+        const toggle = document.getElementById('toggle-' + tipo);
+        const badge  = document.getElementById('badge-' + tipo);
+        const urlBox = document.getElementById('url-' + tipo);
+        const fondo  = document.getElementById(tipo + '-fondo');
+
+        if (toggle) toggle.checked = !!ses.activo;
+        if (badge)  { badge.textContent = ses.activo ? 'Activo' : 'Inactivo'; badge.className = 'din-badge' + (ses.activo ? ' activo' : ''); }
+        if (urlBox) urlBox.style.display = ses.activo ? 'flex' : 'none';
+        if (fondo)  fondo.value = ses.config?.fondo || '';
+
+        // Rellenar input de deadline si existe
+        if (JUEGO_TIPOS.includes(tipo)) {
+            const inp = document.getElementById(tipo + '-deadline');
+            if (inp) {
+                const dl = ses.deadline;
+                inp.value = dl ? new Date(new Date(dl).getTime() - new Date(dl).getTimezoneOffset()*60000).toISOString().slice(0,16) : '';
+            }
+        }
+
+        // Cargar ganador guardado en config
+        renderGanadorActual();
+
+        const tb = document.getElementById('tbody-lb-' + tipo);
+        if (!tb) return;
+        if (!lista.length) { tb.innerHTML = `<tr><td colspan="5" class="din-empty">Sin registros</td></tr>`; return; }
+        const sorted = [...lista].sort((a, b) => (parseInt(b.metadata?.puntos||0)) - (parseInt(a.metadata?.puntos||0)));
+        tb.innerHTML = sorted.map((r, i) => {
+            const pts = r.metadata?.puntos || 0;
+            const id  = r.ig || r.numero || '—';
+            const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+            return `<tr>
+                <td><div class="score-rank"><div class="pos ${cls}">${i+1}</div></div></td>
+                <td>${esc(r.nombre)}</td>
+                <td style="font-size:.78rem;color:#aaa">${esc(id)}</td>
+                <td style="color:#FFD54A;font-weight:700">${pts}</td>
+                <td><button class="del-btn" onclick="borrarEntrada('${tipo}',${r.id})"><i class="fa-solid fa-xmark"></i></button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Toggles de habilitación
+    JUEGO_TIPOS.forEach(tipo => {
+        document.getElementById('toggle-' + tipo)?.addEventListener('change', function() {
+            config(tipo, { activo: this.checked }, 'status-' + tipo);
+        });
+        // Guardar fondo
+        document.getElementById('btn-' + tipo + '-fondo-save')?.addEventListener('click', async () => {
+            const url   = document.getElementById(tipo + '-fondo')?.value.trim() || '';
+            const ses   = sesiones[tipo] || {};
+            const cfg   = Object.assign({}, ses.config || {}, { fondo: url || undefined });
+            if (!url) delete cfg.fondo;
+            const st = document.getElementById('status-' + tipo);
+            if (st) { st.textContent = 'Guardando…'; st.className = 'din-status'; }
+            try {
+                await P.dinamica.config(portalActual, tipo, { config: cfg });
+                await cargarDinamica(tipo);
+                if (st) { st.textContent = '✔ Fondo actualizado'; st.className = 'din-status ok'; setTimeout(() => st.textContent='',2500); }
+            } catch(e) { if (st) { st.textContent = e.message; st.className = 'din-status err'; } }
+        });
+    });
+
+    // Botones "Probar" — cargan el juego inline en la card (modo admin, sin requerir activo=true)
+    ['juego_tetris','juego_3lineas','juego_pacman','juego_breakout','juego_bomberman','juego_invaders','juego_flappy'].forEach(tipo => {
+        document.getElementById('btn-probar-' + tipo)?.addEventListener('click', function() {
+            const div = document.getElementById('probar-' + tipo);
+            if (!div) return;
+            if (div.innerHTML.trim()) { div.innerHTML = ''; this.innerHTML = '<i class="fa-solid fa-play"></i> Probar'; return; }
+            this.innerHTML = '<i class="fa-solid fa-stop"></i> Cerrar';
+            window.PumasPortal?.juegos?.montarAdmin(portalActual, 'probar-' + tipo, tipo);
+        });
+    });
+
+    // Deadline guardar/quitar para todos los juegos (Snake usa IDs con guión, los demás con guión-bajo)
+    JUEGO_TIPOS.forEach(tipo => {
+        const inputId = tipo + '-deadline';
+        const btnSave  = document.getElementById('btn-' + tipo + '-deadline');
+        const btnClear = document.getElementById('btn-' + tipo + '-nodeadline');
+        btnSave?.addEventListener('click', async () => {
+            const val = document.getElementById(inputId)?.value;
+            const st  = document.getElementById('status-' + tipo);
+            if (!val) { alert('Selecciona fecha y hora.'); return; }
+            if (st) { st.textContent = 'Guardando…'; st.className = 'din-status'; }
+            try {
+                await P.dinamica.config(portalActual, tipo, { deadline: new Date(val).toISOString() });
+                await cargarDinamica(tipo);
+                if (st) { st.textContent = '✔ Cierre guardado'; st.className = 'din-status ok'; setTimeout(()=>st.textContent='',2500); }
+            } catch(e) { if (st) { st.textContent = e.message; st.className = 'din-status err'; } }
+        });
+        btnClear?.addEventListener('click', async () => {
+            const st = document.getElementById('status-' + tipo);
+            if (st) { st.textContent = 'Quitando…'; st.className = 'din-status'; }
+            try {
+                await P.dinamica.config(portalActual, tipo, { quitarDeadline: true });
+                const inp = document.getElementById(inputId); if (inp) inp.value = '';
+                await cargarDinamica(tipo);
+                if (st) { st.textContent = '✔ Límite removido'; st.className = 'din-status ok'; setTimeout(()=>st.textContent='',2500); }
+            } catch(e) { if (st) { st.textContent = e.message; st.className = 'din-status err'; } }
+        });
+    });
+
+    // Sorteos: poblar links de portales cuando cambia el portal seleccionado
+    function actualizarSorteoPortales() {
+        const wrap = document.getElementById('sorteos-portales');
+        if (!wrap) return;
+        const portalObj = P.PORTALES[portalActual];
+        if (!portalObj) { wrap.innerHTML = '<span style="color:#555;font-size:.82rem">Sin portal seleccionado</span>'; return; }
+        const baseUrl = window.location.origin + window.location.pathname.replace('admin/dinamicas.html','');
+        const sorteoUrl = baseUrl + 'portales/' + portalActual + '/sorteo.html';
+        wrap.innerHTML = `
+            <a href="${sorteoUrl}" target="_blank" class="btn-mini" style="gap:6px"><i class="fa-solid fa-shuffle"></i> Ver sorteo</a>
+            <button class="btn-mini" onclick="navigator.clipboard.writeText('${sorteoUrl}').then(()=>alert('URL copiada'))"><i class="fa-solid fa-copy"></i> Copiar URL</button>
+        `;
+    }
+
+    // Exportar WA / CSV / Limpiar (event delegation)
+    document.addEventListener('click', async e => {
+        const btnWa    = e.target.closest('[data-lb-wa]');
+        const btnCsv   = e.target.closest('[data-lb-csv]');
+        const btnClear = e.target.closest('[data-lb-clear]');
+
+        if (btnWa) {
+            const tipo = btnWa.dataset.lbWa;
+            const lista = (entradas[tipo] || []).slice().sort((a,b)=>(b.metadata?.puntos||0)-(a.metadata?.puntos||0));
+            if (!lista.length) { alert('No hay registros.'); return; }
+            const portal = (P.PORTALES[portalActual]||{}).nombre || portalActual;
+            const nombre = JUEGO_NOMBRES[tipo] || tipo;
+            let txt = `*Top jugadores ${nombre} — ${portal}*\n\n`;
+            const medals = ['🥇','🥈','🥉'];
+            lista.slice(0,20).forEach((r,i) => {
+                const pts = r.metadata?.puntos || 0;
+                const id  = r.ig || r.numero;
+                txt += `${medals[i]||(i+1+'.')} ${r.nombre}${id ? ` (ID: ${id})` : ''} — ${pts} pts\n`;
+            });
+            navigator.clipboard.writeText(txt).then(()=>alert('Copiado para WhatsApp.')).catch(()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('Copiado.');});
+        }
+
+        if (btnCsv) {
+            const tipo = btnCsv.dataset.lbCsv;
+            const lista = (entradas[tipo] || []).slice().sort((a,b)=>(b.metadata?.puntos||0)-(a.metadata?.puntos||0));
+            if (!lista.length) { alert('No hay registros.'); return; }
+            const rows = ['#,Jugador,ID,Puntos,Fecha'].concat(
+                lista.map((r,i)=>`${i+1},"${(r.nombre||'').replace(/"/g,'""')}","${(r.ig||r.numero||'').replace(/"/g,'""')}",${r.metadata?.puntos||0},"${r.creado?new Date(r.creado).toLocaleString('es-MX'):''}"`)
+            ).join('\n');
+            descargar(`lb_${tipo}_${portalActual}.csv`, rows, 'text/csv');
+        }
+
+        if (btnClear) {
+            const tipo = btnClear.dataset.lbClear;
+            if (!confirm(`¿Borrar todos los registros de ${JUEGO_NOMBRES[tipo] || tipo}?`)) return;
+            const st = document.getElementById('status-' + tipo);
+            if (st) { st.textContent = 'Limpiando...'; st.className = 'din-status'; }
+            try {
+                await P.dinamica.vaciar(portalActual, tipo);
+                await cargarDinamica(tipo);
+                if (st) { st.textContent = '✔ Limpiado'; st.className = 'din-status ok'; setTimeout(()=>st.textContent='',2500); }
+            } catch(e) { if (st) { st.textContent = e.message; st.className = 'din-status err'; } }
+        }
+    });
+
+    /* ── Ganador del evento ── */
+    function renderGanadorActual() {
+        const tipo = document.getElementById('gan-juego')?.value || 'juego';
+        const ses  = sesiones[tipo] || {};
+        const gan  = ses.config?.ganador;
+        const el   = document.getElementById('ganador-actual');
+        if (!el) return;
+        if (gan && gan.nombre) {
+            el.innerHTML = `<span style="color:#FFD54A">🏆 Ganador actual (${esc(JUEGO_NOMBRES[tipo]||tipo)}):</span>
+                <b style="color:#fff;margin-left:6px">${esc(gan.nombre)}</b>
+                <span style="color:#aaa;margin-left:6px">— ${gan.puntos ?? '?'} pts</span>`;
+        } else {
+            el.textContent = 'Sin ganador registrado para ' + (JUEGO_NOMBRES[tipo] || tipo) + '.';
+        }
+    }
+
+    document.getElementById('gan-juego')?.addEventListener('change', () => {
+        const tipo = document.getElementById('gan-juego').value;
+        renderGanadorActual();
+        // Pre-llenar desde el top 1
+        const lista = (entradas[tipo] || []).slice().sort((a,b)=>(b.metadata?.puntos||0)-(a.metadata?.puntos||0));
+        if (lista[0]) {
+            document.getElementById('gan-nombre').value = lista[0].nombre || '';
+            document.getElementById('gan-puntos').value = lista[0].metadata?.puntos || '';
+        }
+    });
+
+    document.getElementById('btn-guardar-ganador')?.addEventListener('click', async () => {
+        const tipo   = document.getElementById('gan-juego').value;
+        const nombre = document.getElementById('gan-nombre').value.trim();
+        const puntos = parseInt(document.getElementById('gan-puntos').value) || 0;
+        if (!nombre) { alert('Escribe el nombre del ganador.'); return; }
+        const st  = document.getElementById('status-ganador');
+        const ses = sesiones[tipo] || {};
+        const cfg = Object.assign({}, ses.config || {}, { ganador: { nombre, puntos } });
+        st.textContent = 'Guardando…'; st.className = 'din-status';
+        try {
+            await P.dinamica.config(portalActual, tipo, { config: cfg });
+            await cargarDinamica(tipo);
+            st.textContent = `✔ Ganador de ${JUEGO_NOMBRES[tipo]||tipo} guardado`; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 3000);
+        } catch(e) { st.textContent = e.message; st.className = 'din-status err'; }
+    });
+
+    /* ── Borrar entrada individual ── */
+    window.borrarEntrada = async function(tipo, id) {
+        if (!confirm('¿Borrar este registro?')) return;
+        try {
+            await P.dinamica.borrar(portalActual, id);
+            await cargarDinamica(tipo);
+        } catch(e) { alert(e.message); }
+    };
+
+    /* ── Descarga helper ── */
+    function descargar(nombre, contenido, mime) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['﻿' + contenido], { type: mime + ';charset=utf-8' }));
+        a.download = nombre; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    }
+
+
+    /* ══════════════════════════════════════
+       SNAKE — motor del juego
+    ══════════════════════════════════════ */
+    const canvas  = document.getElementById('snakeCanvas');
+    const ctx     = canvas.getContext('2d');
+    const GRID    = 20;
+    const CELL    = canvas.width / GRID;
+    const COLORS  = { head: '#4dff91', body: '#2ab870', food: '#FFD54A', wall: '#1a1c26' };
+
+    let snake, dir, nextDir, food, score, gameLoop, gameRunning, gamePaused;
+    let juegoJugador = null;
+    try { juegoJugador = JSON.parse(localStorage.getItem('pg_din_jugador') || 'null'); } catch(e) {}
+
+    function resetGame() {
+        snake = [{ x: 10, y: 10 }];
+        dir = { x: 1, y: 0 }; nextDir = { x: 1, y: 0 };
+        food = spawnFood();
+        score = 0; gameRunning = false; gamePaused = false;
+        document.getElementById('game-score').textContent = '0';
+        renderCanvas();
+    }
+
+    function spawnFood() {
+        let pos;
+        do { pos = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) }; }
+        while (snake.some(s => s.x === pos.x && s.y === pos.y));
+        return pos;
+    }
+
+    function renderCanvas() {
+        ctx.fillStyle = COLORS.wall; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Grid dots
+        ctx.fillStyle = 'rgba(255,255,255,.04)';
+        for (let x = 0; x < GRID; x++) for (let y = 0; y < GRID; y++)
+            ctx.fillRect(x * CELL + CELL/2 - 1, y * CELL + CELL/2 - 1, 2, 2);
+        // Food
+        ctx.fillStyle = COLORS.food;
+        ctx.shadowColor = COLORS.food; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.arc(food.x * CELL + CELL/2, food.y * CELL + CELL/2, CELL/2 - 3, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        // Snake
+        snake.forEach((s, i) => {
+            ctx.fillStyle = i === 0 ? COLORS.head : COLORS.body;
+            ctx.shadowColor = i === 0 ? COLORS.head : 'transparent';
+            ctx.shadowBlur = i === 0 ? 10 : 0;
+            const p = i === 0 ? 1 : 2;
+            ctx.beginPath();
+            ctx.roundRect(s.x * CELL + p, s.y * CELL + p, CELL - p*2, CELL - p*2, 4);
+            ctx.fill();
+        });
+        ctx.shadowBlur = 0;
+        if (!gameRunning) {
+            ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#D8C395'; ctx.font = 'bold 16px Michroma, monospace'; ctx.textAlign = 'center';
+            ctx.fillText(gamePaused ? 'PAUSADO' : 'PRESIONA INICIAR', canvas.width/2, canvas.height/2);
+            ctx.textAlign = 'left';
+        }
+    }
+
+    function step() {
+        dir = { ...nextDir };
+        const nx = snake[0].x + dir.x;
+        const ny = snake[0].y + dir.y;
+        // WALL collision = game over
+        if (nx < 0 || nx >= GRID || ny < 0 || ny >= GRID) { gameOver(); return; }
+        const head = { x: nx, y: ny };
+        // Self collision
+        if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
+        snake.unshift(head);
+        if (head.x === food.x && head.y === food.y) {
+            score += 10 + Math.floor(snake.length / 3);
+            document.getElementById('game-score').textContent = score;
+            food = spawnFood();
+        } else { snake.pop(); }
+        renderCanvas();
+    }
+
+    function gameOver() {
+        clearInterval(gameLoop); gameRunning = false;
+        document.getElementById('btn-start-game').disabled = false;
+        document.getElementById('btn-pause-game').disabled = true;
+        ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 22px Michroma, monospace'; ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 14);
+        ctx.fillStyle = '#D8C395'; ctx.font = '14px Michroma, monospace';
+        ctx.fillText('Puntuación: ' + score, canvas.width/2, canvas.height/2 + 14);
+        ctx.textAlign = 'left';
+        // Update local best
+        const prev = parseInt(localStorage.getItem('pg_din_best_score') || '0');
+        if (score > prev) localStorage.setItem('pg_din_best_score', score);
+        document.getElementById('game-best').textContent = Math.max(score, prev);
+        if (score > 0) {
+            if (juegoJugador) guardarPuntuacion(juegoJugador.nombre, juegoJugador.ig || juegoJugador.numero || '', score);
+            else { setTimeout(() => document.getElementById('game-reg-form').style.display = '', 200); }
+        }
+    }
+
+    async function guardarPuntuacion(nombre, ig, pts) {
+        const st = document.getElementById('status-juego');
+        st.textContent = 'Guardando puntuación...'; st.className = 'din-status';
+        try {
+            await P.dinamica.registrar(portalActual, 'juego', { nombre, ig: ig || '', metadata: { puntos: pts } });
+            await cargarDinamica('juego');
+            st.textContent = '✔ Puntuación guardada'; st.className = 'din-status ok';
+            setTimeout(() => st.textContent = '', 3000);
+        } catch(e) {
+            st.textContent = 'No se guardó: ' + (e.message || 'error'); st.className = 'din-status err';
+        }
+        document.getElementById('game-reg-form').style.display = 'none';
+    }
+
+    document.getElementById('btn-game-reg-save').addEventListener('click', () => {
+        const nombre = document.getElementById('game-reg-nombre').value.trim();
+        const ig     = document.getElementById('game-reg-num').value.trim();
+        if (!nombre) { alert('Escribe tu nombre.'); return; }
+        juegoJugador = { nombre, ig };
+        try { localStorage.setItem('pg_din_jugador', JSON.stringify(juegoJugador)); } catch(e) {}
+        guardarPuntuacion(nombre, ig, score);
+    });
+
+    document.getElementById('btn-start-game').addEventListener('click', () => {
+        if (gameRunning) return;
+        if (!juegoJugador) {
+            document.getElementById('game-reg-form').style.display = '';
+            document.getElementById('game-reg-nombre').focus();
+            return;
+        }
+        document.getElementById('game-reg-form').style.display = 'none';
+        resetGame();
+        gameRunning = true; gamePaused = false;
+        document.getElementById('btn-start-game').disabled = true;
+        document.getElementById('btn-pause-game').disabled = false;
+        gameLoop = setInterval(step, 130);
+    });
+
+    document.getElementById('btn-pause-game').addEventListener('click', () => {
+        if (!gameRunning) return;
+        if (gamePaused) {
+            gamePaused = false;
+            gameLoop = setInterval(step, 130);
+            document.getElementById('btn-pause-game').innerHTML = '<i class="fa-solid fa-pause"></i> Pausar';
+        } else {
+            gamePaused = true;
+            clearInterval(gameLoop);
+            document.getElementById('btn-pause-game').innerHTML = '<i class="fa-solid fa-play"></i> Reanudar';
+            renderCanvas();
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        const map = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right', w:'up', s:'down', a:'left', d:'right', W:'up', S:'down', A:'left', D:'right' };
+        const dirs = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
+        if (e.key === ' ') { e.preventDefault(); document.getElementById('btn-pause-game').click(); return; }
+        const d = map[e.key];
+        if (!d) return;
+        e.preventDefault();
+        const nd = dirs[d];
+        if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd;
+    });
+
+    let touchStart = null;
+    canvas.addEventListener('touchstart', e => { touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; e.preventDefault(); }, { passive: false });
+    canvas.addEventListener('touchend', e => {
+        if (!touchStart) return;
+        const dx = e.changedTouches[0].clientX - touchStart.x;
+        const dy = e.changedTouches[0].clientY - touchStart.y;
+        if (Math.abs(dx) > Math.abs(dy)) nextDir = dx > 0 ? {x:1,y:0} : {x:-1,y:0};
+        else nextDir = dy > 0 ? {x:0,y:1} : {x:0,y:-1};
+        touchStart = null; e.preventDefault();
+    }, { passive: false });
+
+    // Init best score and player name
+    document.getElementById('game-best').textContent = localStorage.getItem('pg_din_best_score') || '0';
+    if (juegoJugador) {
+        document.getElementById('game-reg-nombre').value = juegoJugador.nombre;
+        document.getElementById('game-reg-num').value = juegoJugador.ig || juegoJugador.numero || '';
+    }
+
+    /* ── Arranque ── */
+    resetGame();
+    await cargarTodo();
+
+    /* ════════════════════════════════════════════
+       BANNER DEL GANADOR — canvas 1080×1080
+    ═══════════════════════════════════════════════ */
+    (function initBanner() {
+        const BCV  = document.getElementById('banAdminCv');
+        const BCTX = BCV.getContext('2d');
+        const BS   = 1080;
+        const BJUEGOS = {
+            snake:      { label: 'Snake',         emoji: '🐍', pts: 'PUNTOS',      titulo: 'GANADOR' },
+            tetris:     { label: 'Tetris',         emoji: '🧱', pts: 'PUNTOS',      titulo: 'GANADOR' },
+            treslineas: { label: 'Tres en Línea',  emoji: '✕○', pts: 'VICTORIAS',   titulo: 'GANADOR' },
+            mvp:        { label: 'Entrenos PROYECTN', emoji: '⭐', pts: 'PUNTUACIÓN',   titulo: 'MVP' },
+        };
+        let banBg = null;
+        let banFontsReady = false;
+
+        const banFonts = Promise.all([
+            document.fonts.load('400 40px Michroma'),
+            document.fonts.load('700 40px Michroma'),
+        ]).then(() => { banFontsReady = true; }).catch(() => { banFontsReady = true; });
+
+        function banFitFont(ctx, text, fam, maxW, maxSz) {
+            let sz = maxSz;
+            ctx.font = `700 ${sz}px ${fam}`;
+            while (ctx.measureText(text).width > maxW && sz > 18) {
+                sz -= 2; ctx.font = `700 ${sz}px ${fam}`;
+            }
+            return sz;
+        }
+
+        function banRender() {
+            const juego  = BJUEGOS[document.getElementById('ban-juego').value];
+            const nombre = document.getElementById('ban-nombre').value.trim() || 'GANADOR';
+            const idff   = document.getElementById('ban-idff').value.trim();
+            const puntos = document.getElementById('ban-puntos').value.trim();
+            const torneo = document.getElementById('ban-torneo').value.trim();
+            const C = BCTX, S = BS;
+
+            /* fondo */
+            if (banBg) {
+                const sc = Math.max(S / banBg.width, S / banBg.height);
+                const w = banBg.width * sc, h = banBg.height * sc;
+                C.drawImage(banBg, (S-w)/2, (S-h)/2, w, h);
+            } else {
+                const g = C.createRadialGradient(S*.5,S*.3,0,S*.5,S*.5,S*.75);
+                g.addColorStop(0,'#1a1b22'); g.addColorStop(1,'#07080d');
+                C.fillStyle = g; C.fillRect(0,0,S,S);
+                C.strokeStyle='rgba(216,195,149,.04)'; C.lineWidth=1;
+                for (let i=60;i<S;i+=60){
+                    C.beginPath();C.moveTo(i,0);C.lineTo(i,S);C.stroke();
+                    C.beginPath();C.moveTo(0,i);C.lineTo(S,i);C.stroke();
+                }
+            }
+            /* overlay */
+            const ov=C.createLinearGradient(0,0,0,S);
+            ov.addColorStop(0,'rgba(0,0,0,.55)');ov.addColorStop(.45,'rgba(0,0,0,.3)');ov.addColorStop(1,'rgba(0,0,0,.75)');
+            C.fillStyle=ov; C.fillRect(0,0,S,S);
+            /* barras doradas */
+            C.fillStyle='#D8C395'; C.fillRect(0,0,S,7); C.fillRect(0,S-7,S,7);
+            /* PROYECTN */
+            C.font=`400 ${S*.028}px Michroma,sans-serif`; C.fillStyle='#D8C395';
+            C.letterSpacing=`${S*.005}px`; C.textAlign='center';
+            C.fillText('PROYECTN',S/2,S*.07); C.letterSpacing='0px';
+            /* badge juego */
+            const bY=S*.115, bTxt=`${juego.emoji}  ${juego.label.toUpperCase()}`;
+            C.font=`400 ${S*.022}px Michroma,sans-serif`;
+            const bW=C.measureText(bTxt).width+S*.06, bH=S*.05, bX=S/2-bW/2;
+            C.fillStyle='rgba(216,195,149,.12)'; C.strokeStyle='rgba(216,195,149,.4)'; C.lineWidth=1.5;
+            const br=8; C.beginPath();
+            C.moveTo(bX+br,bY);C.lineTo(bX+bW-br,bY);C.quadraticCurveTo(bX+bW,bY,bX+bW,bY+br);
+            C.lineTo(bX+bW,bY+bH-br);C.quadraticCurveTo(bX+bW,bY+bH,bX+bW-br,bY+bH);
+            C.lineTo(bX+br,bY+bH);C.quadraticCurveTo(bX,bY+bH,bX,bY+bH-br);
+            C.lineTo(bX,bY+br);C.quadraticCurveTo(bX,bY,bX+br,bY);C.closePath();
+            C.fill(); C.stroke();
+            C.fillStyle='#D8C395'; C.fillText(bTxt,S/2,bY+bH*.68);
+            /* GANADOR / MVP label */
+            C.font=`400 ${S*.033}px Michroma,sans-serif`; C.fillStyle='rgba(216,195,149,.7)';
+            C.letterSpacing=`${S*.012}px`; C.fillText(juego.titulo,S/2,S*.28); C.letterSpacing='0px';
+            /* divisores */
+            const dY=S*.3; C.strokeStyle='#D8C395'; C.lineWidth=1;
+            C.beginPath();C.moveTo(S/2-S*.28,dY);C.lineTo(S/2-S*.18,dY);C.stroke();
+            C.beginPath();C.moveTo(S/2+S*.18,dY);C.lineTo(S/2+S*.28,dY);C.stroke();
+            /* NOMBRE */
+            const nSz=banFitFont(C,nombre.toUpperCase(),'Michroma,sans-serif',S*.82,S*.12);
+            C.font=`700 ${nSz}px Michroma,sans-serif`;
+            const nG=C.createLinearGradient(0,S*.32,0,S*.32+nSz);
+            nG.addColorStop(0,'#f5e8c0');nG.addColorStop(.5,'#D8C395');nG.addColorStop(1,'#b8944a');
+            C.fillStyle=nG; C.fillText(nombre.toUpperCase(),S/2,S*.32+nSz*.85);
+            /* ID FF */
+            if(idff){
+                C.font=`400 ${S*.03}px sans-serif`; C.fillStyle='rgba(255,255,255,.55)';
+                C.fillText('ID: '+idff,S/2,S*.47);
+            }
+            /* puntos */
+            if(puntos){
+                const pY=S*.57;
+                C.font=`400 ${S*.023}px Michroma,sans-serif`; C.fillStyle='rgba(216,195,149,.6)';
+                C.letterSpacing=`${S*.006}px`; C.fillText(juego.pts,S/2,pY); C.letterSpacing='0px';
+                const pSz=banFitFont(C,puntos,'Michroma,sans-serif',S*.55,S*.145);
+                C.font=`700 ${pSz}px Michroma,sans-serif`;
+                const pG=C.createLinearGradient(0,pY,0,pY+pSz);
+                pG.addColorStop(0,'#ffffff');pG.addColorStop(1,'#D8C395');
+                C.fillStyle=pG; C.fillText(puntos,S/2,pY+pSz*.97);
+            }
+            /* torneo */
+            if(torneo){
+                C.font=`600 ${S*.028}px sans-serif`; C.fillStyle='rgba(255,255,255,.45)';
+                C.fillText(torneo,S/2,S*.84);
+            }
+            /* watermark */
+            C.font=`400 ${S*.018}px Michroma,sans-serif`; C.fillStyle='rgba(216,195,149,.3)';
+            C.textAlign='left'; C.fillText('pumasgaming.com',S*.045,S*.955); C.textAlign='center';
+        }
+
+        function banSafeRender() {
+            if (banFontsReady) banRender(); else banFonts.then(() => banRender());
+        }
+
+        function banLoadBg(src) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload  = () => { banBg = img; banSafeRender(); };
+            img.onerror = () => { banBg = null; banSafeRender(); };
+            img.src = src;
+        }
+
+        /* inputs → re-render */
+        function banSyncLabel() {
+            const j = BJUEGOS[document.getElementById('ban-juego').value];
+            const map = { 'PUNTOS':'Puntuación', 'VICTORIAS':'Victorias ganadas', 'PUNTUACIÓN':'Puntuación' };
+            document.getElementById('ban-label-pts').textContent = map[j.pts] || j.pts;
+        }
+        ['ban-juego','ban-nombre','ban-idff','ban-puntos','ban-torneo'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                banSyncLabel();
+                banSafeRender();
+            });
+        });
+
+        /* URL fondo */
+        document.getElementById('ban-fondo-url').addEventListener('input', function() {
+            const v = this.value.trim();
+            if (!v) { banBg = null; banSafeRender(); return; }
+            banLoadBg(v);
+        });
+
+        /* archivo */
+        const banDrop   = document.getElementById('ban-drop');
+        const banFileIn = document.getElementById('ban-fondo-file');
+        const banPrevImg= document.getElementById('ban-prev-img');
+        const banDropTxt= document.getElementById('ban-drop-txt');
+
+        function banHandleFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const rd = new FileReader();
+            rd.onload = e => {
+                banPrevImg.src = e.target.result;
+                banPrevImg.style.display = 'block';
+                banDropTxt.style.display = 'none';
+                banLoadBg(e.target.result);
+            };
+            rd.readAsDataURL(file);
+        }
+
+        banFileIn.addEventListener('change', () => banHandleFile(banFileIn.files[0]));
+        banDrop.addEventListener('dragover',  e => { e.preventDefault(); banDrop.classList.add('over'); });
+        banDrop.addEventListener('dragleave', () => banDrop.classList.remove('over'));
+        banDrop.addEventListener('drop', e => { e.preventDefault(); banDrop.classList.remove('over'); banHandleFile(e.dataTransfer.files[0]); });
+
+        /* limpiar fondo */
+        document.getElementById('btn-ban-limpiar-fondo').addEventListener('click', () => {
+            banBg = null; banPrevImg.style.display='none'; banDropTxt.style.display='block';
+            document.getElementById('ban-fondo-url').value = ''; banFileIn.value = '';
+            banSafeRender();
+        });
+
+        /* DESCARGAR */
+        document.getElementById('btn-ban-descargar').addEventListener('click', () => {
+            const nombre = document.getElementById('ban-nombre').value.trim() || 'ganador';
+            const juego  = document.getElementById('ban-juego').value;
+            const a = document.createElement('a');
+            a.href     = BCV.toDataURL('image/png');
+            a.download = `banner-${juego}-${nombre.replace(/\s+/g,'-').toLowerCase()}.png`;
+            a.click();
+        });
+
+        /* AUTOCOMPLETAR desde ganador guardado */
+        document.getElementById('btn-ban-desde-ganador').addEventListener('click', () => {
+            const juego   = document.getElementById('gan-juego')?.value || 'juego';
+            const nombre  = document.getElementById('gan-nombre')?.value.trim() || '';
+            const puntos  = document.getElementById('gan-puntos')?.value.trim() || '';
+            const mapa    = { juego:'snake', juego_tetris:'tetris', juego_3lineas:'treslineas' };
+            document.getElementById('ban-juego').value  = mapa[juego] || 'snake';
+            document.getElementById('ban-nombre').value = nombre;
+            document.getElementById('ban-puntos').value = puntos;
+            banSyncLabel();
+            banSafeRender();
+            document.getElementById('card-banner').scrollIntoView({ behavior:'smooth', block:'start' });
+        });
+
+        /* render inicial */
+        banFonts.then(() => banRender());
+    })();
+
+})();
+</script>
+<script src="../portal-kit/juegos.js?v=20261019a"></script>
+</body>
+</html>

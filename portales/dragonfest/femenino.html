@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dragon Fest Femenino by PROYECTN · Resultados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../portal-kit/latam.css?v=20261013e">
+    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" href="imagenes/dragonfestfem.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="dragonfestfem" data-modo="publico"></script>
+    <script src="../../portal-kit/descargas.js?v=20261013e"></script>
+</head>
+<body data-tema="dragonfestfem">
+
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="imagenes/dragonfestfem.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'">
+            <div class="logo"><span class="t-a">DRAGON FEST</span><small>FEMENINO by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#semana" onclick="closeMenu()">Semana</a></li>
+                <li><a href="#calendario" onclick="closeMenu()">Calendario</a></li>
+                <li><a href="#historico" onclick="closeMenu()">Histórico</a></li>
+                                <li><a href="#killers" onclick="closeMenu()">Killers</a></li>
+                <li><a href="#destacados" onclick="closeMenu()">Destacados</a></li>
+                <li><a href="./">Mixto</a></li>
+                <li><a href="#baneados" onclick="closeMenu()">Baneados</a></li>
+                <li><a href="cupos-femenino.html"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="/">PROYECTX</a></li>
+                <li><a href="admin.html"><i class="fa-solid fa-lock"></i> Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="DFF">
+        <div class="hero-copy">
+            <div class="eyebrow">Resultados oficiales · Free Fire</div>
+            <h1><span class="t-a">Dragon</span> <span class="t-b">Fest</span><small>by <b>PROYECTX</b> · Femenino</small></h1>
+            <p>Tabla general, últimos entrenos y top killers de Dragon Fest Femenino, actualizados con cada sala procesada.</p>
+            <div class="hero-actions"><a href="cupos-femenino.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Apartar cupo</a></div>
+            <div class="stat-row">
+                <div><b id="statEntrenos">0</b><small>Entrenos</small></div>
+                <div><b id="statEquipos">0</b><small>Equipos</small></div>
+                <div><b id="statMapas">0</b><small>Mapas</small></div>
+                <div><b id="statKills">0</b><small>Kills</small></div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="imagenes/dragonfestfem.png" alt="" onerror="this.onerror=null;this.src='imagenes/LOGO PUMAS WEB.png'">
+            </div>
+            <!-- Mascota del portal: PNG vertical sin fondo. Si no existe, se oculta sola. -->
+            <img class="hero-mascota" src="imagenes/mascotadragonfestfem.png" alt="Mascota" onerror="this.hidden=true">
+        </div>
+    </section>
+
+    <section id="semana">
+        <h2 class="section-title">Top 50 de la semana</h2>
+        <div class="semana-grid">
+        <div class="card-box">
+            <div class="tabla-cabecera">
+                <h3 class="subtitulo-bloque" id="tituloTop50">Top 50 Equipos · Semana</h3>
+                <div class="orden-toggle" id="ordenSemana" role="group" aria-label="Ordenar Top 50"></div>
+            </div>
+            <p class="leyenda-tabla"><b>SES</b> entrenos jugados · <b>BOO</b> booyah · <b>KILL</b> kills · <b>PG</b> Puntos Generales · <b>PR</b> Puntos Reales (PG ÷ sesiones)</p>
+            <div class="tabla-doble">
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodySemanaA" data-latam-vacio><tr class="vacio"><td colspan="7"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</td></tr></tbody>
+                </table>
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodySemanaB"></tbody>
+                </table>
+            </div>
+        </div>
+        <aside class="card-box" id="calendario">
+            <h3 class="subtitulo-bloque"><i class="fa-solid fa-calendar-days"></i> Calendario de entrenos</h3>
+            <div id="latamCalendario"><p class="res-vacio">Cargando...</p></div>
+        </aside>
+        </div>
+    </section>
+
+    <section id="historico">
+        <h2 class="section-title">Histórico Top 100</h2>
+        <div class="card-box">
+            <div class="tabla-cabecera">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-trophy"></i> Equipos históricos</h3>
+                <div class="orden-toggle" id="ordenHistorico" role="group" aria-label="Ordenar histórico"></div>
+            </div>
+            <p class="leyenda-tabla"><b>PG</b> Puntos Generales · <b>PR</b> Puntos Reales (PG ÷ sesiones). <span id="notaHistorico">Orden: PR (PG ÷ sesiones) → booyah</span></p>
+            <div class="tabla-doble">
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodyTop100A" data-latam-vacio><tr class="vacio"><td colspan="7"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</td></tr></tbody>
+                </table>
+                <table class="pg-tabla lt-tabla"><caption></caption>
+                    <thead><tr><th>#</th><th>Equipo</th><th>SES</th><th>BOO</th><th>KILL</th><th>PG</th><th>PR</th></tr></thead>
+                    <tbody id="bodyTop100B"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="killers">
+        <h2 class="section-title">Top killers</h2>
+        <div class="card-box">
+            <h3 class="subtitulo-bloque"><i class="fa-solid fa-skull"></i> Top 10 killers<span class="wk-range">Por KDA (kills ÷ salas) y por kills totales · mínimo 3 salas</span></h3>
+            <div class="lt-killers" id="gridKillers"><p class="res-vacio">Cargando...</p></div>
+        </div>
+    </section>
+
+    <section id="destacados">
+        <h2 class="section-title">Destacados</h2>
+        <div class="dest-grid" id="latamDestacados"><p class="res-vacio">Cargando...</p></div>
+    </section>
+
+    <section id="baneados">
+        <h2 class="section-title">Equipos baneados</h2>
+        <div class="card-box" id="baneadosPublicos"><p class="res-vacio">Cargando...</p></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>DRAGON FEST FEMENINO</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+    </script>
+    <script src="../../portal-kit/baneados.js?v=20261013e"></script>
+    <script src="../../portal-kit/latam.js?v=20261013e"></script>
+    <script>PumasBaneados.montarPublico('baneadosPublicos', 'dragonfestfem');</script>
+    <script>Latam.iniciarResultadosPortal('dragonfestfem');</script>
+</body>
+</html>

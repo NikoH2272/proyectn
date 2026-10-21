@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin · Ascensos QFD by PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Orbitron se usa en la imagen que se descarga -->
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="icon" href="imagenes/qfd.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="ascensosqfd" data-modo="protegido"></script>
+</head>
+<body data-tema="qfd">
+
+    <header class="site-header">
+        <a class="logo-container" href="admin.html">
+            <img src="imagenes/qfd.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">ASCENSOS QFD</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#resultados" onclick="closeMenu()">Herramienta</a></li>
+                <li><a href="#baneados" onclick="closeMenu()">Baneados</a></li>
+                <li><a href="#gestionCupos" onclick="closeMenu()"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="#usuariosPortal" onclick="closeMenu()"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><a href="/admin/sorteo.html?p=ascensosqfd"><i class="fa-solid fa-dice"></i> Sorteo</a></li>
+                <li><a href="./"><i class="fa-solid fa-trophy"></i> Ver portal</a></li>
+                <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="login.html" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="QFD">
+        <div class="hero-copy">
+            <div class="eyebrow">Herramienta oficial · Free Fire</div>
+            <h1><span class="t-a">Ascensos</span> <span class="t-b">QFD</span><small>by <b>PUMAS</b></small></h1>
+            <p>Procesa las salas, corrige nombres y genera la tabla de ascensos lista para publicar en 1280×720.</p>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="imagenes/qfd.png" alt="" onerror="this.onerror=null;this.src='imagenes/proyectn.png'">
+            </div>
+            <!-- Mascota del portal: PNG vertical sin fondo. Si no existe, se oculta sola. -->
+            <img class="hero-mascota" src="imagenes/mascotaqfd.png" alt="Mascota" onerror="this.hidden=true">
+        </div>
+    </section>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Procesador de resultados por salas</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Sube los archivos (<strong>.log</strong> o <strong>.txt</strong>) o ingresa salas manuales que se sumarán a la tabla compuesta (excluyendo el top killer).
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="selectModoCalculo">Modo de cálculo / tabla</label>
+                    <select id="selectModoCalculo" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="normal" selected>NORMAL (Total Score)</option>
+                        <option value="top">SOLO TOP (Rank Score)</option>
+                        <option value="kill">SOLO KILL (Kill Score)</option>
+                    </select>
+                </div>
+                <!-- QFD tiene un solo diseño. Dragon Fest (mixto/femenino) está en /dragonfest/ -->
+                <div class="form-group" hidden>
+                    <select id="selectTemaVisual" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="fdquisqueya" selected>FD QUISQUEYA (Celeste)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="inputModerador">Moderador / admin</label>
+                    <input type="text" id="inputModerador" placeholder="Ej: Mod · PROYECTN" oninput="renderizarResultados()">
+                </div>
+                <div class="form-group">
+                    <label for="inputFechaHora">Fecha y hora (local)</label>
+                    <input type="datetime-local" id="inputFechaHora" onchange="renderizarResultados()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputFileUpload">Archivos logs de sala (.log, .txt) · selecciona varios a la vez</label>
+                <input type="file" id="inputFileUpload" class="file-input-custom" multiple accept=".txt,.log" onchange="procesarArchivos()">
+            </div>
+
+            <div class="panel-suave manual-room-section">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-keyboard"></i> Agregar sala manual (suma puntaje, no top killer)</h3>
+                <p class="muted">Escribe o pega los equipos y sus puntajes en formato <strong>Equipo, Puntos</strong> (uno por línea):</p>
+                <div class="form-group">
+                    <textarea id="textareaSalaManual" rows="6" aria-label="Sala manual" placeholder="Equipo A, 20&#10;Equipo B, 15&#10;Equipo C, 10"></textarea>
+                </div>
+                <button class="btn-access" id="btnAgregarManual" onclick="agregarSalaManualMasiva()" style="margin-top: 15px;">
+                    <i class="fa-solid fa-plus"></i> Sumar como nueva sala
+                </button>
+            </div>
+
+            <div id="contenedorEdicionEquipos" style="margin-top: 25px; display: none;">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-pen-to-square"></i> Editar / corregir nombres de equipos</h3>
+                <div id="tablaEdicionEquipos" class="table-input-container"></div>
+            </div>
+
+            <div class="results-wrapper">
+                <div class="table-fixed-container">
+                    <div id="outputTablasLadoALado" class="result-box" style="margin-top: 30px;"></div>
+                </div>
+
+                <div style="margin-top: 40px; text-align: center;">
+                    <button class="btn-access" id="btnDescargarImagen" onclick="descargarTablaReducida()">
+                        <i class="fa-solid fa-download"></i> Descargar imagen reducida (1280x720)
+                    </button>
+                </div>
+                <div id="outputTablaReducida" class="result-box"></div>
+            </div>
+
+            <!-- Cargar el entreno a la base de datos (con confirmación) -->
+            <div id="guardarBD"></div>
+        </div>
+    </section>
+
+    <section id="baneados" class="tool-section">
+        <h2 class="section-title">Equipos baneados</h2>
+        <div class="tool-container">
+            <p class="tool-desc">Equipos que no pueden jugar los ascensos. Salen en el portal público de QFD.</p>
+            <div id="baneadosAdmin"></div>
+        </div>
+    </section>
+
+    <section id="gestionCupos" class="tool-section">
+        <h2 class="section-title">Cupos de Ascensos QFD</h2>
+        <div class="tool-container">
+            <p class="tool-desc">Programa jornadas y administra las inscripciones de este portal.</p>
+            <div class="form-group" style="max-width:460px">
+                <label for="gestionCuposSeccion">Sección</label>
+                <select id="gestionCuposSeccion" data-segmentado><option value="cupos">Cupos</option><option value="vip">VIP</option><option value="baneos">Baneos</option></select>
+            </div>
+            <section class="panel-suave">
+                <div data-gestion-panel="cupos"><h3 class="subtitulo-bloque">Cupos</h3><div id="cuposAdmin"></div></div>
+                <div data-gestion-panel="vip" hidden><h3 class="subtitulo-bloque">VIP · horarios y equipos autorizados</h3><div id="vipCuposAdmin"></div></div>
+                <div data-gestion-panel="baneos" hidden><h3 class="subtitulo-bloque">Baneos por equipo o teléfono</h3><div id="baneosCuposAdmin"></div></div>
+            </section>
+        </div>
+    </section>
+
+    <!-- Usuarios del portal (sql/31): el staff solo entra aquí; solo lo ven el admin del portal y el superadmin -->
+    <section id="usuariosPortal" class="tool-section">
+        <h2 class="section-title">Usuarios del portal</h2>
+        <div class="tool-container"><div id="usuariosPortalAdmin"></div></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>ASCENSOS QFD</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+    </script>
+    <script src="script.js?v=20261013e"></script>
+    <script src="../../portal-kit/guardado.js?v=20261013e"></script>
+    <script src="../../portal-kit/baneados.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos.js?v=20261013e"></script>
+    <script src="../../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="../../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'ascensosqfd'), { once: true });</script>
+    <script>window.addEventListener('pg:sesion', () => PumasBaneados.montarAdmin('baneadosAdmin', 'ascensosqfd'), { once: true });</script>
+    <script>window.addEventListener('pg:sesion', () => {
+        const seccion = document.getElementById('gestionCuposSeccion');
+        const montadas = new Set();
+        const paneles = {
+            cupos: () => PumasCupos.montarAdmin('cuposAdmin', 'ascensosqfd'),
+            vip: () => PumasControl.montarVip('vipCuposAdmin', 'ascensosqfd', { agregar: true }),
+            baneos: () => PumasControl.montarBaneos('baneosCuposAdmin', 'ascensosqfd')
+        };
+        const actualizar = () => {
+            document.querySelectorAll('[data-gestion-panel]').forEach(panel => { panel.hidden = panel.dataset.gestionPanel !== seccion.value; });
+            if (!montadas.has(seccion.value)) { paneles[seccion.value](); montadas.add(seccion.value); }
+        };
+        seccion.addEventListener('change', actualizar);
+        actualizar();
+    }, { once: true });</script>
+    <script>
+        // Botón "Cargar a la base de datos" (salas de logs + salas manuales, con nombres corregidos y equipos borrados fuera)
+        PumasGuardado.montar({
+            contenedor: 'guardarBD',
+            portal: () => 'ascensosqfd',
+            nombrePortal: () => 'Ascensos QFD',
+            tituloPorDefecto: () => 'Entreno ' + 'Ascensos QFD',
+            datos: () => {
+                if (!salasProcesadas.length) return null;
+                const fh = document.getElementById('inputFechaHora').value;
+                return {
+                    salas: salasProcesadas,
+                    nombreVisible: n => equiposEliminados.has(n) ? null : (correccionesNombres[n] || n),
+                    fecha: fh ? new Date(fh) : new Date(),
+                    moderador: document.getElementById('inputModerador').value.trim()
+                };
+            }
+        });
+    </script>
+</body>
+</html>

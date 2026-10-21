@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PROYECTN | Portal Oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="../imagenes/proyectn.png" alt="Logo PROYECTN" class="logo-img">
+            <div class="logo">
+                <a href="../index.html">PROYECTN</a>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#resultados">Resultados FF</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" style="background: linear-gradient(rgba(10,11,16,0.7), rgba(10,11,16,0.9)), url('../imagenes/hero-bg.jpg') center/cover;">
+        <h1>El Dominio de <span>PROYECTN</span></h1>
+        <p>Portal oficial de alto rendimiento competitivo. Gestiona torneos y estadísticas con precisión profesional.</p>
+        <a href="#resultados" class="btn-access"><i class="fa-solid fa-lock-open"></i> Acceso a Herramientas</a>
+    </section>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Creador de Resultados Free Fire (Manual)</h2>
+        <div class="tool-container">
+            <p class="tool-desc">
+                Ingresa los equipos con su respectivo Tag, selecciona el tema visual/estético para la tabla reducida y anota el <strong>TOP (1 al 12)</strong> junto a las bajas.
+            </p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>CANTIDAD DE SALAS A JUGAR</label>
+                    <select id="selectCantidadSalas" class="dropdown-select" onchange="actualizarEstructuraEquipos()">
+                        <option value="4">4 Salas</option>
+                        <option value="5" selected>5 Salas</option>
+                        <option value="6">6 Salas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>VISUALIZACIÓN DE LA TABLA (DER.)</label>
+                    <select id="selectTipoTablaDer" class="dropdown-select" onchange="actualizarEstructuraEquipos()">
+                        <option value="top">Solo Top de Ascenso</option>
+                        <option value="top_kill">Top de Ascenso + Tabla de Kills</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>TEMA / DISEÑO VISUAL</label>
+                    <select id="selectTemaVisual" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="pumasgg" selected>PROYECTN</option>
+                        <option value="alca">ALCA COACH</option>
+                        <option value="cacm">CACM FFWS</option>
+                        <option value="leviatan">LEVIANTAN FFWS</option>
+                        <option value="lyon">LYON FFWS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>MODERADOR / ADMIN</label>
+                    <input type="text" id="inputModerador" placeholder="Ej: Mod · PROYECTN" oninput="renderizarResultados()">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>HORARIO DEL TORNEO</label>
+                    <select id="selectHorarioFijo" class="dropdown-select" onchange="renderizarResultados()">
+                        <option value="2PM MEXICO">2PM MEXICO</option>
+                        <option value="4PM MEXICO">4PM MEXICO</option>
+                        <option value="6PM MEXICO" selected>6PM MEXICO</option>
+                        <option value="8PM MEXICO">8PM MEXICO</option>
+                        <option value="10PM MEXICO">10PM MEXICO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>TEXTO PERSONALIZADO / FECHA / EVENTO</label>
+                    <input type="text" id="inputTextoPersonalizado" placeholder="Ej: JORNADA 1 - 31 AGO" oninput="renderizarResultados()">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>LISTA DE EQUIPOS Y TAGS (Formato: Equipo - Tag)</label>
+                <textarea id="inputEquipos" rows="8" class="dropdown-select" style="height: 150px; resize: vertical;" placeholder="LEVIANTAN FFWS - LEVIATAN&#10;LYON FFWS - LYON&#10;CACM FFWS - CACM&#10;PROYECTN - PUMAS&#10;LEVXTATSU - LEVX&#10;ALCA COACH - ALCA" oninput="actualizarEstructuraEquipos()">
+EQUIPO 1 - EQ1
+EQUIPO 2 - EQ2
+EQUIPO 3 - EQ3
+EQUIPO 4 - EQ4
+EQUIPO 5 - EQ5
+EQUIPO 6 - EQ6
+EQUIPO 7 - EQ7
+EQUIPO 8 - EQ8
+EQUIPO 9 - EQ9
+EQUIPO 10 - EQ10
+EQUIPO 11 - EQ11
+EQUIPO 12 - EQ12</textarea>
+            </div>
+
+            <div id="contenedorSalasManuales" style="margin-top: 25px;"></div>
+
+            <div class="results-wrapper">
+                <div id="outputBooyahs" class="result-box" style="margin-top: 30px;"></div>
+                <div id="outputTablasLadoALado" class="result-box" style="margin-top: 30px;"></div>
+                
+                <div style="margin-top: 40px; text-align: center;">
+                    <button class="btn-access" id="btnDescargarImagen" onclick="descargarTablaReducida()" style="font-size: 1.1rem; padding: 15px 35px; margin-bottom: 20px; display: inline-block;">
+                        <i class="fa-solid fa-download"></i> Descargar Imagen Reducida (2000x2000 HD)
+                    </button>
+                </div>
+                <div id="outputTablaReducida" class="result-box" style="margin-top: 10px; display: flex; justify-content: center; overflow-x: auto; -webkit-overflow-scrolling: touch;"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 PROYECTN. Todos los derechos reservados. Diseñado para alto rendimiento competitivo.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin · Pruebas by PROYECTN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Orbitron y Rajdhani se usan en la imagen que se descarga -->
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="stylesheet" href="../ascensos/style.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="pruebas" data-modo="protegido"></script>
+</head>
+<body data-tema="pruebas">
+
+    <header class="site-header">
+        <a class="logo-container" href="admin.html">
+            <img src="imagenes/pruebas.png" alt="Logo" class="logo-img" onerror="this.onerror=null;this.src='../imagenes/proyectn.png'">
+            <div class="logo"><span class="t-a">MÓDULO</span> <span class="t-b">PRUEBAS</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-trophy"></i> Ver portal</a></li>
+                <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Cupos públicos</a></li>
+                <li><a href="/admin/sorteo.html?p=pruebas"><i class="fa-solid fa-dice"></i> Sorteo</a></li>
+                <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="login.html" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="resultados" class="tool-section">
+        <h2 class="section-title">Pruebas · Herramienta</h2>
+        <div class="asc-tabs" role="tablist">
+            <button data-tab="panelResultados"><i class="fa-solid fa-table"></i> Resultados</button>
+            <button data-tab="panelJornadas"><i class="fa-solid fa-clock-rotate-left"></i> Jornadas guardadas</button>
+            <button data-tab="panelBaneados"><i class="fa-solid fa-ban"></i> Baneados</button>
+            <button data-tab="panelCupos"><i class="fa-solid fa-ticket"></i> Cupos</button>
+            <button data-tab="panelAnalisis"><i class="fa-solid fa-chart-simple"></i> Análisis</button>
+            <button data-tab="panelGenerarCsv"><i class="fa-solid fa-file-csv"></i> Generar CSV</button>
+            <button data-tab="panelUsuarios" data-usuarios-portal><i class="fa-solid fa-users-gear"></i> Usuarios</button>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div class="tool-container asc-panel" id="panelResultados">
+            <div class="asc-barra" id="ascBorrador"></div>
+
+            <div class="form-grid cuatro">
+                <div class="form-group">
+                    <label for="selectCategoria">Evento (de quién son los resultados)</label>
+                    <select id="selectCategoria"></select>
+                </div>
+                <div class="form-group">
+                    <label for="inputFecha">Fecha</label>
+                    <input type="date" id="inputFecha">
+                </div>
+                <div class="form-group">
+                    <label for="selectHorario">Horario</label>
+                    <select id="selectHorario">
+                        <option>2PM MEXICO</option><option>4PM MEXICO</option><option>6PM MEXICO</option>
+                        <option>8PM MEXICO</option><option>10PM MEXICO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputModerador">Moderador</label>
+                    <input type="text" id="inputModerador" maxlength="40" placeholder="Ej: Mod · PROYECTN">
+                </div>
+            </div>
+            <div class="form-grid cuatro">
+                <div class="form-group">
+                    <label for="selectCantidadSalas">Salas a jugar</label>
+                    <select id="selectCantidadSalas">
+                        <option value="3">3 salas</option><option value="4">4 salas</option><option value="5">5 salas</option><option value="6">6 salas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selectModo">Puntaje</label>
+                    <select id="selectModo">
+                        <option value="top">Solo top (posición)</option>
+                        <option value="top_kill">Top + kills</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 2">
+                    <label for="inputTexto">Título / jornada (sale en la imagen)</label>
+                    <input type="text" id="inputTexto" maxlength="60" placeholder="Ej: JORNADA 1 - 31 AGO">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEquipos">Equipos y tags (uno por línea: Equipo - Tag)</label>
+                <textarea id="inputEquipos" class="equipos" spellcheck="false"></textarea>
+            </div>
+
+            <div class="asc-aviso-ban" id="avisoBaneados" hidden></div>
+            <div id="contenedorSalas"></div>
+
+            <div id="ascConfirmar" class="asc-confirmar"></div>
+
+            <h3 class="subtitulo-bloque" style="margin-top:26px"><i class="fa-solid fa-image"></i> Imagen 2000 × 2000</h3>
+            <div class="asc-previa" id="ascPrevia"></div>
+
+            <div class="asc-acciones">
+                <button class="btn-access" id="btnGuardarJornada"><i class="fa-solid fa-cloud-arrow-up"></i> Generar imagen y guardar</button>
+                <button class="btn-access btn-outline" id="btnSoloImagen"><i class="fa-solid fa-download"></i> Solo descargar imagen</button>
+            </div>
+            <p class="asc-estado" id="ascEstado" role="status"></p>
+        </div>
+
+        <!-- JORNADAS -->
+        <div class="tool-container asc-panel" id="panelJornadas" hidden>
+            <p class="tool-desc">Jornadas guardadas en la base de Pruebas (salen en el portal público). Puedes borrar las que estén mal y volver a cargarlas.</p>
+            <div class="jornadas-admin" id="jornadasAdmin"></div>
+        </div>
+
+        <!-- BANEADOS -->
+        <div class="tool-container asc-panel" id="panelBaneados" hidden>
+            
+            <div id="baneosAdmin"></div>
+        </div>
+
+        <!-- CUPOS -->
+        <div class="tool-container asc-panel" id="panelCupos" hidden>
+            <p class="tool-desc">Abre cupos para la próxima jornada, igual que en PROYECTN. Los equipos se inscriben en <a href="cupos.html">la página de cupos</a>.</p>
+            <div id="cuposAdmin"></div>
+            <h3 class="subtitulo-bloque" style="margin-top:30px"><i class="fa-solid fa-crown"></i> Cupos VIP · horarios y lista VIP</h3>
+            <div id="cuposVipAdmin"></div>
+        </div>
+
+        <!-- ANÁLISIS DE ENTRENOS (replays .json + .bin) -->
+        <div class="tool-container asc-panel" id="panelAnalisis" hidden>
+            <div id="analisisAdmin"></div>
+        </div>
+
+        <!-- GENERAR CSV -->
+        <div class="tool-container asc-panel" id="panelGenerarCsv" hidden>
+            <div id="generadorCsv"></div>
+        </div>
+
+        <!-- USUARIOS DEL PORTAL (sql/31) -->
+        <div class="tool-container asc-panel" id="panelUsuarios" hidden>
+            <div id="usuariosPortalAdmin"></div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 <b>PRUEBAS</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+    </script>
+    <script src="../ascensos/categorias.js?v=20261013e"></script>
+    <script src="../portal-kit/baneados.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos.js?v=20261013e"></script>
+    <script src="../ascensos/ascensos.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos-control.js?v=20261013e"></script>
+    <script src="../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'pruebas'), { once: true });</script>
+    <script>
+        // VIP y baneados por equipo y número (sql/25)
+        window.addEventListener('pg:sesion', () => {
+            PumasControl.montarVip('cuposVipAdmin', 'pruebas', { agregar: true });
+            PumasControl.montarBaneos('baneosAdmin', 'pruebas', () => window.PumasBaneados && PumasBaneados.cargar('pruebas'));
+        }, { once: true });
+    </script>
+    <script src="../portal-kit/completos.js?v=20261013e"></script>
+    <script src="../portal-kit/analisis-admin.js?v=20261013e"></script>
+    <script src="../portal-kit/generador-csv.js?v=20261013e"></script>
+    <script>
+        PumasAnalisis.montar('analisisAdmin', { portal: 'pruebas', marca: 'MÓDULO PRUEBAS' });
+        PumasGenerador.montar('generadorCsv');
+    </script>
+</body>
+</html>

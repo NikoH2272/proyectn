@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{MODULO} by PROYECTN · Cupos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-portal="@p" data-modo="publico" data-sin-sorteo></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" data-mod-href="./" href="./">
+            <img src="../imagenes/proyectn.png" alt="Logo" class="logo-img" data-mod-logo>
+            <div class="logo"><span data-mod-titulo>MÓDULO</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a data-mod-href="./" href="./"><i class="fa-solid fa-trophy"></i> Resultados</a></li>
+                <li><a href="/">PROYECTN</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main data-mod-cuerpo>
+        <section>
+            <h2 class="section-title">Reserva tu cupo</h2>
+            <p class="tool-desc">Inscribe a tu equipo en los próximos entrenos de <b data-mod-nombre>este módulo</b>. Al confirmar se abre el grupo de coordinación.</p>
+            <div id="cuposPublicos"></div>
+        </section>
+    </main>
+    <footer><p>&copy; 2026 <b data-mod-nombre>MÓDULO</b> by PROYECTN. Todos los derechos reservados.</p></footer>
+    <script src="modulo.js?v=20261013e"></script>
+    <script src="../portal-kit/cupos.js?v=20261013e"></script>
+    <script>moduloListo.then(m => { if (m) PumasCupos.montarPublico('cuposPublicos', m.id); });</script>
+</body>
+</html>

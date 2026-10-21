@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pumas Gaming | Portal Oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../../../portal-kit/portal.js?v=20261013e" data-modo="publico"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="imagenes/LOGO PUMAS WEB.png" alt="Logo Pumas Gaming" class="logo-img">
+            <div class="logo">PUMAS GAMING</div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#equipo">Equipo</a></li>
+                <li><a href="#jersey">Jersey</a></li>
+                <li><a href="#entrenamientos">Entrenamientos</a></li>
+                <li><a href="#comunidad">Comunidad</a></li>
+                <li><a href="#resultados">Resultados FF</a></li>
+                <li><a href="login.html" class="btn-access" style="padding: 8px 18px; font-size: 0.9rem;"><i class="fa-solid fa-user-lock"></i> Iniciar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+<!-- SECCIÓN 1: GESTIÓN DE RESULTADOS GENERALES (105 EQUIPOS - FONDO maya.png) -->
+<section id="resultadosGeneral" class="tool-section">
+    <h2 class="section-title">Gestión y Resultados Generales (Torneo Masivo)</h2>
+    <div class="tool-container">
+        <p class="tool-desc">Carga los archivos de registro (.log) globales para procesar la tabla masiva de 105 equipos.</p>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label>ARCHIVOS DE REGISTRO GENERAL (.LOG / .TXT)</label>
+            <input type="file" id="fileInputGeneral" accept=".log,.txt,.csv" multiple onchange="prepararRenombradoEquiposGeneral()">
+        </div>
+
+        <div id="seccionRenombrarGeneral" style="display: none; background: rgba(0,0,0,0.7); padding: 25px; border-radius: 8px; border: 1px solid var(--accent-yellow); margin-bottom: 30px;">
+            <h3 style="color: var(--accent-yellow); font-family: 'Orbitron'; margin-bottom: 15px; font-size: 1.1rem;">
+                <i class="fa-solid fa-pen-to-square"></i> CORRECCIÓN DE NOMBRES GENERALES
+            </h3>
+            <div id="listaEquiposInputsGeneral" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; padding-right: 5px;"></div>
+            <button class="btn-generar" style="margin-top: 20px;" onclick="procesarGeneralConNombresPersonalizados()">
+                <i class="fa-solid fa-gears"></i> GENERAR TABLA GENERAL
+            </button>
+        </div>
+
+        <div class="results-wrapper">
+            <div id="outputGeneral" class="result-box"></div>
+        </div>
+    </div>
+</section>
+
+<!-- SECCIÓN 2: RESULTADOS DETALLADOS POR SALA (FONDO mayasala.png) -->
+<section id="resultadosSala" class="tool-section" style="border-top: 2px solid rgba(255, 0, 85, 0.3);">
+    <h2 class="section-title" style="border-color: var(--secondary);">Resultados Detallados por Sala</h2>
+    <div class="tool-container">
+        <p class="tool-desc">Sube los archivos independientes para generar el reporte detallado usando la plantilla de sala.</p>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label style="color: var(--secondary);">ARCHIVOS DE SALA INDIVIDUAL (.LOG / .TXT)</label>
+            <input type="file" id="fileInputSala" accept=".log,.txt,.csv" multiple onchange="prepararResultadosSala()">
+        </div>
+
+        <div class="results-wrapper">
+            <div id="outputSala" class="result-box"></div>
+        </div>
+    </div>
+</section>
+
+    <footer>
+        <p>&copy; 2026 PUMAS GAMING. Todos los derechos reservados. Diseñado para alto rendimiento competitivo.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

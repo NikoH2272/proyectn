@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="pg-verificando">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C79JND219Y');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Resultados completos | PROYECTN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261013e" data-modo="login" data-sin-efecto></script>
+    <script src="../portal-kit/completos.js?v=20261013e"></script>
+    <style>
+        .exp-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 10px; max-width: 900px; margin: 0 auto; }
+        .exp-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid rgba(var(--primary-rgb), .25); border-left: 4px solid var(--c, var(--primary)); background: #121212; cursor: pointer; }
+        .exp-item input { width: 20px; height: 20px; accent-color: var(--primary); }
+        .exp-item b { color: var(--light); font-size: .9rem; }
+        .exp-item small { display: block; color: var(--gray); }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo"><span class="t-a">PUMAS</span> ADMIN</div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" id="btnSalir"><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section>
+        <h2 class="section-title">Resultados completos</h2>
+        <p class="tool-desc">La sala exporta <b>Resultados</b> (.log: equipos, top y kills) y <b>Resultados completos</b> (.csv: daño, headshots, revividas, paredes gloo, tiempo vivo y armas).
+            Marca los eventos que pueden subir los <b>completos</b>: en su herramienta aparece la opción del .csv y en su portal las <b>estadísticas avanzadas</b>.</p>
+        <main id="raiz"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
+    </section>
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+
+    <script>
+    (async function () {
+        const P = PumasPortal, esc = P.escaparHtml;
+        const s = await P.guard('principal', 'login.html', 'gestionar');
+        if (!s) return;
+        document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
+        document.getElementById('btnSalir').addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); });
+        const raiz = document.getElementById('raiz');
+
+        async function pintar(msg) {
+            PumasCompletos.olvidarConfig();
+            const [filas, activos] = await Promise.all([P.cargarModulos(true), PumasCompletos.habilitados()]);
+            // Eventos con entrenos (los que suben .log): todos menos el inicio, LATAM y los ascensos
+            const eventos = filas.filter(p => p.activo !== false && !['principal', 'entrenoslatam'].includes(p.id) && p.tipo !== 'ascensos')
+                .sort((a, b) => (a.id === 'entrenamientos' ? -1 : b.id === 'entrenamientos' ? 1 : (a.orden ?? 99) - (b.orden ?? 99)));
+            raiz.innerHTML = `<div class="exp-lista">${eventos.map(p => `
+                <label class="exp-item" style="--c:${esc(p.color_tema || p.color || '#D8C395')}">
+                    <input type="checkbox" value="${esc(p.id)}" ${activos.includes(p.id) ? 'checked' : ''}>
+                    <span><b>${esc(p.id === 'entrenamientos' ? 'Entrenos PROYECTN' : p.nombre)}</b><small>${esc(p.id)}</small></span>
+                </label>`).join('')}</div>
+                <div class="barra-guardar" style="max-width:900px"><span class="muted" id="msg" role="status">${esc(msg || '')}</span>
+                    <button class="btn-access" id="guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar</button></div>`;
+            raiz.querySelector('#guardar').addEventListener('click', async () => {
+                const lista = [...raiz.querySelectorAll('input:checked')].map(i => i.value);
+                raiz.querySelector('#msg').textContent = 'Guardando...';
+                try { await P.stats.configurar(lista); await pintar('✔ Guardado. ' + (lista.length ? lista.length + ' evento(s) con resultados completos.' : 'Ningún evento con resultados completos.')); }
+                catch (e) { raiz.querySelector('#msg').textContent = /admin_export_completo|PGRST202|Could not find/i.test(e.message) ? 'Falta correr sql/23_resultados_completos.sql en Supabase.' : e.message; }
+            });
+        }
+        pintar();
+    })();
+    </script>
+</body>
+</html>
