@@ -1173,45 +1173,83 @@ footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
 .subtitulo-index i { color: var(--primary); }
 
 /* Logos de portales activos (solo iconos dentro del portal card) */
+/* ── Carrusel de logos de ascensos participantes ── */
 .asc-logos-activos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
+    margin-top: 18px;
     padding-top: 14px;
     border-top: 1px solid var(--border);
 }
-.asc-logo-chip {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    border: 2px solid var(--chip, var(--primary));
-    background: color-mix(in srgb, var(--chip, var(--primary)) 12%, var(--surface));
+.asc-carousel {
+    overflow: hidden;
+    position: relative;
+    mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
+}
+.asc-carousel-track {
     display: flex;
+    gap: 12px;
+    width: max-content;
+    animation: asc-scroll 28s linear infinite;
+}
+.asc-carousel:hover .asc-carousel-track { animation-play-state: paused; }
+@keyframes asc-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .asc-carousel-track { animation: none; }
+    .asc-carousel { mask-image: none; -webkit-mask-image: none; overflow-x: auto; }
+}
+
+.asc-logo-chip {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    border: 2px solid var(--chip, var(--primary));
+    background: color-mix(in srgb, var(--chip, var(--primary)) 10%, var(--surface));
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 4px;
     text-decoration: none;
-    transition: transform .15s, box-shadow .15s;
+    transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
     overflow: hidden;
     position: relative;
 }
+.asc-logo-chip:active { transform: scale(0.95); }
+@media (hover: hover) and (pointer: fine) {
+    .asc-logo-chip:hover {
+        transform: translateY(-4px) scale(1.06);
+        box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    }
+}
 .asc-logo-chip img {
-    width: 28px;
-    height: 28px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
 }
 .asc-logo-fallback {
     display: none;
-    font-size: .8rem;
+    font-size: .85rem;
     font-weight: 800;
     color: var(--chip, var(--primary));
     font-family: var(--font-display);
     align-items: center;
     justify-content: center;
 }
-.asc-logo-chip:hover {
-    transform: translateY(-3px) scale(1.1);
-    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+.asc-logo-chip-nombre {
+    font: 600 .5rem/1 var(--font-display);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--chip, var(--primary));
+    text-align: center;
+    max-width: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 4px;
 }
 
 /* Portal card wide (ocupa todo el ancho) */

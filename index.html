@@ -241,13 +241,16 @@
                 const cats = (window.ASC_CATEGORIAS || []);
                 custom.forEach(c => { if (!cats.find(x => x.id === c.id)) cats.push(c); });
                 const CAT = id => cats.find(c => c.id === id) || { nombre: id, color: '#B6FF00' };
-                cont.innerHTML = activos.map(id => {
+                const chipHTML = id => {
                     const c = CAT(id);
-                    return `<a class="asc-logo-chip" href="/ascensos/equipo.html?cat=${encodeURIComponent(id)}" style="--chip:${esc(c.color)}" title="${esc(c.nombre)}">
-                        ${c.logo ? `<img src="${esc(c.logo)}" alt="${esc(c.nombre)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <span class="asc-logo-fallback">${esc(c.nombre.charAt(0))}</span>` : `<span class="asc-logo-fallback">${esc(c.nombre.charAt(0))}</span>`}
-                    </a>`;
-                }).join('');
+                    const logo = c.logo
+                        ? `<img src="${esc(c.logo)}" alt="${esc(c.nombre)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="asc-logo-fallback">${esc(c.nombre.charAt(0))}</span>`
+                        : `<span class="asc-logo-fallback" style="display:flex">${esc(c.nombre.charAt(0))}</span>`;
+                    return `<a class="asc-logo-chip" href="/ascensos/equipo.html?cat=${encodeURIComponent(id)}" style="--chip:${esc(c.color)}" title="${esc(c.nombre)}">${logo}<span class="asc-logo-chip-nombre">${esc(c.nombre)}</span></a>`;
+                };
+                const items = activos.map(chipHTML).join('');
+                /* duplicar para loop infinito sin pausa */
+                cont.innerHTML = `<div class="asc-carousel"><div class="asc-carousel-track">${items}${items}</div></div>`;
             } catch (e) { cont.innerHTML = ''; }
         })();
 
