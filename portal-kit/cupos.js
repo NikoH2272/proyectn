@@ -9,6 +9,9 @@
     const esc = P.escaparHtml;
     const PAISES = ['+57', '+52', '+54', '+56', '+51', '+593', '+58', '+591', '+595', '+598', '+502', '+504', '+503', '+505', '+506', '+507', '+1', '+34'];
     const fmt = iso => new Date(iso).toLocaleString('es', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const TZS = [{ z: 'America/Mexico_City', l: 'MX' }, { z: 'America/Bogota', l: 'COL' }, { z: 'America/Argentina/Buenos_Aires', l: 'ARG' }];
+    const fmtTz = (iso, tz) => new Intl.DateTimeFormat('es', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(iso));
+    const horas3 = iso => TZS.map(t => `<b class="hz-l">${t.l}</b> ${fmtTz(iso, t.z)}`).join(' &nbsp;·&nbsp; ');
 
     // "2d 03:14:22" · "03:14:22"
     function restante(ms) {
@@ -141,7 +144,7 @@
             </div>` : ''}
             <div class="form-grid">
                 <div class="form-group"><label for="cpTitulo">Título</label><input id="cpTitulo" maxlength="120" placeholder="Ej: Jornada de ascensos · Lunes"></div>
-                <div class="form-group"><label for="cpFecha">Fecha y hora</label><input id="cpFecha" type="datetime-local"></div>
+                <div class="form-group"><label for="cpFecha">Fecha y hora <small class="muted">(tu hora local)</small></label><input id="cpFecha" type="datetime-local"><div class="horas-ref" id="cpHorasRef"></div></div>
             </div>
             <div class="form-grid">
                 <div class="form-group"><label for="cpCupos">Cupos totales</label><input id="cpCupos" type="number" min="1" max="100" value="12"></div>
@@ -180,6 +183,16 @@
                 <button class="btn-mini" id="cpRefrescar" style="float:right"><i class="fa-solid fa-rotate-right"></i></button></h3>
             <div id="cpLista"></div>`);
         const msg = t => { cont.querySelector('#cpMsg').textContent = t; };
+
+        /* ── Leyenda de horas MX/COL/ARG ── */
+        const cpFechaEl = cont.querySelector('#cpFecha');
+        const cpHRef    = cont.querySelector('#cpHorasRef');
+        if (cpFechaEl && cpHRef) {
+            cpFechaEl.addEventListener('input', () => {
+                const v = cpFechaEl.value;
+                cpHRef.innerHTML = v ? horas3(new Date(v).toISOString()) : '';
+            });
+        }
 
         cont.querySelector('#cpGuardar').addEventListener('click', async () => {
             const f = cont.querySelector('#cpFecha').value, pub = cont.querySelector('#cpPub').value;
@@ -220,7 +233,7 @@
                 return `<article class="cupo-admin">
                     <div class="cupo-top">
                         <div>${g.tipo === 'VIP' ? '<span class="cupo-vip">VIP</span> ' : ''}<b>${esc(g.titulo)}</b> <span class="cupo-estado e-${estado.toLowerCase()}">${estado}</span>
-                            <p class="muted">${fmt(g.fecha)} · ${g.inscritos.length}/${g.cupos} inscritos${programado ? ' · se publica ' + fmt(g.publicar_en) : ''}</p></div>
+                            <p class="muted">${fmt(g.fecha)}<br><span class="cupo-horas-3">${horas3(g.fecha)}</span></p><p class="muted">${g.inscritos.length}/${g.cupos} inscritos${programado ? ' · se publica ' + fmt(g.publicar_en) : ''}</p></div>
                         <div class="cupo-acciones">
                             ${programado ? `<button class="btn-mini" data-acc="PUBLICAR" data-id="${g.id}">Publicar ya</button>` : ''}
                             ${g.estado === 'ABIERTO' ? `<button class="btn-mini" data-acc="CERRADO" data-id="${g.id}">Cerrar</button>` : `<button class="btn-mini" data-acc="ABIERTO" data-id="${g.id}">Abrir</button>`}

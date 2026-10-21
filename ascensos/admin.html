@@ -206,6 +206,7 @@
 
         let activos = [];
         let customTeams = [];
+        let overrides = {};
 
         function leerConfig(data) {
             if (!data) return;
@@ -213,14 +214,18 @@
             const obj = typeof data === 'string' ? JSON.parse(data) : data;
             activos = obj.activos || obj || [];
             customTeams = obj.custom || [];
+            overrides = obj.overrides || {};
         }
 
         function renderCatCard(c) {
             const estaActivo = activos.includes(c.id);
             const esCustom = c._custom;
-            return `<article class="card-box" style="border-left:4px solid ${esc(c.color)}" data-eq-card="${esc(c.id)}">
+            const ov = overrides[c.id] || {};
+            const colorActual = ov.color || c.color || '#B6FF00';
+            const linkActual  = ov.link  || c.link  || '';
+            return `<article class="card-box" style="border-left:4px solid ${esc(colorActual)}" data-eq-card="${esc(c.id)}">
                 <div style="display:flex;align-items:center;gap:12px">
-                    ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:44px;height:44px;object-fit:contain;flex-shrink:0" onerror="this.hidden=true">` : `<span style="width:44px;height:44px;border-radius:8px;background:${esc(c.color)};opacity:.5;flex-shrink:0"></span>`}
+                    ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:44px;height:44px;object-fit:contain;flex-shrink:0" onerror="this.hidden=true">` : `<span style="width:44px;height:44px;border-radius:8px;background:${esc(colorActual)};opacity:.5;flex-shrink:0"></span>`}
                     <div>
                         <strong>${esc(c.nombre)}</strong><br>
                         <small class="muted">${esc(c.id)}${esCustom ? ' · personalizado' : ''}</small>
@@ -228,10 +233,24 @@
                     <label class="chk" style="margin-left:auto">
                         <input type="checkbox" class="chk-eq" data-id="${esc(c.id)}"${estaActivo ? ' checked' : ''}> Activo
                     </label>
+                    <button class="btn-mini" data-editar-eq="${esc(c.id)}" title="Editar color y WhatsApp"><i class="fa-solid fa-pen"></i></button>
                     ${esCustom ? `<button class="btn-mini" style="color:#ff6b6b;border-color:rgba(255,107,107,.4)" data-borrar-custom="${esc(c.id)}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+                <div class="eq-edit-panel" id="eq-edit-${esc(c.id)}" hidden style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+                    <div class="form-group" style="margin:0;min-width:120px">
+                        <label style="font-size:.75rem">Color</label>
+                        <input type="color" class="eq-color-inp" value="${esc(colorActual)}" style="width:60px;height:32px;padding:2px;border-radius:6px;cursor:pointer">
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:200px">
+                        <label style="font-size:.75rem">Link WhatsApp / Discord</label>
+                        <input type="url" class="eq-link-inp" value="${esc(linkActual)}" placeholder="https://chat.whatsapp.com/..." style="font-size:.82rem">
+                    </div>
+                    <button class="btn-access btn-mini eq-save-btn" data-guardar-eq="${esc(c.id)}" style="flex-shrink:0"><i class="fa-solid fa-check"></i> Guardar</button>
+                    <button class="btn-mini eq-cancel-btn" data-cancelar-eq="${esc(c.id)}" style="flex-shrink:0"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <p style="margin:8px 0 0;font-size:.78rem;color:var(--muted)" data-eq-estado="${esc(c.id)}">
                     ${estaActivo ? `✔ Mini portal activo · <a href="equipo.html?cat=${encodeURIComponent(c.id)}" target="_blank">Ver</a>` : 'Inactivo · no aparece en el inicio'}
+                    ${linkActual ? ` · <a href="${esc(linkActual)}" target="_blank"><i class="fa-brands fa-whatsapp"></i> Grupo</a>` : ''}
                 </p>
             </article>`;
         }
@@ -289,12 +308,42 @@
             };
 
             cont.addEventListener('click', e => {
-                const b = e.target.closest('[data-borrar-custom]');
-                if (!b) return;
-                const id = b.dataset.borrarCustom;
-                customTeams = customTeams.filter(c => c.id !== id);
-                activos = activos.filter(x => x !== id);
-                renderGrid(cont);
+                const borrar = e.target.closest('[data-borrar-custom]');
+                if (borrar) {
+                    const id = borrar.dataset.borrarCustom;
+                    customTeams = customTeams.filter(c => c.id !== id);
+                    activos = activos.filter(x => x !== id);
+                    renderGrid(cont);
+                    return;
+                }
+                const editar = e.target.closest('[data-editar-eq]');
+                if (editar) {
+                    const id = editar.dataset.editarEq;
+                    const panel = document.getElementById('eq-edit-' + id);
+                    if (panel) { panel.hidden = !panel.hidden; }
+                    return;
+                }
+                const cancelar = e.target.closest('[data-cancelar-eq]');
+                if (cancelar) {
+                    const id = cancelar.dataset.cancelarEq;
+                    const panel = document.getElementById('eq-edit-' + id);
+                    if (panel) panel.hidden = true;
+                    return;
+                }
+                const guardar = e.target.closest('[data-guardar-eq]');
+                if (guardar) {
+                    const id = guardar.dataset.guardarEq;
+                    const panel = document.getElementById('eq-edit-' + id);
+                    if (!panel) return;
+                    const color = panel.querySelector('.eq-color-inp').value;
+                    const link  = panel.querySelector('.eq-link-inp').value.trim();
+                    if (!overrides[id]) overrides[id] = {};
+                    overrides[id].color = color;
+                    overrides[id].link  = link || null;
+                    panel.hidden = true;
+                    renderGrid(cont);
+                    return;
+                }
             }, { capture: false });
         }
 
@@ -302,7 +351,7 @@
             const btn  = document.getElementById('btnGuardarEquipos');
             const msg  = document.getElementById('equiposAscEstado');
             const checked = [...document.querySelectorAll('.chk-eq:checked')].map(el => el.dataset.id);
-            const config = { activos: checked, custom: customTeams };
+            const config = { activos: checked, custom: customTeams, overrides };
             btn.disabled = true;
             msg.textContent = 'Guardando...';
             msg.style.color = '';

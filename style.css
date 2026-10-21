@@ -1381,3 +1381,45 @@ footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
     .portal-card-logo { width: 56px; height: 56px; }
 }
 .noticia-lista a:hover { text-decoration: underline; }
+
+/* ─── Cupos: leyenda de zonas horarias ─── */
+.horas-ref {
+    margin-top: 6px;
+    font-size: .78rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    min-height: 18px;
+}
+.hz-l {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .04em;
+}
+.cupo-horas-3 {
+    font-size: .76rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 2px;
+}
+.cupo-horas-3 .hz-l { font-size: .7rem; }
+
+/* ─── Portal: tag Free Fire ─── */
+.portal-ff-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #ff6b35;
+    background: rgba(255,107,53,.12);
+    border: 1px solid rgba(255,107,53,.3);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-bottom: 6px;
+    align-self: flex-start;
+}

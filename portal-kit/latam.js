@@ -212,6 +212,7 @@
                 : `<a class="btn-access" href="${p.url}">Portal <i class="fa-solid fa-arrow-right"></i></a>`;
             return `<article class="card-box latam-card" style="--c:${p.color}">
                 <div class="latam-logo">${imgLogo(p.logo, p.nombre)}</div>
+                <span class="portal-ff-tag"><i class="fa-solid fa-fire-flame-curved"></i> Free Fire</span>
                 <h3>${esc(p.id === 'entrenamientos' ? 'Pumas Gaming' : p.nombre)}</h3>
                 <div class="latam-acciones">${botones}</div>
             </article>`;

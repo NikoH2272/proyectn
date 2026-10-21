@@ -19,7 +19,7 @@
 
     // Leer categoria de URL
     const CAT_ID = new URLSearchParams(location.search).get('cat') || '';
-    const catInfo = CAT(CAT_ID);
+    let catInfo = Object.assign({}, CAT(CAT_ID));
 
     let jornadas = [];
     let dia = null;
@@ -67,14 +67,16 @@
             logo.alt = catInfo.nombre;
             logo.onerror = () => { logo.hidden = true; };
         }
-        if (catInfo.link) {
-            const acts = document.querySelector('.hero-actions');
-            if (acts) {
+        const acts = document.querySelector('.hero-actions');
+        if (acts) {
+            const prev = acts.querySelector('.btn-wa-grupo');
+            if (prev) prev.remove();
+            if (catInfo.link) {
                 const btn = document.createElement('a');
                 btn.href = catInfo.link;
                 btn.target = '_blank';
                 btn.rel = 'noopener noreferrer';
-                btn.className = 'btn-access btn-outline';
+                btn.className = 'btn-access btn-outline btn-wa-grupo';
                 btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Unirse al grupo';
                 acts.insertAdjacentElement('afterbegin', btn);
             }
@@ -246,6 +248,17 @@
         }
         montarHero();
         enlazar();
+        // Cargar overrides de color/link desde DB y re-aplicar si existen
+        P.db().rpc('asc_equipos_activos', { p_portal: PORTAL }).then(({ data }) => {
+            if (!data) return;
+            const obj = Array.isArray(data) ? {} : (typeof data === 'string' ? JSON.parse(data) : data);
+            const ov = (obj.overrides || {})[CAT_ID];
+            if (ov) {
+                if (ov.color) catInfo.color = ov.color;
+                if (ov.link !== undefined) catInfo.link = ov.link;
+                montarHero();
+            }
+        }).catch(() => {});
         try {
             const { data, error } = await P.db()
                 .from('asc_jornadas')
