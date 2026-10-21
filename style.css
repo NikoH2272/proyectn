@@ -964,4 +964,78 @@ footer{padding-bottom:calc(26px + env(safe-area-inset-bottom))}
 }
 .noticia-lista p { margin: 0; font-size: .85rem; color: var(--text-muted); line-height: 1.5; }
 .noticia-lista a { color: var(--primary); text-decoration: none; }
+
+/* ─── Portales competitivos ─── */
+#portales-competitivos { padding: 0 clamp(16px, 5vw, 48px); }
+
+.portales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.portal-card {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    border-top: 3px solid var(--primary);
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.portal-card:hover {
+    border-color: rgba(182, 255, 0, .35);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,.35);
+}
+.portal-card-logo {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 4px;
+}
+.portal-card-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portal-card-eyebrow {
+    font: 600 .65rem/1 var(--font-display);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+.portal-card-body h3 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    font-family: var(--font-display);
+}
+.portal-card-body p {
+    margin: 0 0 14px;
+    font-size: .86rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.portal-card-stats {
+    margin: 0 0 16px !important;
+    justify-content: flex-start;
+    gap: 20px;
+}
+.portal-card-stats > div {
+    text-align: center;
+}
+.portal-card-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+    .portal-card { flex-direction: column; gap: 14px; }
+    .portal-card-logo { width: 56px; height: 56px; }
+}
 .noticia-lista a:hover { text-decoration: underline; }

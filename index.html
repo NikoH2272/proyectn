@@ -44,6 +44,7 @@
         <ul>
             <li><a href="/portales/pumasgaming/" onclick="closeMenu()">Entrenamientos</a></li>
             <li><a href="/entrenoslatam/" onclick="closeMenu()">LATAM</a></li>
+            <li><a href="/ascensos/" onclick="closeMenu()"><i class="fa-solid fa-trophy"></i> Ascensos AZA</a></li>
             <li><a href="#rankings" onclick="closeMenu()">Rankings</a></li>
             <li><a href="/herramienta/" onclick="closeMenu()"><i class="fa-solid fa-screwdriver-wrench"></i> Herramientas</a></li>
             <li><a href="/admin/login.html" class="btn-admin-nav" onclick="closeMenu()" style="color: var(--primary);"><i class="fa-solid fa-lock"></i> Admin</a></li>
@@ -68,6 +69,31 @@
             <span class="mark-fallback">PN</span>
         </div>
     </section>
+
+<section id="portales-competitivos">
+    <h2 class="section-title">Portales</h2>
+    <div class="portales-grid">
+        <article class="portal-card portal-card--ascensos">
+            <div class="portal-card-logo">
+                <img src="ascensos/imagenes/aza.png" alt="AZA" onerror="this.hidden=true">
+            </div>
+            <div class="portal-card-body">
+                <div class="portal-card-eyebrow">Free Fire · Oficial</div>
+                <h3>Ascensos AZA</h3>
+                <p>Resultados de cada jornada, ranking acumulado y cupos para la próxima fecha de ascensos.</p>
+                <div class="stat-row portal-card-stats" id="ascEstadisticas">
+                    <div><b id="ascStatJornadas">—</b><small>Jornadas</small></div>
+                    <div><b id="ascStatEquipos">—</b><small>Equipos</small></div>
+                    <div><b id="ascStatAscensos">—</b><small>Ascensos</small></div>
+                </div>
+                <div class="portal-card-links">
+                    <a href="/ascensos/" class="btn-access"><i class="fa-solid fa-trophy"></i> Ver portal</a>
+                    <a href="/ascensos/cupos.html" class="btn-access btn-outline"><i class="fa-solid fa-ticket"></i> Cupos</a>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
 
 <section id="latam">
     <div class="latam-cabecera"><img src="entrenoslatam/imagenes/latam.png" alt="Entrenos LATAM" onerror="this.parentElement.hidden=true"></div>
@@ -153,6 +179,26 @@
             const nav = document.getElementById('mainNav');
             nav.classList.remove('is-active');
         }
+    </script>
+    <script>
+    /* ── Stats Ascensos AZA ── */
+    (async function () {
+        try {
+            const sb = window.PumasPortal && window.PumasPortal.supabase;
+            if (!sb) return;
+            const { data } = await sb.from('asc_jornadas').select('equipos, clasificados').eq('portal', 'ascensosaza');
+            if (!data || !data.length) return;
+            const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+            const eqs = new Set(), asc = [];
+            data.forEach(j => {
+                (j.equipos || []).forEach(e => eqs.add(norm(e.n)));
+                (j.clasificados || []).forEach(c => asc.push(c));
+            });
+            document.getElementById('ascStatJornadas').textContent = data.length;
+            document.getElementById('ascStatEquipos').textContent = eqs.size;
+            document.getElementById('ascStatAscensos').textContent = asc.length;
+        } catch (e) {}
+    })();
     </script>
     <script src="script.js"></script>
     <script src="entrenamientos.js?v=20261013e"></script>
