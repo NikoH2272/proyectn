@@ -164,9 +164,15 @@
         if (!cont) return;
         try {
             const { data, error } = await P.db().rpc('asc_equipos_activos', { p_portal: PORTAL });
-            if (error || !data || !data.length) { cont.closest('section').hidden = true; return; }
-            const activos = Array.isArray(data) ? data : (typeof data === 'string' ? JSON.parse(data) : []);
+            if (error || !data) { cont.closest('section').hidden = true; return; }
+            // Formato puede ser array antiguo ["ev_cacm"] o objeto {activos:[...], custom:[...]}
+            let activos, custom = [];
+            if (Array.isArray(data)) { activos = data; }
+            else { const obj = typeof data === 'string' ? JSON.parse(data) : data; activos = obj.activos || []; custom = obj.custom || []; }
+            // Registrar custom teams en ASC_CATEGORIAS para que CAT() los encuentre
+            custom.forEach(c => { if (!window.ASC_CATEGORIAS.find(x => x.id === c.id)) window.ASC_CATEGORIAS.push(c); });
             if (!activos.length) { cont.closest('section').hidden = true; return; }
+            cont.closest('section').hidden = false;
             cont.innerHTML = activos.map(id => {
                 const c = CAT(id);
                 return `<a class="asc-equipo-card" href="equipo.html?cat=${encodeURIComponent(id)}" style="--cat:${c.color}">

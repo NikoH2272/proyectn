@@ -112,7 +112,20 @@
         const cont = document.getElementById(contId);
         if (!cont) return;
         const conTipo = portal !== 'ascensosaza';
+        const conCat  = !!window.ASC_OPCIONES;
         cont.innerHTML = `
+            ${conCat ? `<div id="cpCatBanner" style="display:none;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;margin-bottom:14px;border-left:5px solid var(--cp-cat,var(--primary));background:color-mix(in srgb,var(--cp-cat,var(--primary)) 8%,var(--surface));transition:border-color .25s,background .25s">
+                <img id="cpCatLogo" src="" alt="" style="width:52px;height:52px;object-fit:contain;display:none" onerror="this.style.display='none'">
+                <div>
+                    <div style="font-size:.7rem;letter-spacing:.08em;opacity:.7;text-transform:uppercase">Ascenso seleccionado</div>
+                    <strong id="cpCatNombre" style="font-size:1.1rem;color:var(--cp-cat,var(--primary))"></strong>
+                </div>
+            </div>
+            <div class="form-grid" style="margin-bottom:4px">
+                <div class="form-group"><label for="cpCategoria">Evento de ascensos</label>
+                    <select id="cpCategoria"><option value="">— elige el evento —</option>${window.ASC_OPCIONES('')}</select>
+                </div>
+            </div>` : ''}
             <div class="form-grid">
                 <div class="form-group"><label for="cpTitulo">Título</label><input id="cpTitulo" maxlength="120" placeholder="Ej: Jornada de ascensos · Lunes"></div>
                 <div class="form-group"><label for="cpFecha">Fecha y hora</label><input id="cpFecha" type="datetime-local"></div>
@@ -130,9 +143,29 @@
             </div>
             <button class="btn-generar" id="cpGuardar"><i class="fa-solid fa-floppy-disk"></i> Abrir cupos</button>
             <p class="muted" id="cpMsg" role="status" style="margin-top:10px"></p>
-            <h3 class="subtitulo-bloque" style="margin-top:26px"><i class="fa-solid fa-list-check"></i> Programados (últimos 60 días)
+        `;
+        if (conCat) {
+            const selCat = cont.querySelector('#cpCategoria');
+            const banner = cont.querySelector('#cpCatBanner');
+            const catLogo = cont.querySelector('#cpCatLogo');
+            const catNom  = cont.querySelector('#cpCatNombre');
+            selCat.addEventListener('change', () => {
+                const id = selCat.value;
+                if (!id) { banner.style.display = 'none'; return; }
+                const c = window.ASC_CATEGORIA(id);
+                banner.style.display = 'flex';
+                banner.style.setProperty('--cp-cat', c.color);
+                catNom.textContent = c.nombre;
+                if (c.logo) { catLogo.src = c.logo; catLogo.style.display = ''; }
+                else catLogo.style.display = 'none';
+                // Pre-rellenar título si está vacío
+                const tit = cont.querySelector('#cpTitulo');
+                if (!tit.value) tit.value = c.nombre + ' · Jornada';
+            });
+        }
+        cont.insertAdjacentHTML('beforeend', `<h3 class="subtitulo-bloque" style="margin-top:26px"><i class="fa-solid fa-list-check"></i> Programados (últimos 60 días)
                 <button class="btn-mini" id="cpRefrescar" style="float:right"><i class="fa-solid fa-rotate-right"></i></button></h3>
-            <div id="cpLista"></div>`;
+            <div id="cpLista"></div>`);
         const msg = t => { cont.querySelector('#cpMsg').textContent = t; };
 
         cont.querySelector('#cpGuardar').addEventListener('click', async () => {

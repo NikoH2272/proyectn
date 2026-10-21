@@ -194,12 +194,15 @@
     (function () {
         const P = window.PumasPortal;
         const esc = P.escaparHtml;
+        let _tok = '';
         function getToken() {
-            try { return JSON.parse(localStorage.getItem('pg_session') || '').token || ''; } catch (e) { return ''; }
+            if (_tok) return _tok;
+            try { const r = localStorage.getItem('pg_session') || ''; const p = JSON.parse(r); return (typeof p === 'object' ? p.token : p) || ''; } catch { return ''; }
         }
 
         window.addEventListener('pg:sesion', function (e) {
             const ses = e.detail;
+            _tok = ses.token || '';
             if (!P.tiene(ses, 'gestionar')) return;
             const tab = document.querySelector('.asc-tabs [data-tab="panelPortales"]');
             if (!tab) return;
@@ -284,12 +287,15 @@
         const P = window.PumasPortal;
         const esc = P.escaparHtml;
         const PORTAL = P.portal;
+        let _tok = '';
         function getToken() {
-            try { return JSON.parse(localStorage.getItem('pg_session') || '').token || ''; } catch (e) { return ''; }
+            if (_tok) return _tok;
+            try { const r = localStorage.getItem('pg_session') || ''; const p = JSON.parse(r); return (typeof p === 'object' ? p.token : p) || ''; } catch { return ''; }
         }
 
         window.addEventListener('pg:sesion', function (e) {
             const ses = e.detail;
+            _tok = ses.token || '';
             if (!P.tiene(ses, 'gestionar')) return;
             const tab = document.querySelector('.asc-tabs [data-tab="panelEquipos"]');
             if (!tab) return;
@@ -298,6 +304,36 @@
         }, { once: true });
 
         let activos = [];
+        let customTeams = [];
+
+        function leerConfig(data) {
+            if (!data) return;
+            if (Array.isArray(data)) { activos = data; customTeams = []; return; }
+            const obj = typeof data === 'string' ? JSON.parse(data) : data;
+            activos = obj.activos || obj || [];
+            customTeams = obj.custom || [];
+        }
+
+        function renderCatCard(c) {
+            const estaActivo = activos.includes(c.id);
+            const esCustom = c._custom;
+            return `<article class="card-box" style="border-left:4px solid ${esc(c.color)}" data-eq-card="${esc(c.id)}">
+                <div style="display:flex;align-items:center;gap:12px">
+                    ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:44px;height:44px;object-fit:contain;flex-shrink:0" onerror="this.hidden=true">` : `<span style="width:44px;height:44px;border-radius:8px;background:${esc(c.color)};opacity:.5;flex-shrink:0"></span>`}
+                    <div>
+                        <strong>${esc(c.nombre)}</strong><br>
+                        <small class="muted">${esc(c.id)}${esCustom ? ' · personalizado' : ''}</small>
+                    </div>
+                    <label class="chk" style="margin-left:auto">
+                        <input type="checkbox" class="chk-eq" data-id="${esc(c.id)}"${estaActivo ? ' checked' : ''}> Activo
+                    </label>
+                    ${esCustom ? `<button class="btn-mini" style="color:#ff6b6b;border-color:rgba(255,107,107,.4)" data-borrar-custom="${esc(c.id)}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+                <p style="margin:8px 0 0;font-size:.78rem;color:var(--muted)" data-eq-estado="${esc(c.id)}">
+                    ${estaActivo ? `✔ Mini portal activo · <a href="equipo.html?cat=${encodeURIComponent(c.id)}" target="_blank">Ver</a>` : 'Inactivo · no aparece en el inicio'}
+                </p>
+            </article>`;
+        }
 
         async function cargarEquipos() {
             const cont = document.getElementById('equiposAscAdmin');
@@ -306,23 +342,8 @@
             try {
                 const { data, error } = await P.db().rpc('asc_equipos_activos', { p_portal: PORTAL });
                 if (error) throw error;
-                activos = Array.isArray(data) ? data : (typeof data === 'string' ? JSON.parse(data || '[]') : []);
-                const cats = window.ASC_CATEGORIAS.filter(c => c.tipo === 'evento');
-                if (!cats.length) { cont.innerHTML = '<p class="res-vacio">Sin categorías de evento definidas.</p>'; return; }
-                cont.innerHTML = `<div class="roles-grid">${cats.map(c => `
-                    <article class="card-box" style="border-left:4px solid ${esc(c.color)}">
-                        <label class="chk" style="display:flex;align-items:center;gap:12px;cursor:pointer">
-                            <input type="checkbox" class="chk-eq" data-id="${esc(c.id)}"${activos.includes(c.id) ? ' checked' : ''}>
-                            ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:40px;height:40px;object-fit:contain;flex-shrink:0">` : ''}
-                            <div>
-                                <strong>${esc(c.nombre)}</strong>
-                                <br><small class="muted">${esc(c.id)}</small>
-                            </div>
-                        </label>
-                        <p style="margin:8px 0 0;font-size:.8rem;color:var(--muted)">
-                            ${activos.includes(c.id) ? '✔ Mini portal activo · <a href="equipo.html?cat=' + encodeURIComponent(c.id) + '" target="_blank">Ver</a>' : 'Inactivo · no aparece en el inicio'}
-                        </p>
-                    </article>`).join('')}</div>`;
+                leerConfig(data);
+                renderGrid(cont);
                 btn.hidden = false;
                 btn.onclick = guardarEquipos;
             } catch (e) {
@@ -330,10 +351,55 @@
             }
         }
 
+        function renderGrid(cont) {
+            const predefinidos = window.ASC_CATEGORIAS.filter(c => c.tipo === 'evento');
+            const custom = customTeams.map(c => ({ ...c, _custom: true }));
+            const todos = [...predefinidos, ...custom];
+            if (!todos.length) { cont.innerHTML = '<p class="res-vacio">Sin categorías definidas.</p>'; return; }
+            cont.innerHTML = `<div class="roles-grid" id="eqGrid">${todos.map(renderCatCard).join('')}</div>
+            <details class="card-box" style="margin-top:14px;cursor:pointer">
+                <summary style="font-weight:700;color:var(--primary);list-style:none;display:flex;align-items:center;gap:8px"><i class="fa-solid fa-plus"></i> Agregar equipo personalizado</summary>
+                <div class="form-grid" style="margin-top:14px">
+                    <div class="form-group"><label>Nombre</label><input id="inpCN" maxlength="40" placeholder="Ej: SHADOW"></div>
+                    <div class="form-group"><label>ID (sin espacios)</label><input id="inpCI" maxlength="24" placeholder="Ej: ev_shadow"></div>
+                    <div class="form-group"><label>Color</label><input id="inpCC" type="color" value="#B6FF00"></div>
+                    <div class="form-group"><label>URL del logo (opcional)</label><input id="inpCL" type="url" placeholder="https://..."></div>
+                </div>
+                <button class="btn-access btn-mini" id="btnAgregarCustom" style="margin-top:8px"><i class="fa-solid fa-plus"></i> Agregar y activar</button>
+                <p class="muted" style="margin-top:6px;font-size:.8rem" id="msgCustom"></p>
+            </details>`;
+
+            cont.querySelector('#btnAgregarCustom').onclick = () => {
+                const nombre = cont.querySelector('#inpCN').value.trim();
+                const id = cont.querySelector('#inpCI').value.trim().replace(/\s+/g, '_').toLowerCase() || 'ev_' + nombre.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const color = cont.querySelector('#inpCC').value || '#B6FF00';
+                const logo  = cont.querySelector('#inpCL').value.trim();
+                const msg   = cont.querySelector('#msgCustom');
+                if (!nombre || !id) { msg.textContent = 'Nombre e ID son obligatorios.'; return; }
+                if (customTeams.find(c => c.id === id) || window.ASC_CATEGORIAS.find(c => c.id === id)) {
+                    msg.textContent = 'Ya existe un equipo con ese ID.'; return;
+                }
+                customTeams.push({ id, nombre, color, logo: logo || null });
+                if (!activos.includes(id)) activos.push(id);
+                renderGrid(cont);
+                msg.textContent = '';
+            };
+
+            cont.addEventListener('click', e => {
+                const b = e.target.closest('[data-borrar-custom]');
+                if (!b) return;
+                const id = b.dataset.borrarCustom;
+                customTeams = customTeams.filter(c => c.id !== id);
+                activos = activos.filter(x => x !== id);
+                renderGrid(cont);
+            }, { capture: false });
+        }
+
         async function guardarEquipos() {
             const btn  = document.getElementById('btnGuardarEquipos');
             const msg  = document.getElementById('equiposAscEstado');
             const checked = [...document.querySelectorAll('.chk-eq:checked')].map(el => el.dataset.id);
+            const config = { activos: checked, custom: customTeams };
             btn.disabled = true;
             msg.textContent = 'Guardando...';
             msg.style.color = '';
@@ -341,19 +407,16 @@
                 const { error } = await P.db().rpc('admin_asc_equipos_guardar', {
                     p_token: getToken(),
                     p_portal: PORTAL,
-                    p_activos: JSON.stringify(checked)
+                    p_activos: config
                 });
                 if (error) throw error;
                 activos = checked;
                 msg.textContent = `✔ Guardado · ${checked.length} equipo(s) activo(s)`;
                 msg.style.color = 'var(--primary)';
-                // Actualizar badges
                 document.querySelectorAll('.chk-eq').forEach(el => {
-                    const art = el.closest('article');
-                    const info = art.querySelector('p');
-                    const id = el.dataset.id;
-                    if (info) info.innerHTML = el.checked
-                        ? `✔ Mini portal activo · <a href="equipo.html?cat=${encodeURIComponent(id)}" target="_blank">Ver</a>`
+                    const est = document.querySelector(`[data-eq-estado="${CSS.escape(el.dataset.id)}"]`);
+                    if (est) est.innerHTML = el.checked
+                        ? `✔ Mini portal activo · <a href="equipo.html?cat=${encodeURIComponent(el.dataset.id)}" target="_blank">Ver</a>`
                         : 'Inactivo · no aparece en el inicio';
                 });
             } catch (e) {

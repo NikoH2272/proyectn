@@ -190,8 +190,19 @@
         });
     }
 
+    /* ---------------- Custom teams (registro previo) ---------------- */
+    async function cargarCustomCats() {
+        try {
+            const { data } = await P.db().rpc('asc_equipos_activos', { p_portal: PORTAL });
+            if (!data || Array.isArray(data)) return;
+            const obj = typeof data === 'string' ? JSON.parse(data) : data;
+            (obj.custom || []).forEach(c => { if (!window.ASC_CATEGORIAS.find(x => x.id === c.id)) window.ASC_CATEGORIAS.push(c); });
+        } catch (e) {}
+    }
+
     /* ---------------- Init ---------------- */
     async function iniciar() {
+        await cargarCustomCats();
         if (!CAT_ID) {
             document.querySelector('.portal-hero').innerHTML = `<div class="hero-copy"><p class="res-vacio">Categoría no especificada. <a href="./">Volver</a></p></div>`;
             return;
