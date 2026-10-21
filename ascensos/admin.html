@@ -221,11 +221,12 @@
             const estaActivo = activos.includes(c.id);
             const esCustom = c._custom;
             const ov = overrides[c.id] || {};
-            const colorActual = ov.color || c.color || '#B6FF00';
-            const linkActual  = ov.link  || c.link  || '';
-            return `<article class="card-box" style="border-left:4px solid ${esc(colorActual)}" data-eq-card="${esc(c.id)}">
+            const colorActual  = ov.color  || c.color  || '#B6FF00';
+            const color2Actual = ov.color2 || c.color2 || colorActual;
+            const linkActual   = ov.link   || c.link   || '';
+            return `<article class="card-box" style="border-left:4px solid ${esc(colorActual)};border-right:4px solid ${esc(color2Actual)}" data-eq-card="${esc(c.id)}">
                 <div style="display:flex;align-items:center;gap:12px">
-                    ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:44px;height:44px;object-fit:contain;flex-shrink:0" onerror="this.hidden=true">` : `<span style="width:44px;height:44px;border-radius:8px;background:${esc(colorActual)};opacity:.5;flex-shrink:0"></span>`}
+                    ${c.logo ? `<img src="${esc(c.logo)}" alt="" style="width:44px;height:44px;object-fit:contain;flex-shrink:0" onerror="this.hidden=true">` : `<span style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,${esc(colorActual)},${esc(color2Actual)});flex-shrink:0"></span>`}
                     <div>
                         <strong>${esc(c.nombre)}</strong><br>
                         <small class="muted">${esc(c.id)}${esCustom ? ' · personalizado' : ''}</small>
@@ -233,13 +234,17 @@
                     <label class="chk" style="margin-left:auto">
                         <input type="checkbox" class="chk-eq" data-id="${esc(c.id)}"${estaActivo ? ' checked' : ''}> Activo
                     </label>
-                    <button class="btn-mini" data-editar-eq="${esc(c.id)}" title="Editar color y WhatsApp"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-mini" data-editar-eq="${esc(c.id)}" title="Editar colores y WhatsApp"><i class="fa-solid fa-pen"></i></button>
                     ${esCustom ? `<button class="btn-mini" style="color:#ff6b6b;border-color:rgba(255,107,107,.4)" data-borrar-custom="${esc(c.id)}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
                 <div class="eq-edit-panel" id="eq-edit-${esc(c.id)}" hidden style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
-                    <div class="form-group" style="margin:0;min-width:120px">
-                        <label style="font-size:.75rem">Color</label>
+                    <div class="form-group" style="margin:0">
+                        <label style="font-size:.75rem">Color 1</label>
                         <input type="color" class="eq-color-inp" value="${esc(colorActual)}" style="width:60px;height:32px;padding:2px;border-radius:6px;cursor:pointer">
+                    </div>
+                    <div class="form-group" style="margin:0">
+                        <label style="font-size:.75rem">Color 2</label>
+                        <input type="color" class="eq-color2-inp" value="${esc(color2Actual)}" style="width:60px;height:32px;padding:2px;border-radius:6px;cursor:pointer">
                     </div>
                     <div class="form-group" style="margin:0;flex:1;min-width:200px">
                         <label style="font-size:.75rem">Link WhatsApp / Discord</label>
@@ -335,11 +340,13 @@
                     const id = guardar.dataset.guardarEq;
                     const panel = document.getElementById('eq-edit-' + id);
                     if (!panel) return;
-                    const color = panel.querySelector('.eq-color-inp').value;
-                    const link  = panel.querySelector('.eq-link-inp').value.trim();
+                    const color  = panel.querySelector('.eq-color-inp').value;
+                    const color2 = panel.querySelector('.eq-color2-inp').value;
+                    const link   = panel.querySelector('.eq-link-inp').value.trim();
                     if (!overrides[id]) overrides[id] = {};
-                    overrides[id].color = color;
-                    overrides[id].link  = link || null;
+                    overrides[id].color  = color;
+                    overrides[id].color2 = color2;
+                    overrides[id].link   = link || null;
                     panel.hidden = true;
                     renderGrid(cont);
                     return;

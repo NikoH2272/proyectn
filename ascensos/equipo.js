@@ -40,20 +40,25 @@
         const lighten = (h, t) => { h = h.replace('#',''); const blend = c => Math.min(255, Math.round(parseInt(c,16)*(1-t)+255*t)).toString(16).padStart(2,'0'); return `#${blend(h.slice(0,2))}${blend(h.slice(2,4))}${blend(h.slice(4,6))}`; };
 
         const c1    = safeHex(color);
+        const c2    = safeHex(color2);
         const pRgb  = toRgb(c1);
         const lum   = (h => { const r=parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255; return .2126*r+.7152*g+.0722*b; })(c1.replace('#',''));
-        const onPrimary = lum > 0.45 ? '#0a0b10' : '#ffffff';
-        const accent    = lighten(c1, 0.30);
-        const aRgb      = toRgb(accent);
+        const onPrimary  = lum > 0.45 ? '#0a0b10' : '#ffffff';
+        const accentAuto = lighten(c1, 0.30);
+        const accentFin  = (c2 !== c1) ? c2 : accentAuto;
+        const aRgb       = toRgb(accentFin);
 
-        const root = document.documentElement;
-        root.style.setProperty('--primary',     c1);
-        root.style.setProperty('--primary-2',   safeHex(color2));
-        root.style.setProperty('--primary-rgb',  pRgb);
-        root.style.setProperty('--accent',       accent);
-        root.style.setProperty('--accent-rgb',   aRgb);
-        root.style.setProperty('--on-primary',   onPrimary);
-        root.style.setProperty('--primary-text', onPrimary);
+        // Aplicar en body además de :root para sobreescribir body[data-tema="aza"]
+        const setVar = (k, v) => { document.documentElement.style.setProperty(k, v); document.body.style.setProperty(k, v); };
+        setVar('--primary',      c1);
+        setVar('--primary-2',    c2);
+        setVar('--primary-rgb',  pRgb);
+        setVar('--accent',       accentFin);
+        setVar('--accent-rgb',   aRgb);
+        setVar('--on-primary',   onPrimary);
+        setVar('--primary-text', onPrimary);
+        setVar('--bg-a',         '#08090B');
+        setVar('--bg-b',         '#0D1014');
 
         const hero = $('equipoHero');
         if (hero) { hero.style.setProperty('--cat', color); }
@@ -254,7 +259,8 @@
             const obj = Array.isArray(data) ? {} : (typeof data === 'string' ? JSON.parse(data) : data);
             const ov = (obj.overrides || {})[CAT_ID];
             if (ov) {
-                if (ov.color) catInfo.color = ov.color;
+                if (ov.color)            catInfo.color  = ov.color;
+                if (ov.color2)           catInfo.color2 = ov.color2;
                 if (ov.link !== undefined) catInfo.link = ov.link;
                 montarHero();
             }
