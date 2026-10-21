@@ -895,9 +895,24 @@ footer {
 .train-more a{color:var(--primary);font:600 .78rem var(--font-display);letter-spacing:.06em;text-decoration:none}
 .latam-layout{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;margin-top:8px}
 @media(max-width:900px){.latam-layout{grid-template-columns:1fr}}
+/* Ligas LATAM: una fila centrada, máx 5 columnas */
+#ligas-latam .latam-layout { display: block; }
+#ligas-latam .latam-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+}
+#ligas-latam .latam-card {
+    flex: 0 0 175px;
+    max-width: 175px;
+}
+@media(max-width: 700px) {
+    #ligas-latam .latam-card { flex: 0 0 calc(50% - 8px); max-width: none; }
+}
 .latam-portales-col{}
 .latam-rankings-col{position:sticky;top:72px}
-.latam-rank-card .rank-list{max-height:340px;overflow-y:auto}
+.latam-rank-card .rank-list{max-height:none;overflow-y:visible}
 .latam-resultados-cta{margin:20px 0 0;text-align:center}
 .latam-resultados-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;font:600 .85rem var(--font-display);letter-spacing:.06em}
 .jersey-grid,.rank-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
