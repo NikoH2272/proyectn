@@ -56,6 +56,7 @@
             <button data-tab="panelBaneados"><i class="fa-solid fa-ban"></i> Baneados</button>
             <button data-tab="panelCupos"><i class="fa-solid fa-ticket"></i> Cupos</button>
             <button data-tab="panelModeradores" hidden><i class="fa-solid fa-user-shield"></i> Moderadores</button>
+            <button data-tab="panelPortales"    hidden><i class="fa-solid fa-sliders"></i> Portales</button>
         </div>
 
         <!-- RESULTADOS -->
@@ -147,6 +148,12 @@
             <div id="moderadoresAdmin"></div>
         </div>
 
+        <!-- PORTALES: cuáles tienen pasarela de ascensos activa (solo superadmin) -->
+        <div class="tool-container asc-panel" id="panelPortales" hidden>
+            <p class="tool-desc">Activa el apartado de ascensos en cada portal del sitio. Cuando está activo, aparece una sección de pasarela (CTA) en ese portal con un enlace a los ascensos configurados.</p>
+            <div id="portalesAscAdmin"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p></div>
+        </div>
+
         <!-- CUPOS -->
         <div class="tool-container asc-panel" id="panelCupos" hidden>
             <p class="tool-desc">Abre cupos para la próxima jornada, igual que en PROYECTN. Los equipos se inscriben en <a href="cupos.html">la página de cupos</a>.</p>
@@ -171,5 +178,94 @@
     <script>window.addEventListener('pg:sesion', () => {
         PumasControl.montarBaneos('baneosCuposAdmin', 'ascensosaza');
     }, { once: true });</script>
+    <script>
+    /* ── Panel Portales: solo superadmin (gestionar) ── */
+    (function () {
+        const P = window.PumasPortal;
+        const esc = P.escaparHtml;
+        function getToken() {
+            try { return JSON.parse(localStorage.getItem('pg_session') || '').token || ''; } catch (e) { return ''; }
+        }
+
+        window.addEventListener('pg:sesion', function (e) {
+            const ses = e.detail;
+            if (!P.tiene(ses, 'gestionar')) return;
+            const tab = document.querySelector('.asc-tabs [data-tab="panelPortales"]');
+            if (!tab) return;
+            tab.hidden = false;
+            tab.addEventListener('click', cargarPortales, { once: true });
+        }, { once: true });
+
+        async function cargarPortales() {
+            const cont = document.getElementById('portalesAscAdmin');
+            if (!cont) return;
+            try {
+                const [{ data: portales, error }, { data: ascPortales }] = await Promise.all([
+                    P.db().rpc('admin_ascensos_portales_listar', { p_token: getToken() }),
+                    P.db().from('portales').select('id, nombre').eq('tipo', 'ascensos').order('nombre')
+                ]);
+                if (error) throw error;
+                const lista = portales || [];
+                const asc = ascPortales || [];
+                const optsAsc = '<option value="">— ninguno —</option>' +
+                    asc.map(a => `<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join('');
+
+                if (!lista.length) { cont.innerHTML = '<p class="res-vacio">Sin portales configurables.</p>'; return; }
+                cont.innerHTML = `<div class="roles-grid">${lista.map(p => `
+                    <article class="card-box" data-pid="${esc(p.id)}">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                            <span style="width:10px;height:10px;border-radius:50%;background:${esc(p.color)};flex-shrink:0;display:inline-block"></span>
+                            <div><strong>${esc(p.nombre)}</strong><br><small class="muted">${esc(p.id)} · ${esc(p.tipo)}</small></div>
+                        </div>
+                        <label class="chk" style="margin-bottom:10px">
+                            <input type="checkbox" class="chk-asc-activo"${p.asc_activo ? ' checked' : ''}> Mostrar pasarela de ascensos
+                        </label>
+                        <div class="form-grid" style="margin-top:8px">
+                            <div class="form-group">
+                                <label>Portal de ascensos</label>
+                                <select class="sel-asc-portal">${optsAsc.replace(`value="${esc(p.asc_portal)}"`, `value="${esc(p.asc_portal)}" selected`)}</select>
+                            </div>
+                            <div class="form-group">
+                                <label>Texto del botón (opcional)</label>
+                                <input class="inp-asc-btn" placeholder="Apartar cupo" maxlength="60" value="${esc(p.asc_btn || '')}">
+                            </div>
+                        </div>
+                        <div class="acciones" style="margin-top:10px">
+                            <button class="btn-access btn-mini" onclick="guardarPortalAsc(this)"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        </div>
+                        <p class="muted" style="margin-top:6px;font-size:.8rem;min-height:1.2em" role="status" data-msg></p>
+                    </article>`).join('')}</div>`;
+            } catch (e) {
+                cont.innerHTML = `<p class="res-vacio pg-error">${esc(e.message || 'Error al cargar portales')}</p>`;
+            }
+        }
+
+        window.guardarPortalAsc = async function (btn) {
+            const P = window.PumasPortal;
+            const art = btn.closest('[data-pid]');
+            const msg = art.querySelector('[data-msg]');
+            const p_portal     = art.dataset.pid;
+            const p_asc_activo = art.querySelector('.chk-asc-activo').checked;
+            const p_asc_portal = art.querySelector('.sel-asc-portal').value;
+            const p_asc_btn    = art.querySelector('.inp-asc-btn').value.trim();
+            btn.disabled = true;
+            msg.textContent = 'Guardando...';
+            try {
+                const { error } = await P.db().rpc('admin_ascensos_portal_config', {
+                    p_token: getToken(), p_portal, p_asc_activo,
+                    p_asc_portal: p_asc_portal, p_asc_btn: p_asc_btn
+                });
+                if (error) throw error;
+                msg.textContent = '✔ Guardado';
+                msg.style.color = 'var(--primary)';
+            } catch (e) {
+                msg.textContent = e.message || 'Error';
+                msg.style.color = '#ff4d4d';
+            } finally {
+                btn.disabled = false;
+            }
+        };
+    })();
+    </script>
 </body>
 </html>

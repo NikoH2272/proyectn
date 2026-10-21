@@ -901,3 +901,28 @@ section.hero { overflow: hidden; }
         .orden-btn:active   { transform: scale(.94) !important; transition: transform .08s ease; }
     }
 }
+
+/* ── Pasarela de Ascensos ─────────────────────────────────────────── */
+.pasarela-asc { border-left: 4px solid var(--asc-c, var(--primary)); }
+.pasarela-asc-inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    border-left: 4px solid var(--asc-c, var(--primary)) !important;
+}
+.pasarela-asc-icon {
+    font-size: 2.4rem;
+    color: var(--asc-c, var(--primary));
+    flex-shrink: 0;
+    line-height: 1;
+}
+.pasarela-asc-copy { flex: 1; min-width: 180px; }
+.pasarela-asc-copy h2 { margin: 2px 0 4px; font-size: 1.3rem; }
+.pasarela-asc-copy p  { margin: 0; color: var(--muted); font-size: .88rem; }
+.pasarela-asc-cta { display: flex; gap: 10px; flex-wrap: wrap; flex-shrink: 0; }
+@media (max-width: 640px) {
+    .pasarela-asc-inner { flex-direction: column; align-items: flex-start; }
+    .pasarela-asc-cta { width: 100%; }
+    .pasarela-asc-cta .btn-access { flex: 1; justify-content: center; }
+}
