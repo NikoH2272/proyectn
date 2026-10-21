@@ -12,7 +12,20 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PROYECTN | Portal Gamer</title>
+    <title>PROYECTN | Free Fire Competitivo — Ascensos, Ligas y Torneos</title>
+    <meta name="description" content="Plataforma competitiva de Free Fire: Ascensos AZA, Ligas LATAM, torneos y entrenamientos. Resultados en tiempo real, ranking actualizado y cupos para tu próxima jornada.">
+    <meta name="keywords" content="Free Fire competitivo, ascensos Free Fire, Ascensos AZA, ligas LATAM, torneos Free Fire, entrenos Free Fire, PROYECTN, ranking Free Fire">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://proyectn.com/">
+    <meta property="og:title" content="PROYECTN | Free Fire Competitivo — Ascensos, Ligas y Torneos">
+    <meta property="og:description" content="Ascensos AZA, Ligas LATAM, torneos y entrenamientos de Free Fire. Resultados en tiempo real y cupos para la próxima jornada.">
+    <meta property="og:image" content="https://proyectn.com/imagenes/proyectn.png">
+    <meta property="og:site_name" content="PROYECTN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PROYECTN | Free Fire Competitivo">
+    <meta name="twitter:description" content="Ascensos AZA, Ligas LATAM, torneos y entrenamientos de Free Fire.">
+    <meta name="twitter:image" content="https://proyectn.com/imagenes/proyectn.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -42,63 +55,73 @@
 
     <nav class="main-nav" id="mainNav">
         <ul>
+            <li><a href="#ascensos-aza" onclick="closeMenu()"><i class="fa-solid fa-trophy"></i> Ascensos AZA</a></li>
+            <li><a href="#ligas-latam" onclick="closeMenu()"><i class="fa-solid fa-earth-americas"></i> Ligas LATAM</a></li>
             <li><a href="/portales/pumasgaming/" onclick="closeMenu()">Entrenamientos</a></li>
-            <li><a href="/entrenoslatam/" onclick="closeMenu()">LATAM</a></li>
-            <li><a href="/ascensos/" onclick="closeMenu()"><i class="fa-solid fa-trophy"></i> Ascensos AZA</a></li>
-            <li><a href="#rankings" onclick="closeMenu()">Rankings</a></li>
+            <li><a href="#comunidad" onclick="closeMenu()">Comunidad</a></li>
             <li><a href="/herramienta/" onclick="closeMenu()"><i class="fa-solid fa-screwdriver-wrench"></i> Herramientas</a></li>
             <li><a href="/admin/login.html" class="btn-admin-nav" onclick="closeMenu()" style="color: var(--primary);"><i class="fa-solid fa-lock"></i> Admin</a></li>
         </ul>
     </nav>
 </header>
 
- <section class="portal-hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-            <div class="eyebrow">Comunidad competitiva · Free Fire</div>
-            <h1 id="hero-title">Nacidos para <span>competir.</span></h1>
-            <p>PROYECTN reúne a equipos que juegan con carácter. Entrena, sigue la competencia y crea tus resultados desde un solo lugar.</p>
-            <div class="hero-actions">
-                <a href="#latam" class="btn-access">Ver portales</a>
-                <a href="#comunidad" class="btn-access btn-outline">Entrar a la comunidad</a>
-                <a href="/portales/pumasgaming/juegos.html" class="btn-access btn-outline"><i class="fa-solid fa-gamepad"></i> Juegos</a>
-                <a href="/portales/pumasgaming/dinamicas.html" class="btn-access btn-outline"><i class="fa-solid fa-bolt"></i> Dinámicas</a>
-            </div>
+<section class="portal-hero index-hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+        <div class="eyebrow hero-anim-1">
+            <span class="live-badge"><span class="live-dot"></span>Resultados en vivo</span>
+            Free Fire Competitivo
         </div>
-        <div class="hero-mark" aria-hidden="true">
+        <h1 id="hero-title" class="hero-anim-2">
+            Entrena. Compite.<br><span class="hero-highlight">Asciende.</span>
+        </h1>
+        <p class="hero-anim-3">Ligas, ascensos y torneos de Free Fire — resultados en tiempo real, ranking actualizado y cupos para tu próxima jornada.</p>
+        <div class="hero-tags hero-anim-4">
+            <span class="hero-tag"><i class="fa-solid fa-trophy"></i> Ascensos AZA</span>
+            <span class="hero-tag"><i class="fa-solid fa-earth-americas"></i> Ligas LATAM</span>
+            <span class="hero-tag"><i class="fa-solid fa-medal"></i> Torneos</span>
+            <span class="hero-tag"><i class="fa-solid fa-dumbbell"></i> Entrenos</span>
+        </div>
+        <div class="hero-actions hero-anim-5">
+            <a href="#ascensos-aza" class="btn-access"><i class="fa-solid fa-trophy"></i> Ascensos AZA</a>
+            <a href="#ligas-latam" class="btn-access btn-outline"><i class="fa-solid fa-earth-americas"></i> Ligas LATAM</a>
+            <a href="#comunidad" class="btn-access btn-outline"><i class="fa-brands fa-discord"></i> Comunidad</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-mark hero-anim-mark" aria-hidden="true">
             <img src="/imagenes/proyectn.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
             <span class="mark-fallback">PN</span>
         </div>
-    </section>
-
-<section id="portales-competitivos">
-    <h2 class="section-title">Portales</h2>
-    <div class="portales-grid">
-        <article class="portal-card portal-card--ascensos">
-            <div class="portal-card-logo">
-                <img src="ascensos/imagenes/aza.png" alt="AZA" onerror="this.hidden=true">
-            </div>
-            <div class="portal-card-body">
-                <div class="portal-card-eyebrow">Free Fire · Oficial</div>
-                <h3>Ascensos AZA</h3>
-                <p>Resultados de cada jornada, ranking acumulado y cupos para la próxima fecha de ascensos.</p>
-                <div class="stat-row portal-card-stats" id="ascEstadisticas">
-                    <div><b id="ascStatJornadas">—</b><small>Jornadas</small></div>
-                    <div><b id="ascStatEquipos">—</b><small>Equipos</small></div>
-                    <div><b id="ascStatAscensos">—</b><small>Ascensos</small></div>
-                </div>
-                <div class="portal-card-links">
-                    <a href="/ascensos/" class="btn-access"><i class="fa-solid fa-trophy"></i> Ver portal</a>
-                    <a href="/ascensos/cupos.html" class="btn-access btn-outline"><i class="fa-solid fa-ticket"></i> Cupos</a>
-                </div>
-            </div>
-        </article>
     </div>
 </section>
 
-<section id="latam">
-    <div class="latam-cabecera"><img src="entrenoslatam/imagenes/latam.png" alt="Entrenos LATAM" onerror="this.parentElement.hidden=true"></div>
-    <h2 class="section-title">Entrenos LATAM</h2>
-    <p class="latam-intro">PROYECTN y sus ligas aliadas: entrena en cualquiera. Cada una tiene su portal de resultados y su grupo.</p>
+<section id="ascensos-aza" data-reveal>
+    <div class="section-header-row">
+        <h2 class="section-title">Ascensos AZA</h2>
+        <a href="/ascensos/" class="section-ver-todo">Ver portal <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <article class="portal-card portal-card--ascensos portal-card--wide">
+        <div class="portal-card-logo">
+            <img src="ascensos/imagenes/aza.png" alt="AZA" onerror="this.hidden=true">
+        </div>
+        <div class="portal-card-body">
+            <div class="portal-card-eyebrow"><i class="fa-solid fa-circle-dot" style="color:#B6FF00;font-size:.6em"></i> Free Fire · Oficial</div>
+            <h3>Ascensos AZA</h3>
+            <p>Resultados de cada jornada, ranking acumulado por categoría y cupos para la próxima fecha de ascensos.</p>
+            <div class="portal-card-links">
+                <a href="/ascensos/" class="btn-access"><i class="fa-solid fa-trophy"></i> Ver portal</a>
+                <a href="/ascensos/cupos.html" class="btn-access btn-outline"><i class="fa-solid fa-ticket"></i> Cupos</a>
+            </div>
+            <div class="asc-logos-activos" id="indexPortalesActivos"></div>
+            <div id="indexCuposAbiertos"></div>
+        </div>
+    </article>
+</section>
+
+<section id="ligas-latam" data-reveal>
+    <div class="latam-cabecera"><img src="entrenoslatam/imagenes/latam.png" alt="Ligas LATAM" onerror="this.parentElement.hidden=true"></div>
+    <h2 class="section-title">Ligas LATAM</h2>
+    <p class="latam-intro">PROYECTN y sus ligas aliadas: entrena en cualquiera. Cada una tiene su portal de resultados y su grupo de WhatsApp.</p>
 
     <div class="latam-layout">
         <!-- Cuadrícula de portales -->
@@ -128,7 +151,7 @@
     </div>
 </section>
 
-    <section id="noticias">
+    <section id="comunidad" data-reveal>
         <h2 class="section-title">Comunidad &amp; Noticias</h2>
 
         <div class="discord-cta">
@@ -181,25 +204,91 @@
         }
     </script>
     <script>
-    /* ── Stats Ascensos AZA ── */
+    /* ── Ascensos AZA en index ── */
     (async function () {
-        try {
-            const sb = window.PumasPortal && window.PumasPortal.supabase;
-            if (!sb) return;
-            const { data } = await sb.from('asc_jornadas').select('equipos, clasificados').eq('portal', 'ascensosaza');
-            if (!data || !data.length) return;
-            const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
-            const eqs = new Set(), asc = [];
-            data.forEach(j => {
-                (j.equipos || []).forEach(e => eqs.add(norm(e.n)));
-                (j.clasificados || []).forEach(c => asc.push(c));
-            });
-            document.getElementById('ascStatJornadas').textContent = data.length;
-            document.getElementById('ascStatEquipos').textContent = eqs.size;
-            document.getElementById('ascStatAscensos').textContent = asc.length;
-        } catch (e) {}
+        const sb = window.PumasPortal && window.PumasPortal.supabase;
+        if (!sb) return;
+        const esc = window.PumasPortal.escaparHtml;
+        const PORTAL = 'ascensosaza';
+
+        // Stats
+        (async () => {
+            try {
+                const { data } = await sb.from('asc_jornadas').select('equipos, clasificados').eq('portal', PORTAL);
+                if (!data || !data.length) return;
+                const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+                const eqs = new Set();
+                let asc = 0;
+                data.forEach(j => {
+                    (j.equipos||[]).forEach(e => eqs.add(norm(e.n)));
+                    asc += (j.clasificados||[]).length;
+                });
+                const counter = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    let i = 0, step = Math.ceil(val / 30);
+                    const t = setInterval(() => { i = Math.min(i + step, val); el.textContent = i; if (i >= val) clearInterval(t); }, 40);
+                };
+                counter('ascStatJornadas', data.length);
+                counter('ascStatEquipos', eqs.size);
+                counter('ascStatAscensos', asc);
+            } catch (e) {}
+        })();
+
+        // Portales activos (equipos con mini portal)
+        (async () => {
+            const cont = document.getElementById('indexPortalesActivos');
+            if (!cont) return;
+            try {
+                const { data } = await sb.rpc('asc_equipos_activos', { p_portal: PORTAL });
+                let activos = [], custom = [];
+                if (data) {
+                    if (Array.isArray(data)) { activos = data; }
+                    else { const o = typeof data === 'string' ? JSON.parse(data) : data; activos = o.activos||[]; custom = o.custom||[]; }
+                }
+                if (!activos.length) { cont.innerHTML = '<p class="muted" style="font-size:.82rem">Sin portales activos aún.</p>'; return; }
+                const cats = (window.ASC_CATEGORIAS || []);
+                custom.forEach(c => { if (!cats.find(x => x.id === c.id)) cats.push(c); });
+                const CAT = id => cats.find(c => c.id === id) || { nombre: id, color: '#B6FF00' };
+                cont.innerHTML = activos.map(id => {
+                    const c = CAT(id);
+                    return `<a class="asc-logo-chip" href="/ascensos/equipo.html?cat=${encodeURIComponent(id)}" style="--chip:${esc(c.color)}" title="${esc(c.nombre)}">
+                        ${c.logo ? `<img src="${esc(c.logo)}" alt="${esc(c.nombre)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <span class="asc-logo-fallback">${esc(c.nombre.charAt(0))}</span>` : `<span class="asc-logo-fallback">${esc(c.nombre.charAt(0))}</span>`}
+                    </a>`;
+                }).join('');
+            } catch (e) { cont.innerHTML = ''; }
+        })();
+
+        // Cupos abiertos
+        (async () => {
+            const cont = document.getElementById('indexCuposAbiertos');
+            if (!cont) return;
+            try {
+                const lista = await window.PumasPortal.cupos.publicos(PORTAL);
+                const abiertos = lista.filter(g => g.estado === 'ABIERTO' && !g.pendiente);
+                if (!abiertos.length) return;
+                cont.innerHTML = `<div class="cupos-index-cta">
+                    <i class="fa-solid fa-ticket"></i>
+                    <div>
+                        <strong>${abiertos.length} cupo(s) abierto(s) ahora</strong>
+                        <span>${esc(abiertos[0].titulo)}${abiertos.length > 1 ? ` y ${abiertos.length - 1} más` : ''}</span>
+                    </div>
+                    <a href="/ascensos/cupos.html" class="btn-access btn-mini"><i class="fa-solid fa-arrow-right"></i> Inscribirse</a>
+                </div>`;
+            } catch (e) {}
+        })();
+    })();
+
+    /* ── Scroll reveal ── */
+    (function () {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('[data-reveal]').forEach(el => obs.observe(el));
     })();
     </script>
+    <script src="ascensos/categorias.js?v=20261021"></script>
     <script src="script.js"></script>
     <script src="entrenamientos.js?v=20261013e"></script>
     <script src="portal-kit/latam.js?v=20261013e"></script>
