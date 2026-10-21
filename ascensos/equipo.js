@@ -34,15 +34,26 @@
         const color  = catInfo.color  || '#B6FF00';
         const color2 = catInfo.color2 || color;
 
-        // Aplicar color del equipo como tema del mini portal
-        const root = document.documentElement;
-        root.style.setProperty('--primary',   color);
-        root.style.setProperty('--primary-2', color2);
-        // Calcular si el color es claro para decidir el contraste del texto sobre botones
-        const lum = (h => { h = h.replace('#',''); const r=parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255; return .2126*r+.7152*g+.0722*b; })(color.length===7?color:'#B6FF00');
+        // Aplicar color del equipo como tema completo del mini portal
+        const safeHex = c => /^#[0-9a-fA-F]{6}$/.test(c) ? c : '#B6FF00';
+        const toRgb   = h => { h = h.replace('#',''); return `${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)}`; };
+        const lighten = (h, t) => { h = h.replace('#',''); const blend = c => Math.min(255, Math.round(parseInt(c,16)*(1-t)+255*t)).toString(16).padStart(2,'0'); return `#${blend(h.slice(0,2))}${blend(h.slice(2,4))}${blend(h.slice(4,6))}`; };
+
+        const c1    = safeHex(color);
+        const pRgb  = toRgb(c1);
+        const lum   = (h => { const r=parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255; return .2126*r+.7152*g+.0722*b; })(c1.replace('#',''));
         const onPrimary = lum > 0.45 ? '#0a0b10' : '#ffffff';
-        root.style.setProperty('--primary-text', onPrimary);
+        const accent    = lighten(c1, 0.30);
+        const aRgb      = toRgb(accent);
+
+        const root = document.documentElement;
+        root.style.setProperty('--primary',     c1);
+        root.style.setProperty('--primary-2',   safeHex(color2));
+        root.style.setProperty('--primary-rgb',  pRgb);
+        root.style.setProperty('--accent',       accent);
+        root.style.setProperty('--accent-rgb',   aRgb);
         root.style.setProperty('--on-primary',   onPrimary);
+        root.style.setProperty('--primary-text', onPrimary);
 
         const hero = $('equipoHero');
         if (hero) { hero.style.setProperty('--cat', color); }
