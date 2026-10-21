@@ -398,7 +398,7 @@
         return { media_type: 'image/jpeg', data: url.split(',')[1], vista: url };
     }
 
-    const CON_IA = PORTAL === 'ascensosaza';   // la IA es solo para Ascensos AZA
+    const CON_IA = PORTAL === 'ascensosaza';   // la IA es solo para Ascensos LATAM
     function montarIA() {
         const cont = $('iaPanel');
         if (!cont) return;

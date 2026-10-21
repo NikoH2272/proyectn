@@ -30,7 +30,7 @@
 
     /* ---------------- Hero dinámico ---------------- */
     function montarHero() {
-        document.title = `${catInfo.nombre} · Ascensos AZA`;
+        document.title = `${catInfo.nombre} · Ascensos LATAM`;
         const color  = catInfo.color  || '#B6FF00';
         const color2 = catInfo.color2 || color;
 

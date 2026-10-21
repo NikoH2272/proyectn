@@ -12,7 +12,7 @@
     let yo = null;
     let vista = 'principal';   // 'principal' · 'aza'
 
-    // Ascensos AZA es un portal aparte: sus roles (solo ven ese portal) y sus usuarios
+    // Ascensos LATAM es un portal aparte: sus roles (solo ven ese portal) y sus usuarios
     // (admins y moderadores creados allá) NO salen en el panel principal: se manejan en su propia ventana.
     const esRolAza = r => !!r && Array.isArray(r.portales) && r.portales.length === 1 && r.portales[0] === 'ascensosaza';
     // Entrenos PROYECTN también es aparte: su staff (rol que solo ve 'entrenamientos') se maneja en su propia ventana
@@ -115,7 +115,7 @@
 
         <div class="us-tabs" role="tablist">
             <button type="button" class="us-tab${vista === 'principal' ? ' on' : ''}" data-vista-btn="principal"><i class="fa-solid fa-users"></i> Panel principal</button>
-            <button type="button" class="us-tab${vista === 'aza' ? ' on' : ''}" data-vista-btn="aza"><i class="fa-solid fa-wand-magic-sparkles"></i> Ascensos AZA · subusuarios <b>${usuariosAza.length}</b></button>
+            <button type="button" class="us-tab${vista === 'aza' ? ' on' : ''}" data-vista-btn="aza"><i class="fa-solid fa-wand-magic-sparkles"></i> Ascensos LATAM · subusuarios <b>${usuariosAza.length}</b></button>
             <button type="button" class="us-tab${vista === 'pumas' ? ' on' : ''}" data-vista-btn="pumas"><i class="fa-solid fa-paw"></i> Entrenos PROYECTN · subusuarios <b>${nPumas}</b></button>
             <button type="button" class="us-tab${vista === 'portales' ? ' on' : ''}" data-vista-btn="portales"><i class="fa-solid fa-sitemap"></i> Usuarios por portal</button>
         </div>
@@ -172,10 +172,10 @@
         </div>
 
         <div data-vista="aza"${vista === 'aza' ? '' : ' hidden'}>
-            <p class="tool-desc">Ascensos AZA es un portal aparte: sus usuarios <b>solo entran a ese portal</b> y no ven el panel principal ni otros portales.
+            <p class="tool-desc">Ascensos LATAM es un portal aparte: sus usuarios <b>solo entran a ese portal</b> y no ven el panel principal ni otros portales.
                 Aquí, solo desde el superadmin, ves y manejas a todos (admins de AZA y los moderadores que ellos crean).</p>
 
-            <h3 class="bloque-titulo"><i class="fa-solid fa-user-tie"></i> Admins de Ascensos AZA</h3>
+            <h3 class="bloque-titulo"><i class="fa-solid fa-user-tie"></i> Admins de Ascensos LATAM</h3>
             <article class="card-box">
                 <form id="formNuevoAza" class="form-grid nuevo">
                     <div class="form-group"><label for="azUsuario">Usuario (sin @)</label><input id="azUsuario" required autocapitalize="none" spellcheck="false" placeholder="adminaza2" pattern="[a-zA-Z0-9._\\-]{3,30}"></div>
@@ -192,7 +192,7 @@
                 </div>
             </article>
 
-            <h3 class="bloque-titulo"><i class="fa-solid fa-user-shield"></i> Moderadores de Ascensos AZA <small class="muted">(${nMods})</small></h3>
+            <h3 class="bloque-titulo"><i class="fa-solid fa-user-shield"></i> Moderadores de Ascensos LATAM <small class="muted">(${nMods})</small></h3>
             <article class="card-box">
                 <form id="formNuevoMod" class="form-grid nuevo">
                     <div class="form-group"><label for="moUsuario">Usuario (sin @)</label><input id="moUsuario" required autocapitalize="none" spellcheck="false" placeholder="mod.aza1" pattern="[a-zA-Z0-9._\\-]{3,30}"></div>
@@ -204,7 +204,7 @@
                 <div id="tablaMods" style="margin-top:18px"><p class="muted" style="text-align:center">Cargando moderadores...</p></div>
             </article>
 
-            <h3 class="bloque-titulo"><i class="fa-solid fa-id-badge"></i> Roles de Ascensos AZA</h3>
+            <h3 class="bloque-titulo"><i class="fa-solid fa-id-badge"></i> Roles de Ascensos LATAM</h3>
             <div class="roles-grid">${tarjetasAza || '<p class="muted">No hay roles solo de AZA.</p>'}</div>
         </div>`;
 
@@ -225,7 +225,7 @@
                 rol: raiz.querySelector('#azRol').value, clave: raiz.querySelector('#azClave').value };
             if (!u.rol) { avisar('No hay un rol de AZA para asignar.'); return; }
             if (datos.usuarios.some(x => x.usuario.toLowerCase() === u.usuario)) { avisar('Ese usuario ya existe.'); return; }
-            ejecutar(btn, () => P.usuarios.guardarUsuario(u), `Usuario ${u.usuario} creado en Ascensos AZA.`);
+            ejecutar(btn, () => P.usuarios.guardarUsuario(u), `Usuario ${u.usuario} creado en Ascensos LATAM.`);
         });
         raiz.querySelector('#formNuevoMod').addEventListener('submit', e => {
             e.preventDefault();
@@ -298,7 +298,7 @@
         const aviso = portalElegido === 'entrenamientos'
             ? '<p class="muted" style="margin:0 0 12px"><i class="fa-solid fa-circle-info"></i> Los módulos que puede usar cada staff de Pumas se eligen en la pestaña <b>Entrenos PROYECTN · subusuarios</b>.</p>'
             : portalElegido === 'ascensosaza'
-            ? '<p class="muted" style="margin:0 0 12px"><i class="fa-solid fa-circle-info"></i> Los moderadores de AZA (con sus eventos e IA) se manejan en la pestaña <b>Ascensos AZA · subusuarios</b>.</p>' : '';
+            ? '<p class="muted" style="margin:0 0 12px"><i class="fa-solid fa-circle-info"></i> Los moderadores de AZA (con sus eventos e IA) se manejan en la pestaña <b>Ascensos LATAM · subusuarios</b>.</p>' : '';
         caja.innerHTML = aviso + '<div id="usPortalUsuarios"><p class="muted" style="text-align:center">Cargando...</p></div>';
         if (window.PumasUsuariosPortal) window.PumasUsuariosPortal.montar('usPortalUsuarios', portalElegido);
         else caja.innerHTML = '<p class="muted" style="text-align:center">No se pudo cargar el módulo de usuarios por portal.</p>';
@@ -341,7 +341,7 @@
             const fila = btn.closest('tr'), usuario = fila.dataset.mod;
             const campo = c => fila.querySelector(`[data-campo="${c}"]`);
             if (btn.dataset.modAccion === 'borrar') {
-                if (!confirm(`¿Borrar al moderador "${usuario}"? Pierde el acceso a Ascensos AZA.`)) return;
+                if (!confirm(`¿Borrar al moderador "${usuario}"? Pierde el acceso a Ascensos LATAM.`)) return;
                 ejecutar(btn, () => P.ascensos.moderadores.borrar(usuario), `Moderador ${usuario} borrado.`);
                 return;
             }

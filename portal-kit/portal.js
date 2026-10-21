@@ -33,7 +33,7 @@
         dragonfest:     { nombre: 'Dragon Fest',          url: '/portales/dragonfest/',    admin: '/portales/dragonfest/admin.html' },
         dragonfestfem:  { nombre: 'Dragon Fest Femenino', url: '/portales/dragonfest/femenino.html', admin: '/portales/dragonfest/admin.html' },
         // Ascensos (base aparte, sql/17): AZA y el módulo de pruebas usan la misma herramienta
-        ascensosaza:    { nombre: 'Ascensos AZA',     url: '/ascensos/',        admin: '/ascensos/admin.html' },
+        ascensosaza:    { nombre: 'Ascensos LATAM',     url: '/ascensos/',        admin: '/ascensos/admin.html' },
         pruebas:        { nombre: 'Pruebas',          url: '/pruebas/',         admin: '/pruebas/admin.html' },
         torneos:        { nombre: 'Torneos',          url: '/torneos/',         admin: '/admin/torneos.html' }
         // + los módulos creados desde el panel (cargarModulos): /modulo/?p=<id>
