@@ -15,7 +15,7 @@
                 e.target.classList.add('pg-visible');
                 obs.unobserve(e.target);
             });
-        }, { rootMargin: '0px 0px -56px 0px', threshold: 0.06 });
+        }, { rootMargin: '0px 0px -40px 0px', threshold: 0.04 });
 
         // Secciones (excepto el hero que ya tiene animación CSS propia)
         document.querySelectorAll('section:not(.portal-hero)').forEach(function (el) {
@@ -59,7 +59,7 @@
         });
 
         els.forEach(function (el) {
-            mo.observe(el, { childList: true, characterData: true, subtree: true });
+            mo.observe(el, { childList: true, subtree: true });
         });
     }
 
