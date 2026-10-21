@@ -113,6 +113,19 @@
         if (!cont) return;
         const conTipo = portal !== 'ascensosaza';
         const conCat  = !!window.ASC_OPCIONES;
+        // Cargar equipos custom de Mini Portales para que aparezcan en el selector
+        if (conCat && window.ASC_CATEGORIAS) {
+            try {
+                const { data } = await P.db().rpc('asc_equipos_activos', { p_portal: portal });
+                if (data && !Array.isArray(data)) {
+                    const obj = typeof data === 'string' ? JSON.parse(data) : data;
+                    (obj.custom || []).forEach(c => {
+                        if (!window.ASC_CATEGORIAS.find(x => x.id === c.id))
+                            window.ASC_CATEGORIAS.push({ id: c.id, nombre: c.nombre, color: c.color || '#B6FF00', logo: c.logo || null, tipo: 'evento' });
+                    });
+                }
+            } catch (_) {}
+        }
         cont.innerHTML = `
             ${conCat ? `<div id="cpCatBanner" style="display:none;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;margin-bottom:14px;border-left:5px solid var(--cp-cat,var(--primary));background:color-mix(in srgb,var(--cp-cat,var(--primary)) 8%,var(--surface));transition:border-color .25s,background .25s">
                 <img id="cpCatLogo" src="" alt="" style="width:52px;height:52px;object-fit:contain;display:none" onerror="this.style.display='none'">

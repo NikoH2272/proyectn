@@ -711,7 +711,9 @@
                 </div>
                 <div class="mod-eventos">${checks(m.eventos, 'ev_' + m.usuario)}</div>
                 <div class="mod-acc"><button class="btn-mini" data-guardar><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
-                    <button class="btn-mini btn-borrar" data-eliminar><i class="fa-solid fa-trash"></i> Eliminar</button><span class="muted" data-msg></span></div>
+                    <button class="btn-mini btn-borrar" data-eliminar><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    <button class="btn-mini" style="color:var(--primary);border-color:rgba(182,255,0,.3)" onclick="window.ASC_VistaModerador(${JSON.stringify(m.nombre || m.usuario)},${JSON.stringify(m.eventos)})"><i class="fa-solid fa-eye"></i> Ver como</button>
+                    <span class="muted" data-msg></span></div>
             </article>`).join('') : '<p class="res-vacio">Todavía no hay moderadores.</p>'}`;
 
         $('modForm').addEventListener('submit', async e => {
@@ -769,6 +771,36 @@
         if (window.PumasCupos) PumasCupos.montarAdmin('cuposAdmin', PORTAL);
         montarIA();
     }
+
+    /* ---------------- Vista previa por rol (solo superadmin) ---------------- */
+    let _permisosOrig = null;
+    window.ASC_VistaModerador = function (nombre, eventos) {
+        if (!_permisosOrig) _permisosOrig = { ...permisos };
+        permisos.eventos = eventos;
+        permisos.nombre  = nombre;
+        permisos.jefe    = false;
+        aplicarPermisos();
+        // Cambiar al tab de Resultados
+        const tabRes = document.querySelector('.asc-tabs [data-tab="panelResultados"]');
+        if (tabRes) tabRes.click();
+        // Banner de vista previa
+        let banner = document.getElementById('ascVistaPrevia');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'ascVistaPrevia';
+            banner.style.cssText = 'position:fixed;top:0;left:0;width:100%;z-index:9999;background:var(--primary,#B6FF00);color:#0a0b10;padding:8px 16px;font-size:.85rem;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.3)';
+            document.body.insertAdjacentElement('afterbegin', banner);
+            document.body.style.paddingTop = '40px';
+        }
+        banner.innerHTML = `<i class="fa-solid fa-eye"></i> Vista previa como <b>${nombre}</b> · eventos: ${eventos ? eventos.join(', ') : 'todos'}
+            &nbsp;<button onclick="window.ASC_SalirVistaPrevia()" style="background:rgba(0,0,0,.15);border:none;padding:3px 10px;border-radius:6px;cursor:pointer;font-weight:700">✕ Salir de vista previa</button>`;
+    };
+    window.ASC_SalirVistaPrevia = function () {
+        if (_permisosOrig) { Object.assign(permisos, _permisosOrig); _permisosOrig = null; }
+        aplicarPermisos();
+        const banner = document.getElementById('ascVistaPrevia');
+        if (banner) { banner.remove(); document.body.style.paddingTop = ''; }
+    };
 
     // Arranca cuando portal.js confirma la sesión
     window.addEventListener('pg:sesion', iniciar, { once: true });

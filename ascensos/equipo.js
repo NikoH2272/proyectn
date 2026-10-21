@@ -31,8 +31,21 @@
     /* ---------------- Hero dinámico ---------------- */
     function montarHero() {
         document.title = `${catInfo.nombre} · Ascensos AZA`;
+        const color  = catInfo.color  || '#B6FF00';
+        const color2 = catInfo.color2 || color;
+
+        // Aplicar color del equipo como tema del mini portal
+        const root = document.documentElement;
+        root.style.setProperty('--primary',   color);
+        root.style.setProperty('--primary-2', color2);
+        // Calcular si el color es claro para decidir el contraste del texto sobre botones
+        const lum = (h => { h = h.replace('#',''); const r=parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255; return .2126*r+.7152*g+.0722*b; })(color.length===7?color:'#B6FF00');
+        const onPrimary = lum > 0.45 ? '#0a0b10' : '#ffffff';
+        root.style.setProperty('--primary-text', onPrimary);
+        root.style.setProperty('--on-primary',   onPrimary);
+
         const hero = $('equipoHero');
-        if (hero) hero.style.setProperty('--cat', catInfo.color || '#B6FF00');
+        if (hero) { hero.style.setProperty('--cat', color); }
 
         const tit = $('equipoTitulo');
         if (tit) tit.innerHTML = `<span class="t-a">${esc(catInfo.nombre)}</span>`;
@@ -41,6 +54,19 @@
         if (logo && catInfo.logo) {
             logo.src = catInfo.logo;
             logo.alt = catInfo.nombre;
+            logo.onerror = () => { logo.hidden = true; };
+        }
+        if (catInfo.link) {
+            const acts = document.querySelector('.hero-actions');
+            if (acts) {
+                const btn = document.createElement('a');
+                btn.href = catInfo.link;
+                btn.target = '_blank';
+                btn.rel = 'noopener noreferrer';
+                btn.className = 'btn-access btn-outline';
+                btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Unirse al grupo';
+                acts.insertAdjacentElement('afterbegin', btn);
+            }
         }
     }
 
