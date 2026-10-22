@@ -293,7 +293,7 @@
         window.addEventListener('pg:sesion', function (e) {
             const ses = e.detail;
             _tok = ses.token || '';
-            if (!P.tiene(ses, 'gestionar')) return;
+            if (!(ses.portales && ses.portales.includes('*'))) return;
             const tab = document.querySelector('.asc-tabs [data-tab="panelEquipos"]');
             if (!tab) return;
             tab.hidden = false;
