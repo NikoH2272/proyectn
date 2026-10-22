@@ -223,6 +223,8 @@
             </div></div>
         </div>`;
         escalarPrevia();
+        const panelEd = $('panelEditor');
+        if (panelEd && !panelEd.hidden) renderizarEditor();
     }
     // "2026-10-09" → "VIE 09 OCT 2026"
     function fechaLarga(iso) {
@@ -302,6 +304,196 @@
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     }
+
+    /* ────────────────── EDITOR DE IMAGEN ────────────────── */
+    function montarEditor() {
+        const cont = $('editorPanel');
+        if (!cont) return;
+        const modos = [['cuadrado','Cuadrado 2000×2000','fa-square'],['vertical','Vertical 2000×2600','fa-mobile-screen'],['horizontal','Horizontal 2000×1060','fa-panorama']];
+        const bloques = [['tablaGeneral','Tabla general','fa-table'],['topKiller','Top Killer','fa-trophy'],['booyahs','Booyahs','fa-fire'],['destacados','Top 3','fa-medal'],['ascendidos','Ascendidos','fa-arrow-up-right-dots']];
+        const estilos = [['clasico','Clásico','fa-star'],['redondeado','Redondeado','fa-circle'],['minimal','Minimal','fa-minus'],['bold','Bold','fa-bold']];
+        const radio = (n, v, lbl, ic, sel) => `<label class="ed-opt${sel?' activo':''}"><input type="radio" name="${n}" value="${v}" ${sel?'checked':''}><i class="fa-solid ${ic}"></i> ${lbl}</label>`;
+        const check = (v, lbl, ic, sel) => `<label class="ed-opt${sel?' activo':''}"><input type="checkbox" name="edSec" value="${v}" ${sel?'checked':''}><i class="fa-solid ${ic}"></i> ${lbl}</label>`;
+        cont.innerHTML = `
+            <p class="tool-desc">Elige formato, bloques y estilo. La imagen usa los datos de <b>Resultados</b> en tiempo real. Descarga a la resolución elegida.</p>
+            <div class="asc-editor">
+                <div class="ed-controles card-box" style="max-width:none;padding:16px">
+                    <div class="ed-grupo">
+                        <div class="ed-grupo-titulo"><i class="fa-solid fa-image"></i> Formato</div>
+                        <div class="ed-opts" id="edOptsFormato">${modos.map(([v,l,i]) => radio('edFormato',v,l,i,editorCfg.formato===v)).join('')}</div>
+                    </div>
+                    <div class="ed-grupo">
+                        <div class="ed-grupo-titulo"><i class="fa-solid fa-puzzle-piece"></i> Bloques</div>
+                        <div class="ed-opts" id="edOptsSec">${bloques.map(([v,l,i]) => check(v,l,i,editorCfg.secciones[v])).join('')}</div>
+                    </div>
+                    <div class="ed-grupo">
+                        <div class="ed-grupo-titulo"><i class="fa-solid fa-palette"></i> Estilo</div>
+                        <div class="ed-opts" id="edOptsEstilo">${estilos.map(([v,l,i]) => radio('edEstilo',v,l,i,editorCfg.estilo===v)).join('')}</div>
+                    </div>
+                    <div class="asc-acciones" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:18px">
+                        <button class="btn-access" id="btnEdDescargar"><i class="fa-solid fa-download"></i> Descargar imagen</button>
+                    </div>
+                    <p class="asc-estado" id="edEstado" role="status"></p>
+                </div>
+                <div><div class="ed-previa" id="editorPrevia"></div></div>
+            </div>`;
+        const syncOpts = () => cont.querySelectorAll('.ed-opt').forEach(el => {
+            const inp = el.querySelector('input'); if (inp) el.classList.toggle('activo', inp.checked);
+        });
+        $('edOptsFormato').addEventListener('change', e => { if (e.target.name==='edFormato') { editorCfg.formato = e.target.value; syncOpts(); renderizarEditor(); } });
+        $('edOptsSec').addEventListener('change', e => { if (e.target.name==='edSec') { editorCfg.secciones[e.target.value] = e.target.checked; syncOpts(); renderizarEditor(); } });
+        $('edOptsEstilo').addEventListener('change', e => { if (e.target.name==='edEstilo') { editorCfg.estilo = e.target.value; syncOpts(); renderizarEditor(); } });
+        $('btnEdDescargar').addEventListener('click', descargarEditor);
+        addEventListener('resize', escalarEditor);
+        renderizarEditor();
+    }
+
+    function renderizarEditor() {
+        const previa = $('editorPrevia');
+        if (!previa) return;
+        if (!resultado || !resultado.filas.length) {
+            previa.innerHTML = '<div class="ed-vacio"><i class="fa-solid fa-circle-info"></i> Anota resultados en Resultados para ver la vista previa aquí.</div>';
+            previa.style.height = '160px';
+            return;
+        }
+        previa.innerHTML = generarHtmlEditor();
+        escalarEditor();
+    }
+
+    function generarHtmlEditor() {
+        const { filas, activas, clasificados } = resultado;
+        const cfg = editorCfg;
+        const cat = window.ASC_CATEGORIA(estado.categoria);
+        // Booyahs: sacaron top 1 en alguna sala activa
+        const booyahs = filas.filter(f => activas.some(i => f.p[i] === 1));
+        // MVP top killer
+        let mvp = null;
+        if (estado.modo === 'top_kill' && cfg.secciones.topKiller) {
+            const rank = filas.map(f => ({ n: f.n, t: f.t, kills: activas.reduce((s, i) => s + (f.k[i] || 0), 0) })).sort((a, b) => b.kills - a.kills);
+            if (rank.length && rank[0].kills > 0) mvp = rank[0];
+        }
+        const temaClass = `tema-${esc(estado.categoria)}`;
+        const estiloClass = `ed-estilo-${cfg.estilo}`;
+        const fmtClass = cfg.formato === 'vertical' ? 'ed-vertical' : cfg.formato === 'horizontal' ? 'ed-horizontal' : '';
+        const header = bloqueEdHeader(cat);
+        const tabla  = cfg.secciones.tablaGeneral ? bloqueEdTabla(filas, activas, cat) : '';
+        const dest   = cfg.secciones.destacados && filas.length >= 3 ? bloqueEdDestacados(filas) : '';
+        const mvpHtml    = mvp ? bloqueEdMvp(mvp) : '';
+        const booyahHtml = cfg.secciones.booyahs && booyahs.length ? bloqueEdBooyahs(booyahs, activas) : '';
+        const ascHtml    = cfg.secciones.ascendidos ? bloqueEdAscendidos(clasificados) : '';
+        if (cfg.formato === 'horizontal') {
+            return `<div id="editorCaptura" class="ed-wrapper ed-horizontal ${estiloClass} ${temaClass}">
+                ${header}
+                <div class="ed-hori-body"><div class="ed-hori-izq">${tabla}</div>
+                <div class="ed-hori-der">${mvpHtml}${booyahHtml}${ascHtml}</div></div>
+            </div>`;
+        }
+        return `<div id="editorCaptura" class="ed-wrapper ${fmtClass} ${estiloClass} ${temaClass}">
+            ${header}${tabla}${dest}${mvpHtml}${booyahHtml}${ascHtml}
+        </div>`;
+    }
+
+    function bloqueEdHeader(cat) {
+        const modTxt = (estado.categoria === 'leviatan' || estado.categoria === 'alca') ? '#000' : '#fff';
+        return `<div class="ed-header">
+            <div class="ed-badge"><span class="ed-badge-label" style="background:#ff0055;color:#fff">★ HORARIO</span>
+                <b>${esc(estado.horario)}</b>${estado.texto ? `<span style="margin-left:12px;color:#ffcc00">| ${esc(estado.texto)}</span>` : ''}</div>
+            ${estado.moderador ? `<div class="ed-badge"><span class="ed-badge-label" style="background:#00ffcc;color:#0a0b10">🛡️ MOD</span>
+                <b style="color:${modTxt}">${esc(estado.moderador)}</b></div>` : ''}
+        </div>`;
+    }
+
+    function bloqueEdTabla(filas, activas, cat) {
+        const titulo = 'ASCENSOS ' + cat.corto;
+        const mostrar = filas.slice(0, 15);
+        while (mostrar.length < 8) mostrar.push(null);
+        const head = `<tr><th style="width:90px">TOP</th><th class="nom">${esc(titulo)}</th><th style="width:88px">TAG</th>` +
+            activas.map(i => `<th style="width:88px">S${i+1}</th>`).join('') + `<th style="width:115px">TOTAL</th></tr>`;
+        const body = mostrar.map((f, i) => !f
+            ? `<tr><td></td><td class="nom"></td><td></td>${activas.map(() => '<td></td>').join('')}<td></td></tr>`
+            : `<tr><td><b>#${i+1}</b></td><td class="nom"><b>${esc(f.n)}</b></td><td><b>${esc(f.t)}</b></td>` +
+              activas.map(s => f.st[s]===null ? `<td class="sin"><i class="fa-solid fa-skull"></i></td>` : `<td><span class="${f.pp[s]===12?'b12':''}">${f.st[s]}</span></td>`).join('') +
+              `<td><b>${f.total}</b></td></tr>`).join('');
+        return `<div class="ed-bloque-tabla"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    }
+
+    function bloqueEdMvp(mvp) {
+        return `<div class="ed-bloque-mvp">
+            <div class="ed-mvp-trofeo">🏆</div>
+            <div><div class="ed-mvp-titulo">TOP KILLER</div>
+            <div class="ed-mvp-nombre">${esc(mvp.n)}</div>
+            <div class="ed-mvp-kills">${mvp.kills} kills totales${mvp.t ? ' · ' + esc(mvp.t) : ''}</div></div>
+        </div>`;
+    }
+
+    function bloqueEdBooyahs(booyahs, activas) {
+        return `<div class="ed-bloque-booyah">
+            <div class="ed-bloque-titulo">🔥 BOOYAHS</div>
+            <div class="ed-booyah-lista">${booyahs.map(f => {
+                const salas = activas.filter(i => f.p[i] === 1).map(i => 'S'+(i+1)).join(', ');
+                return `<div class="ed-booyah-item">${esc(f.n)}<span class="ed-booyah-sala">${salas}</span></div>`;
+            }).join('')}</div>
+        </div>`;
+    }
+
+    function bloqueEdDestacados(filas) {
+        return `<div class="ed-bloque-dest">${filas.slice(0,3).map((f,i) => `<div class="ed-dest-card ed-dest-${i+1}">
+            <div class="ed-dest-pos">#${i+1}</div>
+            <div class="ed-dest-nombre">${esc(f.n)}</div>
+            <div class="ed-dest-total">${f.total} pts</div>
+            <div class="ed-dest-pts">${f.pts} pos${f.kills > 0 ? ' · ' + f.kills + ' kills' : ''}</div>
+        </div>`).join('')}</div>`;
+    }
+
+    function bloqueEdAscendidos(clasificados) {
+        const lista = clasificados.length
+            ? clasificados.map(f => `<div class="ed-asc-item"><i class="fa-solid fa-crown"></i>${esc(f.n)}${f.t?' · '+esc(f.t):''}<span class="ed-asc-pts">${f.pts} pts</span></div>`).join('')
+            : `<div style="color:rgba(255,255,255,.45);font-size:1.7rem">Sin ascenso directo en esta jornada</div>`;
+        return `<div class="ed-bloque-asc"><div class="ed-asc-titulo"><i class="fa-solid fa-arrow-up-right-dots"></i> ASCENDIDOS</div><div class="ed-asc-lista">${lista}</div></div>`;
+    }
+
+    function escalarEditor() {
+        const previa = $('editorPrevia'), el = $('editorCaptura');
+        if (!previa || !el) return;
+        const h = editorCfg.formato==='horizontal' ? 1060 : editorCfg.formato==='vertical' ? 2600 : 2000;
+        const sc = previa.clientWidth / 2000;
+        el.style.transform = `scale(${sc})`;
+        previa.style.height = Math.ceil(h * sc) + 'px';
+    }
+
+    async function descargarEditor() {
+        const est = txt => { const n=$('edEstado'); if(n) n.textContent=txt; };
+        if (!resultado || !resultado.filas.length) { est('Primero anota resultados en la pestaña Resultados.'); return; }
+        const el = $('editorCaptura');
+        if (!el) { est('Abre la vista previa primero.'); return; }
+        est('Generando imagen...');
+        const btn = $('btnEdDescargar');
+        btn.disabled = true;
+        try {
+            if (document.fonts && document.fonts.ready) await document.fonts.ready;
+            const h = editorCfg.formato==='horizontal' ? 1060 : editorCfg.formato==='vertical' ? 2600 : 2000;
+            const canvas = await html2canvas(el, {
+                scale: 1, width: 2000, height: h, useCORS: true, backgroundColor: null, logging: false,
+                onclone: doc => { const c = doc.getElementById('editorCaptura'); if (c) { c.style.transform='none'; c.style.position='static'; } }
+            });
+            const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+            const cat  = window.ASC_CATEGORIA(estado.categoria);
+            const nombre = `ascensos-${norm(cat.corto)}-${editorCfg.formato}-${estado.fecha || hoyISO()}.png`;
+            const archivo = new File([blob], nombre, { type: 'image/png' });
+            const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+            if (ios && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                try { await navigator.share({ files: [archivo], title: archivo.name }); } catch (e) { if (e.name!=='AbortError') throw e; }
+            } else {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = nombre;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+            }
+            est('✔ Imagen descargada.');
+        } catch (e) { est('Error: ' + e.message); }
+        finally { btn.disabled = false; }
+    }
+    /* ────────────────── FIN EDITOR ────────────────── */
 
     /* ---------------- Guardar en la base ---------------- */
     // "6PM MEXICO" → 18:00 hora de México (UTC-6)
@@ -453,6 +645,8 @@
        1) capturas de SLOTS → equipos y jugadores · 2) capturas de RESULTADOS en orden → top y kills.
        Lo que lee la IA se revisa aquí y con "Pasar a la tabla" llena la anotación (queda en el borrador). */
     let iaDatos = null, iaModo = 'top_kill';
+    let editorMontado = false;
+    let editorCfg = { formato: 'cuadrado', secciones: { tablaGeneral: true, topKiller: true, booyahs: true, destacados: true, ascendidos: true }, estilo: 'redondeado' };
 
     // Achica cada captura (máx. 1600 px, JPG) para que suba rápido y gaste menos
     async function comprimir(file) {
@@ -725,6 +919,65 @@
         addEventListener('resize', escalarPrevia);
     }
 
+    let cfgPortalMontado = false;
+    async function montarConfigPortal() {
+        const caja = $('configPortalPanel');
+        if (!caja) return;
+        if (cfgPortalMontado) return;
+
+        caja.innerHTML = '<p class="muted" style="text-align:center"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p>';
+
+        let cfg = { pub_completos: false, pub_caidas: false };
+        try {
+            const res = await P.db().rpc('portal_features', { p_portal: PORTAL });
+            if (res.data) cfg = { ...cfg, ...res.data };
+        } catch (_) {}
+
+        caja.innerHTML = `
+            <h3 class="subtitulo-bloque"><i class="fa-solid fa-sliders"></i> Configuración pública del portal</h3>
+            <p class="tool-desc">Controla qué secciones son visibles en el portal público de este torneo.</p>
+            <div class="card-box" style="max-width:560px;margin:0 auto">
+                <div class="form-group">
+                    <label class="chk" style="font-size:.95rem;gap:12px">
+                        <input type="checkbox" id="cfgCompletos" ${cfg.pub_completos ? 'checked' : ''}>
+                        <span><b>Resultados completos</b> — muestra la tabla general de todas las jornadas al público</span>
+                    </label>
+                </div>
+                <div class="form-group" style="margin-top:14px">
+                    <label class="chk" style="font-size:.95rem;gap:12px">
+                        <input type="checkbox" id="cfgCaidas" ${cfg.pub_caidas ? 'checked' : ''}>
+                        <span><b>Caídas / Eliminados</b> — muestra la sección de equipos relegados o eliminados en el portal público</span>
+                    </label>
+                </div>
+                <div class="asc-acciones" style="margin-top:20px">
+                    <button class="btn-access" id="btnGuardarCfg"><i class="fa-solid fa-floppy-disk"></i> Guardar configuración</button>
+                </div>
+                <p class="asc-estado" id="cfgEstado" role="status"></p>
+            </div>`;
+
+        $('btnGuardarCfg').addEventListener('click', async () => {
+            const btn = $('btnGuardarCfg');
+            const msg = $('cfgEstado');
+            btn.disabled = true;
+            msg.textContent = 'Guardando...';
+            try {
+                const { error } = await P.db().rpc('admin_portal_features', {
+                    p_token: (P.sesion() || {}).token,
+                    p_portal: PORTAL,
+                    p_completos: $('cfgCompletos').checked,
+                    p_caidas: $('cfgCaidas').checked
+                });
+                if (error) throw new Error(error.message);
+                msg.textContent = '✓ Configuración guardada.';
+                cfgPortalMontado = false; // permite recargar la próxima vez
+            } catch (e) {
+                msg.textContent = 'Error: ' + e.message;
+            } finally { btn.disabled = false; }
+        });
+
+        cfgPortalMontado = true;
+    }
+
     function pestañas() {
         const tabs = document.querySelectorAll('.asc-tabs [data-tab]');
         const abrir = id => {
@@ -732,6 +985,8 @@
             document.querySelectorAll('.asc-panel').forEach(p => { p.hidden = p.id !== id; });
             if (id === 'panelResultados') escalarPrevia();
             if (id === 'panelJornadas') cargarJornadas();
+            if (id === 'panelEditor') { if (!editorMontado) { editorMontado = true; montarEditor(); } else { renderizarEditor(); } }
+            if (id === 'panelConfig') montarConfigPortal();
             try { sessionStorage.setItem('pg_asc_tab', id); } catch (e) { }
         };
         tabs.forEach(t => t.addEventListener('click', () => abrir(t.dataset.tab)));

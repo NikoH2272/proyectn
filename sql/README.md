@@ -39,6 +39,8 @@ Se ejecutan **en orden** en Supabase → SQL Editor. Cada archivo se puede volve
 
 Cuando ejecutes uno, cambia ☐ por ☑ y súbelo a git, para que los dos sepamos en qué estado está la base.
 
+| 50 | `50_portal_features.sql` | Toggles por portal: `pub_completos` y `pub_caidas` en `portal_config`. Funciones `portal_features(p_portal)` (pública) y `admin_portal_features(token, portal, completos, caidas)` (solo gestionar). | ☐ |
+
 ## Reglas
 
 1. **No se edita un archivo que ya se ejecutó.** Cualquier cambio va en un archivo nuevo con el siguiente número (`04_...`, `05_...`).

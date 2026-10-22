@@ -8,12 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../../portal-kit/portal.css?v=20261022c">
-    <link rel="stylesheet" href="../../../ascensos/style.css?v=20261022c">
+    <link rel="stylesheet" href="../../../portal-kit/portal.css?v=20261022e">
+    <link rel="stylesheet" href="../../../ascensos/style.css?v=20261022e">
     <link rel="icon" href="../imagenes/rusheo.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../../portal-kit/portal.js?v=20261022c" data-portal="ascensosrusheo" data-modo="protegido"></script>
+    <script src="../../../portal-kit/portal.js?v=20261022e" data-portal="ascensosrusheo" data-modo="protegido"></script>
 </head>
 <body data-tema="rusheo">
 
@@ -45,6 +45,8 @@
             <button data-tab="panelJornadas"><i class="fa-solid fa-clock-rotate-left"></i> Jornadas guardadas</button>
             <button data-tab="panelBaneados"><i class="fa-solid fa-ban"></i> Baneados</button>
             <button data-tab="panelCupos"><i class="fa-solid fa-ticket"></i> Cupos</button>
+            <button data-tab="panelEditor"><i class="fa-solid fa-paint-brush"></i> Editor imagen</button>
+            <button data-tab="panelConfig" data-pg-permiso="gestionar" hidden><i class="fa-solid fa-sliders"></i> Config portal</button>
             <button data-tab="panelModeradores" hidden><i class="fa-solid fa-user-shield"></i> Moderadores</button>
         </div>
 
@@ -130,6 +132,16 @@
             <div id="baneadosAdmin"></div>
         </div>
 
+        <!-- EDITOR DE IMAGEN -->
+        <div class="tool-container asc-panel" id="panelEditor" hidden>
+            <div id="editorPanel"></div>
+        </div>
+
+        <!-- CONFIG PORTAL: toggles de resultados completos y caídas -->
+        <div class="tool-container asc-panel" id="panelConfig" hidden>
+            <div id="configPortalPanel"></div>
+        </div>
+
         <!-- MODERADORES: Administrador Ascensos Rusheo y superadmin -->
         <div class="tool-container asc-panel" id="panelModeradores" hidden>
             <p class="tool-desc">Los moderadores entran con su usuario y clave a esta herramienta: abren cupos y suben resultados.
@@ -153,11 +165,11 @@
     <script>
         function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
     </script>
-    <script src="categorias.js?v=20261022c"></script>
-    <script src="../../../portal-kit/baneados.js?v=20261022c"></script>
-    <script src="../../../portal-kit/cupos.js?v=20261022c"></script>
+    <script src="categorias.js?v=20261022e"></script>
+    <script src="../../../portal-kit/baneados.js?v=20261022e"></script>
+    <script src="../../../portal-kit/cupos.js?v=20261022e"></script>
     <script src="../../../portal-kit/cupos-control.js?v=20261022c"></script>
-    <script src="../../../ascensos/ascensos.js?v=20261022c"></script>
+    <script src="../../../ascensos/ascensos.js?v=20261022e"></script>
     <script>window.addEventListener('pg:sesion', () => {
         PumasControl.montarBaneos('baneosCuposAdmin', 'ascensosrusheo');
     }, { once: true });</script>

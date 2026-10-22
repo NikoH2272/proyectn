@@ -118,6 +118,7 @@
             <button type="button" class="us-tab${vista === 'aza' ? ' on' : ''}" data-vista-btn="aza"><i class="fa-solid fa-wand-magic-sparkles"></i> Ascensos LATAM · subusuarios <b>${usuariosAza.length}</b></button>
             <button type="button" class="us-tab${vista === 'pumas' ? ' on' : ''}" data-vista-btn="pumas"><i class="fa-solid fa-paw"></i> Entrenos PROYECTN · subusuarios <b>${nPumas}</b></button>
             <button type="button" class="us-tab${vista === 'portales' ? ' on' : ''}" data-vista-btn="portales"><i class="fa-solid fa-sitemap"></i> Usuarios por portal</button>
+            <button type="button" class="us-tab${vista === 'mapa' ? ' on' : ''}" data-vista-btn="mapa"><i class="fa-solid fa-table-cells"></i> Mapa de acceso</button>
         </div>
 
         <div data-vista="principal"${vista === 'principal' ? '' : ' hidden'}>
@@ -154,6 +155,11 @@
                 <div class="acciones"><button class="btn-mini" data-accion="guardar-rol"><i class="fa-solid fa-plus"></i> Crear rol</button></div>
             </article>
         </div>
+        </div>
+
+        <div data-vista="mapa"${vista === 'mapa' ? '' : ' hidden'}>
+            <p class="tool-desc">Vista rápida: qué portales puede ver cada rol. Marca o desmarca y guarda para actualizar varios roles a la vez.</p>
+            <div id="mapaAcceso"><p class="muted" style="text-align:center">Cargando mapa...</p></div>
         </div>
 
         <div data-vista="portales"${vista === 'portales' ? '' : ' hidden'}>
@@ -213,8 +219,10 @@
             raiz.querySelectorAll('[data-vista-btn]').forEach(x => x.classList.toggle('on', x === b));
             raiz.querySelectorAll('[data-vista]').forEach(v => { v.hidden = v.dataset.vista !== vista; });
             if (vista === 'pumas') montarPumas();
+            if (vista === 'mapa') montarMapa();
         }));
         if (vista === 'pumas') montarPumas();
+        if (vista === 'mapa') montarMapa();
         const selPortal = raiz.querySelector('#usPortal');
         selPortal.addEventListener('change', () => { portalElegido = selPortal.value; montarPortal(); });
         if (portalElegido) montarPortal();
@@ -310,6 +318,93 @@
         caja.dataset.listo = '1';
         if (window.PumasConfig) window.PumasConfig.montar('pumasConfigSuper');
         else caja.innerHTML = '<p class="muted" style="text-align:center">No se pudo cargar la configuración de PROYECTN.</p>';
+    }
+
+    function montarMapa() {
+        const caja = raiz.querySelector('#mapaAcceso');
+        if (!caja) return;
+        const roles = datos.roles.filter(r => !esRolAparte(r));
+        const portales = (datos.portales || []).filter(p => p.id !== 'principal');
+        if (!roles.length || !portales.length) { caja.innerHTML = '<p class="muted" style="text-align:center">Sin datos.</p>'; return; }
+
+        // estado local mutable para cambios sin guardar
+        const estado = {};
+        roles.forEach(r => { estado[r.id] = new Set(r.portales || []); });
+
+        const tieneAcceso = (rolId, pId) => { const s = estado[rolId]; return s.has('*') || s.has(pId); };
+        const tieneTodos = rolId => estado[rolId].has('*');
+
+        caja.innerHTML = `
+            <div class="pg-tabla-wrap">
+                <table class="pg-tabla" style="min-width:600px">
+                    <thead><tr>
+                        <th style="min-width:140px">Portal</th>
+                        ${roles.map(r => `<th style="min-width:90px;text-align:center;font-size:.65rem">${esc(r.nombre)}</th>`).join('')}
+                    </tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><small class="muted">★ Todos</small></td>
+                            ${roles.map(r => `<td style="text-align:center">
+                                <input type="checkbox" data-todos="${esc(r.id)}" ${tieneTodos(r.id) ? 'checked' : ''} title="Acceso a todos los portales">
+                            </td>`).join('')}
+                        </tr>
+                        ${portales.map(p => `<tr>
+                            <td><b>${esc(p.nombre)}</b><br><small class="muted">${esc(p.id)}</small></td>
+                            ${roles.map(r => `<td style="text-align:center">
+                                <input type="checkbox" data-rol="${esc(r.id)}" data-portal="${esc(p.id)}"
+                                    ${tieneAcceso(r.id, p.id) ? 'checked' : ''}
+                                    ${tieneTodos(r.id) ? 'disabled' : ''}>
+                            </td>`).join('')}
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:14px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                <button class="btn-access" id="btnGuardarMapa"><i class="fa-solid fa-floppy-disk"></i> Guardar cambios de acceso</button>
+            </div>
+            <p id="mapaMsg" class="auth-msg" role="status" style="text-align:center;margin-top:8px"></p>`;
+
+        caja.querySelectorAll('[data-todos]').forEach(cb => cb.addEventListener('change', () => {
+            const rolId = cb.dataset.todos;
+            if (cb.checked) {
+                estado[rolId] = new Set(['*']);
+            } else {
+                estado[rolId] = new Set();
+            }
+            caja.querySelectorAll(`input[data-rol="${CSS.escape(rolId)}"]`).forEach(c => {
+                c.checked = false;
+                c.disabled = cb.checked;
+            });
+        }));
+
+        caja.querySelectorAll('input[data-portal]').forEach(cb => cb.addEventListener('change', () => {
+            const { rol: rolId, portal: portalId } = cb.dataset;
+            if (cb.checked) estado[rolId].add(portalId); else estado[rolId].delete(portalId);
+        }));
+
+        caja.querySelector('#btnGuardarMapa').addEventListener('click', async () => {
+            const btn = caja.querySelector('#btnGuardarMapa');
+            const msgEl = caja.querySelector('#mapaMsg');
+            btn.disabled = true;
+            msgEl.textContent = 'Guardando...';
+            msgEl.className = 'auth-msg ok';
+            const rolesModificados = roles.filter(r => {
+                const orig = new Set(r.portales || []);
+                const nuevo = estado[r.id];
+                if (orig.size !== nuevo.size) return true;
+                for (const p of nuevo) if (!orig.has(p)) return true;
+                return false;
+            });
+            try {
+                for (const r of rolesModificados)
+                    await P.usuarios.guardarRol({ ...r, portales: [...estado[r.id]] });
+                msgEl.textContent = rolesModificados.length ? `${rolesModificados.length} rol(es) actualizado(s).` : 'Sin cambios que guardar.';
+                if (rolesModificados.length) await recargar();
+            } catch (err) {
+                msgEl.textContent = 'Error: ' + err.message;
+                msgEl.className = 'auth-msg';
+            } finally { btn.disabled = false; }
+        });
     }
 
     async function pintarModeradores() {

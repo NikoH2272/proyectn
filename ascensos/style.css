@@ -228,6 +228,117 @@ input.celda[type=number] { -moz-appearance: textfield; }
 .tema-rusheo    { --tema-table-bg: rgba(18,10,28,.88); --tema-header-text: #ff70a6; --tema-text: #fff; background-image: url('imagenes/fondoasc.png'); }
 .tema-rusheofem { --tema-table-bg: rgba(18,10,28,.88); --tema-header-text: #ffd166; --tema-text: #fff; background-image: url('imagenes/fondofemasc.png'); }
 
+/* =========================================================
+   EDITOR DE IMAGEN · motor de composición visual
+   ========================================================= */
+.asc-editor { display: grid; grid-template-columns: 270px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .asc-editor { grid-template-columns: 1fr; } }
+.ed-controles { position: sticky; top: 90px; display: flex; flex-direction: column; gap: 14px; }
+.ed-grupo { display: flex; flex-direction: column; gap: 6px; }
+.ed-grupo-titulo { color: var(--primary); font: 700 .62rem var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+.ed-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.ed-opt { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border: 1px solid rgba(var(--primary-rgb),.3); border-radius: 6px;
+  color: var(--gray); background: #111; cursor: pointer; font-size: .8rem; transition: border-color .15s, background .15s, color .15s; white-space: nowrap; user-select: none; }
+.ed-opt:hover { border-color: var(--primary); color: var(--light); }
+.ed-opt input { accent-color: var(--primary); cursor: pointer; }
+.ed-opt.activo { border-color: var(--primary); background: rgba(var(--primary-rgb),.12); color: var(--light); }
+.ed-previa { position: relative; width: 100%; overflow: hidden; border: 1px solid rgba(var(--primary-rgb),.2); background: #060606; min-height: 160px; }
+.ed-previa #editorCaptura { position: absolute; top: 0; left: 0; transform-origin: top left; }
+.ed-vacio { padding: 50px 20px; text-align: center; color: var(--gray); font-size: .88rem; }
+
+/* ── Ed: contenedor base ── */
+.ed-wrapper, .ed-wrapper * { box-sizing: border-box; font-family: 'Rajdhani', sans-serif; line-height: 1.2; letter-spacing: normal; }
+.ed-wrapper h2, .ed-wrapper h3, .ed-wrapper th, .ed-wrapper .ed-badge-label { font-family: 'Orbitron', sans-serif; }
+.ed-wrapper i { font-family: "Font Awesome 6 Free" !important; font-weight: 900; }
+.ed-wrapper { position: relative; width: 2000px; height: 2000px; padding: 60px 70px;
+  background-size: 100% 100%; background-position: center; background-color: #0b0b0b;
+  color: #fff; display: flex; flex-direction: column; gap: 22px; }
+.ed-vertical  { height: 2600px; }
+.ed-horizontal { height: 1060px; padding: 38px 60px; gap: 16px; }
+.ed-hori-body { display: flex; gap: 28px; flex: 1; min-height: 0; }
+.ed-hori-izq  { flex: 0 0 1040px; }
+.ed-hori-der  { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Header de badges ── */
+.ed-header { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+.ed-badge { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; border: 2px solid rgba(255,255,255,.3);
+  border-radius: 40px; background: rgba(0,0,0,.6); color: #fff; font-size: 2rem; }
+.ed-badge-label { margin-right: 6px; padding: 4px 10px; border-radius: 4px; font-weight: 900; font-size: 1.5rem; }
+.ed-badge b { font-size: 2rem; }
+
+/* ── Tabla General ── */
+.ed-bloque-tabla table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 10px 4px;
+  background: var(--tema-table-bg, rgba(0,0,0,.7)); color: var(--tema-text, #fff); border-radius: 8px; }
+.ed-bloque-tabla th, .ed-bloque-tabla td { padding: 10px 0; text-align: center; font-size: 1.7rem; }
+.ed-bloque-tabla th { color: var(--tema-header-text, #fff); }
+.ed-bloque-tabla td.nom, .ed-bloque-tabla th.nom { padding-left: 16px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-bloque-tabla .sin i { color: #ff2020; font-size: 1.1rem; }
+.ed-bloque-tabla .b12 { color: #ff8800 !important; font-weight: 900; }
+
+/* ── MVP / Top Killer ── */
+.ed-bloque-mvp { display: flex; align-items: center; gap: 28px; padding: 26px 36px;
+  background: linear-gradient(135deg, rgba(255,180,0,.15), rgba(255,100,0,.08));
+  border: 2px solid rgba(255,180,0,.5); border-radius: 14px; }
+.ed-mvp-trofeo { font-size: 4.5rem; flex-shrink: 0; }
+.ed-mvp-titulo { font: 900 1.9rem 'Orbitron', sans-serif; color: #FFD54A; letter-spacing: .1em; text-transform: uppercase; }
+.ed-mvp-nombre { font-size: 3.4rem; font-weight: 900; color: #fff; margin: 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-mvp-kills  { font-size: 2.6rem; color: #FFD54A; font-weight: 700; }
+
+/* ── Booyahs ── */
+.ed-bloque-booyah { padding: 22px 28px; background: var(--tema-table-bg, rgba(0,0,0,.7)); border-radius: 12px; }
+.ed-bloque-titulo { font: 900 1.9rem 'Orbitron', sans-serif; color: var(--tema-header-text, #fff); margin-bottom: 12px; text-transform: uppercase; }
+.ed-booyah-lista { display: flex; flex-wrap: wrap; gap: 10px; }
+.ed-booyah-item { display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+  border: 2px solid rgba(255,180,0,.4); border-radius: 8px; background: rgba(255,180,0,.08); font-size: 1.75rem; font-weight: 700; }
+.ed-booyah-sala { color: rgba(255,255,255,.5); font-size: 1.4rem; margin-left: 4px; }
+
+/* ── Destacados top 3 ── */
+.ed-bloque-dest { display: flex; gap: 14px; }
+.ed-dest-card { flex: 1; padding: 22px 16px; border-radius: 12px; text-align: center; background: var(--tema-table-bg, rgba(0,0,0,.7)); }
+.ed-dest-card.ed-dest-1 { border: 3px solid #FFD54A; background: rgba(255,213,74,.12); }
+.ed-dest-card.ed-dest-2 { border: 3px solid #B0BEC5; background: rgba(176,190,197,.08); }
+.ed-dest-card.ed-dest-3 { border: 3px solid #E0A36B; background: rgba(224,163,107,.08); }
+.ed-dest-pos { font-size: 2.8rem; font-weight: 900; }
+.ed-dest-1 .ed-dest-pos { color: #FFD54A; } .ed-dest-2 .ed-dest-pos { color: #B0BEC5; } .ed-dest-3 .ed-dest-pos { color: #E0A36B; }
+.ed-dest-nombre { font-size: 2.1rem; font-weight: 900; color: #fff; margin: 6px 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-dest-total  { font-size: 2.5rem; font-weight: 900; color: var(--tema-header-text, #fff); }
+.ed-dest-pts    { font-size: 1.5rem; color: rgba(255,255,255,.6); }
+
+/* ── Ascendidos ── */
+.ed-bloque-asc { padding: 22px 28px; background: rgba(110,231,168,.08); border: 2px solid rgba(110,231,168,.4); border-radius: 12px; }
+.ed-asc-titulo { font: 900 1.9rem 'Orbitron', sans-serif; color: #6ee7a8; margin-bottom: 12px; }
+.ed-asc-lista   { display: flex; flex-wrap: wrap; gap: 10px; }
+.ed-asc-item { display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+  border: 2px solid rgba(110,231,168,.35); border-radius: 8px; background: rgba(110,231,168,.06); font-size: 1.75rem; font-weight: 700; }
+.ed-asc-item i  { color: #FFD54A; font-size: 1.4rem; }
+.ed-asc-pts { color: rgba(255,255,255,.5); font-size: 1.45rem; }
+
+/* ── Estilo: redondeado ── */
+.ed-estilo-redondeado .ed-bloque-tabla table { border-radius: 22px; }
+.ed-estilo-redondeado .ed-bloque-mvp,
+.ed-estilo-redondeado .ed-bloque-booyah,
+.ed-estilo-redondeado .ed-dest-card,
+.ed-estilo-redondeado .ed-bloque-asc    { border-radius: 26px; }
+.ed-estilo-redondeado .ed-badge         { border-radius: 50px; }
+.ed-estilo-redondeado .ed-booyah-item,
+.ed-estilo-redondeado .ed-asc-item      { border-radius: 22px; }
+
+/* ── Estilo: minimal (sin fondo de imagen) ── */
+.ed-estilo-minimal { background-image: none !important; background: #0d0d12 !important; }
+.ed-estilo-minimal .ed-bloque-tabla table { background: rgba(255,255,255,.05); }
+.ed-estilo-minimal .ed-bloque-booyah,
+.ed-estilo-minimal .ed-bloque-asc       { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.14); }
+.ed-estilo-minimal .ed-mvp-trofeo { display: none; }
+
+/* ── Estilo: bold (texto grande, alto contraste) ── */
+.ed-estilo-bold .ed-bloque-tabla th, .ed-estilo-bold .ed-bloque-tabla td { font-size: 2rem; }
+.ed-estilo-bold .ed-mvp-nombre   { font-size: 4.2rem; }
+.ed-estilo-bold .ed-dest-nombre  { font-size: 2.6rem; }
+.ed-estilo-bold .ed-badge        { font-size: 2.4rem; border-width: 3px; }
+.ed-estilo-bold .ed-bloque-titulo { font-size: 2.4rem; }
+.ed-estilo-bold .ed-booyah-item,
+.ed-estilo-bold .ed-asc-item     { font-size: 2.1rem; }
+
 /* ---------- Celular: portal y herramienta más compactos ---------- */
 @media (max-width: 760px) {
   body[data-tema] .portal-hero .hero-visual { display: none; }          /* el logo ya está arriba y en el carrusel */
