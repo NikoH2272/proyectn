@@ -452,7 +452,7 @@
     /* ---------------- Con IA (función de Supabase "ascensos-ia", sql/18) ----------------
        1) capturas de SLOTS → equipos y jugadores · 2) capturas de RESULTADOS en orden → top y kills.
        Lo que lee la IA se revisa aquí y con "Pasar a la tabla" llena la anotación (queda en el borrador). */
-    let iaDatos = null;
+    let iaDatos = null, iaModo = 'top_kill';
 
     // Achica cada captura (máx. 1600 px, JPG) para que suba rápido y gaste menos
     async function comprimir(file) {
@@ -486,13 +486,18 @@
             <div class="form-grid">
                 <div class="form-group"><label for="iaCategoria">Evento de estos resultados</label>
                     <select id="iaCategoria">${window.ASC_OPCIONES(estado.categoria, permisos.eventos)}</select></div>
+                <div class="form-group"><label for="iaModo">Modo de lectura</label>
+                    <select id="iaModo">
+                        <option value="top_kill"${estado.modo === 'top_kill' ? ' selected' : ''}>Top + kills (más preciso)</option>
+                        <option value="top"${estado.modo === 'top' ? ' selected' : ''}>Solo top (más rápido)</option>
+                    </select></div>
                 <div class="form-group"><label for="iaMotor">Motor de IA</label>
                     <select id="iaMotor" disabled><option>Buscando motores...</option></select></div>
             </div>
             <div class="form-grid">
-                <div class="form-group"><label for="iaSlots">1 · Capturas de slots (hasta 4 · normalmente 3)</label>
+                <div class="form-group"><label for="iaSlots">1 · Capturas de slots (hasta 3)</label>
                     <input type="file" id="iaSlots" accept="image/*" multiple><div class="ia-miniaturas" id="iaSlotsVista"></div></div>
-                <div class="form-group"><label for="iaRes">2 · Capturas de resultados, en orden (hasta 12 · normalmente 4 o 5)</label>
+                <div class="form-group"><label for="iaRes">2 · Capturas de resultados, en orden (hasta 5)</label>
                     <input type="file" id="iaRes" accept="image/*" multiple><div class="ia-miniaturas" id="iaResVista"></div></div>
             </div>
             <div class="asc-acciones" style="margin-top:6px"><button class="btn-access" id="iaLeer"><i class="fa-solid fa-wand-magic-sparkles"></i> Leer con IA</button></div>
@@ -525,6 +530,13 @@
             guardarBorrador(); calcular();
         });
         $('selectCategoria').addEventListener('change', () => { $('iaCategoria').value = $('selectCategoria').value; });
+        $('iaModo').addEventListener('change', e => {
+            estado.modo = e.target.value;
+            $('selectModo').value = estado.modo;
+            iaModo = estado.modo;
+            guardarBorrador();
+        });
+        $('selectModo').addEventListener('change', () => { $('iaModo').value = $('selectModo').value; });
         cargarMotores();
     }
 
@@ -567,7 +579,7 @@
 
     async function leerIA() {
         const est = (t, tipo) => { const n = $('iaEstado'); n.textContent = t; n.className = 'asc-estado ' + (tipo || ''); };
-        const slots = [...$('iaSlots').files].slice(0, 4), res = [...$('iaRes').files].slice(0, 12);
+        const slots = [...$('iaSlots').files].slice(0, 3), res = [...$('iaRes').files].slice(0, 5);
         if (!res.length) { est('Sube al menos una captura de resultados.', 'error'); return; }
         const ses = P.sesion();
         if (!ses || !ses.token) { est('Tu sesión expiró: vuelve a entrar.', 'error'); return; }
@@ -576,13 +588,15 @@
         try {
             est('Preparando ' + (slots.length + res.length) + ' capturas...');
             const prep = async l => (await Promise.all(l.map(comprimir))).map(({ media_type, data }) => ({ media_type, data }));
+            const modoActual = $('iaModo') ? $('iaModo').value : (estado.modo || 'top_kill');
             const cuerpo = {
                 token: ses.token, portal: PORTAL, motor: $('iaMotor').value || undefined,
+                modo: modoActual,
                 slots: await prep(slots), resultados: await prep(res),
                 // "Slot 1: DCN ACD - DCN" → la IA cruza el número de escuadra y el tag de los jugadores
                 equipos: equipos().map(e => `Slot ${e.slot}: ${e.nombre}${e.tag ? ' - ' + e.tag : ''}`)
             };
-            // Mismas capturas + misma lista + mismo motor → se reusa la lectura (no se paga dos veces)
+            // Mismas capturas + misma lista + mismo motor + mismo modo → se reusa la lectura (no se paga dos veces)
             const huella = await huellaLectura(cuerpo);
             let data = leerCache(huella);
             if (data) est('Estas capturas ya se habían leído: se reusa el resultado (sin costo).');
@@ -592,6 +606,7 @@
                 guardarCache(huella, data);
             }
             iaDatos = data.datos;
+            iaModo = modoActual;
             pintarIA();
             est((data.aviso ? data.aviso + ' ' : '') + `✔ ${data.motor_nombre || 'La IA'} leyó ${iaDatos.equipos.length} equipos en ${iaDatos.partidas_detectadas} partida(s).` + (data.quedan != null ? ` Te quedan ${data.quedan} lecturas hoy.` : ''), 'ok');
         } catch (e) { est(e.message, 'error'); }
@@ -599,13 +614,30 @@
     }
 
     function pintarIA() {
-        const d = iaDatos, n = Math.max(d.partidas_detectadas || 0, ...d.equipos.flatMap(e => e.partidas.map(p => p.partida)), 1);
-        const celda = (e, i) => { const p = e.partidas.find(x => x.partida === i); return p ? `<td>${p.top}</td><td>${p.kills}</td>` : '<td class="sin">—</td><td class="sin">—</td>'; };
+        const d = iaDatos, conKills = iaModo === 'top_kill';
+        const n = Math.max(d.partidas_detectadas || 0, ...d.equipos.flatMap(e => e.partidas.map(p => p.partida)), 1);
+        const celda = (e, i) => {
+            const p = e.partidas.find(x => x.partida === i);
+            if (conKills) return p ? `<td>${p.top}</td><td>${p.kills}</td>` : '<td class="sin">—</td><td class="sin">—</td>';
+            return p ? `<td>${p.top}</td>` : '<td class="sin">—</td>';
+        };
+        const heads = Array.from({ length: n }, (_, i) => conKills ? `<th>T${i + 1}</th><th class="kill">K${i + 1}</th>` : `<th>T${i + 1}</th>`).join('');
+        // MVP: equipo con más kills totales (solo en modo top_kill)
+        let mvpHtml = '';
+        if (conKills && d.equipos.length) {
+            const ranking = d.equipos.map(e => ({ nombre: e.nombre, kills: e.partidas.reduce((s, p) => s + (p.kills || 0), 0) }))
+                .sort((a, b) => b.kills - a.kills);
+            const mvp = ranking[0];
+            if (mvp && mvp.kills > 0)
+                mvpHtml = `<div class="asc-aviso-ban" style="background:rgba(255,180,0,.12);border-color:rgba(255,180,0,.4)">
+                    <b>🏆 MVP:</b> ${esc(mvp.nombre)} — ${mvp.kills} kills totales</div>`;
+        }
         $('iaResultado').innerHTML = `
             ${(d.avisos || []).length ? `<div class="asc-aviso-ban"><b>Revisa:</b><br>${d.avisos.map(esc).join('<br>')}</div>` : ''}
-            <div class="tabla-anotar"><table><thead><tr><th>Equipo</th><th>Tag</th><th>Jug.</th>${Array.from({ length: n }, (_, i) => `<th>T${i + 1}</th><th class="kill">K${i + 1}</th>`).join('')}</tr></thead>
+            <div class="tabla-anotar"><table><thead><tr><th>Equipo</th><th>Tag</th><th>Jug.</th>${heads}</tr></thead>
             <tbody>${d.equipos.map(e => `<tr><td class="eq">${esc(e.nombre)}</td><td>${esc(e.tag || '')}</td><td title="${esc((e.jugadores || []).join(', '))}">${(e.jugadores || []).length}</td>
                 ${Array.from({ length: n }, (_, i) => celda(e, i + 1)).join('')}</tr>`).join('')}</tbody></table></div>
+            ${mvpHtml}
             <div class="asc-acciones"><button class="btn-access" id="iaPasar"><i class="fa-solid fa-table"></i> Pasar a la tabla</button></div>`;
         $('iaPasar').addEventListener('click', () => aplicarIA(n));
     }
@@ -631,7 +663,7 @@
             if (e.tag) celdas[k('tag', nombre)] = e.tag;
             e.partidas.filter(p => p.partida >= 1 && p.partida <= salas).forEach(p => {
                 celdas[k('p', nombre, p.partida)] = String(p.top);
-                celdas[k('k', nombre, p.partida)] = String(p.kills);
+                if (iaModo === 'top_kill') celdas[k('k', nombre, p.partida)] = String(p.kills);
             });
         });
         // conserva los tags (cantidad) que ya se habían anotado
@@ -639,7 +671,7 @@
         estado.celdas = celdas;
         estado.equiposTxt = lineas.join('\n');
         estado.salas = salas;
-        if (d.equipos.some(e => e.partidas.some(p => p.kills > 0))) estado.modo = 'top_kill';
+        estado.modo = iaModo;
         $('inputEquipos').value = estado.equiposTxt;
         $('selectCantidadSalas').value = String(salas);
         $('selectModo').value = estado.modo;

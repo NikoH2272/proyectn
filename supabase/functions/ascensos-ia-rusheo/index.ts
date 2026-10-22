@@ -14,7 +14,7 @@
 // =====================================================================
 import Anthropic from "npm:@anthropic-ai/sdk";
 
-const MAX_IMAGENES = 16;
+const MAX_IMAGENES = 8;
 const TIPOS = ["image/jpeg", "image/png", "image/webp"];
 const env = (k: string) => (Deno.env.get(k) || "").trim();
 const VERSION = "2026-10-22a";
@@ -32,25 +32,25 @@ class ErrorIA extends Error {
   constructor(mensaje: string, public estado = 502) { super(mensaje); }
 }
 
-const SISTEMA = `Lees capturas de pantalla de salas personalizadas de Free Fire para un torneo de ascensos y devuelves los resultados exactos.
+// Prompt modo "solo top": no pide kills (ahorra tokens de entrada y salida)
+const SISTEMA_TOP = `Lees capturas de Free Fire (salas de ascensos). Devuelve la posición final (top) de cada equipo en cada partida.
+SLOTS: alineación (número de escuadra, nombre/tag del equipo, jugadores).
+RESULTADOS: capturas en orden; muestran el puesto final por escuadra.
+- Cruza el número de escuadra con los tags de jugadores para identificar equipos.
+- Si recibes "Slot N: NOMBRE - TAG", usa esos nombres exactos.
+- No inventes; lo dudoso va en "avisos" (español, una línea por problema).
+Responde SOLO con JSON válido.`;
 
-Recibes dos grupos de imágenes:
-1. SLOTS: la alineación de la sala. Cada slot (número de escuadra) muestra el nombre o tag del equipo y sus jugadores.
-2. RESULTADOS: una captura (o varias seguidas) por partida, en el orden en que se jugaron. Muestran el puesto final (top) de cada escuadra y sus kills (bajas/eliminaciones).
+// Prompt modo "top + kills": extrae posición y kills
+const SISTEMA_KILL = `Lees capturas de Free Fire (salas de ascensos). Devuelve la posición y kills de cada equipo en cada partida.
+SLOTS: alineación (número de escuadra, nombre/tag del equipo, jugadores).
+RESULTADOS: capturas en orden; muestran el puesto final y kills por escuadra.
+- Cruza el número de escuadra con los tags de jugadores para identificar equipos.
+- Si recibes "Slot N: NOMBRE - TAG", usa esos nombres exactos.
+- No inventes; lo dudoso va en "avisos" (español, una línea por problema).
+Responde SOLO con JSON válido.`;
 
-Cómo trabajar:
-- Usa los SLOTS para saber qué jugadores forman cada equipo. En los resultados a veces solo aparecen nombres de jugadores o el número de slot: úsalos para identificar al equipo.
-- Si te dan una lista de equipos conocidos, escribe el nombre del equipo exactamente como aparece en esa lista cuando sea el mismo equipo (ignora mayúsculas, emojis y símbolos al comparar).
-- La lista de equipos viene como "Slot N: NOMBRE - TAG". El número de slot es el número de escuadra en la sala: úsalo para identificar a cada equipo en los slots y en los resultados.
-- Los jugadores suelen llevar el TAG de su equipo en el nombre (ej. "DCN•Juan" es de DCN). Si dos equipos comparten tag, sepáralos por el slot y por las capturas de slots, nunca solo por el tag.
-- Cuando hay lista, devuelve los equipos con el nombre de la lista. Si ves uno que no está, inclúyelo y avísalo en "avisos".
-- Para cada equipo devuelve una entrada por cada partida en la que aparece: número de partida (empieza en 1), top (1 = booyah) y kills totales del equipo en esa partida.
-- Si un equipo no aparece en una partida, no inventes la entrada: déjala fuera.
-- Copia los nombres tal como se leen. Si un dato no se lee con seguridad, da tu mejor lectura y explícalo en "avisos" (en español, una línea por problema).
-- "partidas_detectadas" es el número de partidas distintas que encontraste en las capturas de resultados.
-
-Responde SOLO con JSON con esta forma:
-{"equipos":[{"nombre":"","tag":"","jugadores":[""],"partidas":[{"partida":1,"top":1,"kills":0}]}],"partidas_detectadas":1,"avisos":[""]}`;
+const getSistema = (modo?: string) => modo === 'top' ? SISTEMA_TOP : SISTEMA_KILL;
 
 const ESQUEMA = {
   type: "object",
@@ -114,7 +114,7 @@ const ESQUEMA_GEMINI = {
 };
 
 type Imagen = { media_type: string; data: string };
-type Pedido = { slots: Imagen[]; resultados: Imagen[]; conocidos: string[] };
+type Pedido = { slots: Imagen[]; resultados: Imagen[]; conocidos: string[]; modo: string };
 type Lectura = { datos: unknown; modelo: string };
 
 function piezas(p: Pedido): Array<{ texto: string } | { imagen: Imagen }> {
@@ -171,7 +171,7 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY_RUSHEO") },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SISTEMA }] },
+          systemInstruction: { parts: [{ text: getSistema(p.modo) }] },
           contents: [{ role: "user", parts }],
           generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: ESQUEMA_GEMINI },
         }),
@@ -233,7 +233,7 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
         body: JSON.stringify({
           model: env("IA_PRIVADA_MODELO_RUSHEO"),
           temperature: 0,
-          messages: [{ role: "system", content: SISTEMA }, { role: "user", content }],
+          messages: [{ role: "system", content: getSistema(p.modo) }, { role: "user", content }],
           ...(formato ? { response_format: formato } : {}),
         }),
       });
@@ -256,24 +256,20 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
     listo: () => !!env("ANTHROPIC_API_KEY_RUSHEO"),
     leer: async (p) => {
       const client = new Anthropic({ apiKey: env("ANTHROPIC_API_KEY_RUSHEO") });
-      const contenido: Anthropic.Beta.BetaContentBlockParam[] = piezas(p).map((x) => "texto" in x
+      const contenido: Anthropic.MessageParam["content"] = piezas(p).map((x) => "texto" in x
         ? { type: "text" as const, text: x.texto }
         : { type: "image" as const, source: { type: "base64" as const, media_type: x.imagen.media_type as "image/png", data: x.imagen.data } });
       try {
-        const respuesta = await client.beta.messages.create({
+        const respuesta = await client.messages.create({
           model: "claude-haiku-5-5",
-          max_tokens: 16000,
-          betas: ["server-side-fallback-2026-07-01"],
-          fallbacks: "default",
-          system: SISTEMA,
-          output_config: { effort: "medium", format: { type: "json_schema", schema: ESQUEMA } },
+          max_tokens: 4096,
+          system: getSistema(p.modo),
           messages: [{ role: "user", content: contenido }],
         });
-        if (respuesta.stop_reason === "refusal") throw new ErrorIA("Claude no pudo procesar estas capturas. Revisa que sean de resultados del juego.", 422);
         if (respuesta.stop_reason === "max_tokens") throw new ErrorIA("Demasiadas capturas para una sola lectura. Prueba con menos.", 422);
         const texto = respuesta.content.find((b) => b.type === "text");
         if (!texto || texto.type !== "text") throw new ErrorIA("Claude no devolvió resultados");
-        return { datos: JSON.parse(texto.text), modelo: respuesta.model };
+        return { datos: leerJson(texto.text), modelo: respuesta.model };
       } catch (err) {
         if (err instanceof ErrorIA) throw err;
         if (err instanceof Anthropic.RateLimitError) throw new ErrorIA("Claude está ocupado. Intenta en un minuto.", 429);
@@ -313,7 +309,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return responder({ error: "Usa POST" }, 405);
 
-  let cuerpo: { accion?: string; motor?: string; token?: string; portal?: string; slots?: Imagen[]; resultados?: Imagen[]; equipos?: string[] };
+  let cuerpo: { accion?: string; motor?: string; token?: string; portal?: string; slots?: Imagen[]; resultados?: Imagen[]; equipos?: string[]; modo?: string };
   try {
     cuerpo = await req.json();
   } catch {
@@ -332,6 +328,8 @@ Deno.serve(async (req) => {
   if (!token || !portal) return responder({ error: "Falta la sesión o el portal" }, 401);
   if (portal !== "ascensosrusheo") return responder({ error: "La lectura con IA es solo para Ascensos Rusheo" }, 403);
   if (!resultados.length) return responder({ error: "Sube al menos una captura de resultados" }, 400);
+  if (slots.length > 3) return responder({ error: "Máximo 3 capturas de slots" }, 400);
+  if (resultados.length > 5) return responder({ error: "Máximo 5 capturas de resultados" }, 400);
   if (todas.length > MAX_IMAGENES) return responder({ error: `Máximo ${MAX_IMAGENES} capturas por lectura` }, 400);
   for (const im of todas) {
     if (!im || !TIPOS.includes(im.media_type) || typeof im.data !== "string" || im.data.length > 7_000_000) {
@@ -359,7 +357,7 @@ Deno.serve(async (req) => {
   const autorizado = await permiso.json();
 
   try {
-    const pedido: Pedido = { slots, resultados, conocidos: (cuerpo.equipos ?? []).filter(Boolean).slice(0, 80) };
+    const pedido: Pedido = { slots, resultados, conocidos: (cuerpo.equipos ?? []).filter(Boolean).slice(0, 80), modo: cuerpo.modo || 'top_kill' };
     const orden = [id, ...usables.map((m) => m.id).filter((x) => x !== id)];
     let ultimo: unknown = null;
     for (const mid of orden) {

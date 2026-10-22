@@ -183,7 +183,13 @@ begin
        and not coalesce((select ia from asc_permisos where usuario = lower(quien) and portal = p_portal), false) then
         raise exception 'Tu usuario no tiene habilitada la IA. Pídesela al Administrador Ascensos.';
     end if;
-    if coalesce(p_imagenes, 0) < 1 or p_imagenes > 16 then
+    if coalesce(p_imagenes, 0) < 1 then
+        raise exception 'Sube al menos una captura';
+    end if;
+    if p_portal = 'ascensosrusheo' and p_imagenes > 8 then
+        raise exception 'Máximo 8 capturas por lectura en Ascensos Rusheo (3 slots + 5 resultados)';
+    end if;
+    if p_imagenes > 16 then
         raise exception 'Sube de 1 a 16 capturas por lectura';
     end if;
     select count(*) into hoy from ia_uso
