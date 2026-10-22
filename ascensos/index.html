@@ -17,11 +17,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261013e">
-    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261021b">
+    <link rel="stylesheet" href="style.css?v=20261021b">
     <link rel="icon" href="imagenes/proyectn.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../portal-kit/portal.js?v=20261013e" data-portal="ascensosaza" data-modo="publico"></script>
+    <script src="../portal-kit/portal.js?v=20261021b" data-portal="ascensosaza" data-modo="publico"></script>
 </head>
 <body data-tema="aza">
 
@@ -79,31 +79,27 @@
     </section>
 
     <section id="jornadas">
-        <h2 class="section-title">Jornadas</h2>
+        <h2 class="section-title">Resultados</h2>
         <div class="asc-filtro" id="ascFiltro" role="group" aria-label="Filtrar por evento"></div>
         <div class="asc-jornadas-layout">
             <aside class="card-box asc-cal" id="calendario" aria-label="Calendario de ascensos">
                 <h3 class="subtitulo-bloque"><i class="fa-solid fa-calendar-days"></i> Calendario</h3>
                 <div id="ascCalendario"><p class="res-vacio">Cargando...</p></div>
             </aside>
-            <div class="asc-jornadas-col">
-                <div class="asc-dia" id="ascDia" hidden></div>
-                <div class="jornadas-grid" id="ascJornadas"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando jornadas...</p></div>
-                <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerMas" hidden>Ver más</button></p>
+            <div id="equipos" class="card-box asc-eq-card asc-eq-lateral">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-trophy"></i> Equipos y eventos</h3>
+                <div class="asc-eq-top">
+                    <p class="leyenda-tabla">Equipos con sus ascensos 👑 y total de puntos. El filtro también aplica aquí.</p>
+                    <input type="search" id="ascBuscar" placeholder="Buscar equipo o tag" aria-label="Buscar equipo o tag" autocomplete="off">
+                </div>
+                <div class="asc-equipos" id="ascEquipos"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</p></div>
+                <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerEquipos" hidden>Ver más</button></p>
             </div>
         </div>
-    </section>
-
-    <section id="equipos">
-        <h2 class="section-title">Equipos y eventos</h2>
-        <div class="card-box asc-eq-card">
-            <div class="asc-eq-top">
-                <p class="leyenda-tabla">Cada equipo con los eventos en que jugó (el número es cuántas veces), sus ascensos 👑 y el total de puntos. El filtro de eventos de arriba también aplica aquí.</p>
-                <input type="search" id="ascBuscar" placeholder="Buscar equipo o tag" aria-label="Buscar equipo o tag" autocomplete="off">
-            </div>
-            <div class="asc-equipos" id="ascEquipos"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</p></div>
-            <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerEquipos" hidden>Ver más</button></p>
-        </div>
+        <h3 class="subtitulo-bloque asc-jornadas-titulo"><i class="fa-solid fa-list"></i> Jornadas</h3>
+        <div class="asc-dia" id="ascDia" hidden></div>
+        <div class="jornadas-grid" id="ascJornadas"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando jornadas...</p></div>
+        <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerMas" hidden>Ver más</button></p>
     </section>
 
     <section id="cupos">
@@ -132,9 +128,9 @@
         function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
         function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
     </script>
-    <script src="categorias.js?v=20261013e"></script>
-    <script src="../portal-kit/baneados.js?v=20261013e"></script>
-    <script src="logos.js?v=20261013e"></script>
-    <script src="publico.js?v=20261013e"></script>
+    <script src="categorias.js?v=20261021b"></script>
+    <script src="../portal-kit/baneados.js?v=20261021b"></script>
+    <script src="logos.js?v=20261021b"></script>
+    <script src="publico.js?v=20261021b"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@
     const chip = id => { const c = CAT(id); return `<span class="cat-chip${c.logo ? ' con-logo' : ''}" style="--cat:${c.color}">${logoChip(c)}${esc(c.nombre)}</span>`; };
 
     const MOVIL = matchMedia('(max-width: 640px)').matches;   // en el celular se muestra menos de entrada (menos scroll)
-    const POR_PAGINA_JORNADAS = MOVIL ? 3 : 4, POR_PAGINA_EQUIPOS = MOVIL ? 10 : 15;
+    const POR_PAGINA_JORNADAS = 20, POR_PAGINA_EQUIPOS = MOVIL ? 10 : 15;
     let jornadas = [];
     let filtro = 'todas';      // evento
     let dia = null;            // día elegido en el calendario ("2026-10-09")
@@ -71,12 +71,26 @@
                 : `<span class="cal-d${clave === hoy ? ' hoy' : ''}"><b>${d}</b></span>`;
         }
         const total = delMes.reduce((a, d) => a + porDia[d].length, 0);
+        let detalleHtml = '';
+        if (dia && porDia[dia]) {
+            detalleHtml = `<div class="cal-dia-detail">${porDia[dia].map(j => {
+                const c = CAT(j.categoria);
+                const top5 = (j.equipos || []).slice().sort((a, b) => b.total - a.total).slice(0, 5);
+                return `<details class="cal-jornada-item" open>
+                    <summary><span style="color:${c.color}">${esc(c.nombre)}</span> — ${esc(j.titulo)}</summary>
+                    ${j.imagen ? `<img src="${esc(j.imagen)}" alt="" loading="lazy" class="cal-img-res">` : ''}
+                    <table class="cal-mini-tabla"><tbody>${top5.map((e, i) => `<tr><td>${i + 1}</td><td>${esc(e.n)}</td><td><b>${e.total}</b></td></tr>`).join('')}</tbody></table>
+                    <div class="cal-clasif">${(j.clasificados || []).map(x => `<span>👑 ${esc(x.n)}</span>`).join('')}</div>
+                </details>`;
+            }).join('')}</div>`;
+        }
         cont.innerHTML = `
             <div class="cal-nav"><button data-mes="-1" aria-label="Mes anterior"><i class="fa-solid fa-chevron-left"></i></button>
                 <b>${MESES[m]} ${anio}</b><button data-mes="1" aria-label="Mes siguiente"><i class="fa-solid fa-chevron-right"></i></button></div>
             <div class="cal-sem"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
             <div class="cal-grid">${celdas}</div>
-            <p class="cal-pie">${total ? `<b>${total}</b> ascenso(s) en ${delMes.length} día(s) este mes. Toca un día para verlos.` : 'Sin ascensos este mes.'}</p>`;
+            <p class="cal-pie">${total ? `<b>${total}</b> ascenso(s) en ${delMes.length} día(s) este mes. Toca un día para verlos.` : 'Sin ascensos este mes.'}</p>
+            ${detalleHtml}`;
     }
 
     /* ---------------- Jornadas ---------------- */
@@ -95,6 +109,7 @@
             <table>${cab}<tbody>${filas.slice(0, 5).map(fila).join('')}</tbody></table>
             ${filas.length > 5 ? `<details><summary>Ver tabla completa (${filas.length} equipos)</summary><table><tbody>${filas.slice(5).map((e, i) => fila(e, i + 5)).join('')}</tbody></table></details>` : ''}
             <div class="clasif">${(j.clasificados || []).length ? j.clasificados.map(x => `<span>👑 ${esc(x.n)} · ${x.pts}</span>`).join('') : '<small class="muted">Sin ascenso directo</small>'}</div>
+            ${j.imagen ? `<div class="jornada-img-res"><img src="${esc(j.imagen)}" alt="Resultados ${esc(j.titulo)}" loading="lazy"></div>` : ''}
         </article>`;
     }
 
@@ -128,7 +143,7 @@
                 mapa.set(key, r);
             });
         });
-        return [...mapa.values()].sort((a, b) => b.ascensos - a.ascensos || b.total - a.total);
+        return [...mapa.values()].sort((a, b) => b.total - a.total);
     }
 
     function pintarEquipos() {

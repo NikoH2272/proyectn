@@ -267,6 +267,21 @@ input.celda[type=number] { -moz-appearance: textfield; }
 .cal-d.sel em { color: var(--on-primary); }
 .cal-pie { margin: 10px 0 0; color: var(--gray); font-size: .78rem; line-height: 1.5; }
 .cal-pie b { color: var(--primary); }
+.cal-dia-detail { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.cal-jornada-item { border: 1px solid rgba(var(--primary-rgb), .2); border-radius: 6px; padding: 8px 10px; }
+.cal-jornada-item summary { cursor: pointer; font-size: .8rem; font-weight: 700; color: var(--light); list-style: none; }
+.cal-jornada-item summary::-webkit-details-marker { display: none; }
+.cal-jornada-item summary::before { content: "▶ "; font-size: .65rem; color: var(--gray); }
+.cal-jornada-item[open] summary::before { content: "▼ "; }
+.cal-mini-tabla { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .75rem; }
+.cal-mini-tabla td { padding: 2px 5px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.cal-mini-tabla td:first-child { color: var(--gray); width: 24px; text-align: center; }
+.cal-mini-tabla td:last-child { color: var(--primary); text-align: right; }
+.cal-img-res { width: 100%; border-radius: 4px; margin-top: 8px; display: block; }
+.cal-clasif { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.cal-clasif span { font-size: .7rem; color: #6ee7a8; padding: 2px 6px; border: 1px solid #6ee7a8; border-radius: 3px; }
+.jornada-img-res { margin-top: 12px; }
+.jornada-img-res img { width: 100%; border-radius: 6px; display: block; }
 .asc-dia { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px 14px;
   border: 1px solid rgba(var(--primary-rgb), .4); background: rgba(var(--primary-rgb), .08); color: var(--light); }
 .asc-dia::first-letter { text-transform: uppercase; }
@@ -285,6 +300,8 @@ input.celda[type=number] { -moz-appearance: textfield; }
 
 /* Equipos y eventos */
 .asc-eq-card { max-width: 1180px; }
+.asc-eq-lateral { max-width: none; }
+.asc-jornadas-titulo { margin-top: 28px; margin-bottom: 4px; }
 .asc-eq-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .asc-eq-top .leyenda-tabla { flex: 1 1 360px; margin: 0; }
 #ascBuscar { flex: 0 1 260px; min-height: 40px; padding: 8px 12px; border: 1px solid rgba(var(--primary-rgb), .3); border-radius: 2px; color: var(--light); background: #0f0f0f; font-size: 16px; }
