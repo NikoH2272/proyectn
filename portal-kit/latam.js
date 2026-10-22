@@ -606,12 +606,7 @@
         destacados(r.letales, r.activos, r.jugadores, undefined, undefined, r.topBooyah);
         individuales(r.individuales, filtroPortal || 'todos');
 
-        // El calendario abre en el mes del último entreno si este mes no tiene
         calUltimos = r.ultimos;
-        if (primeraVez && r.ultimos.length) {
-            const f = diaLocal(r.ultimos[0].fecha);
-            calAnio = +f.slice(0, 4); calMes = +f.slice(5, 7) - 1;
-        }
         calSel = null;
         if (primeraVez) calAutoHoy = true;
         cargarMes();
@@ -629,7 +624,15 @@
         if (calAutoHoy) {
             calAutoHoy = false;
             const hoy = diaLocal(new Date().toISOString());
-            if (calSes.some(x => diaLocal(x.fecha) === hoy)) calSel = hoy;
+            if (calSes.some(x => diaLocal(x.fecha) === hoy)) {
+                calSel = hoy;
+            } else if (!calSes.length && calUltimos.length) {
+                // Mes actual sin entrenos: ir al mes del entreno pasado más reciente
+                const pasado = calUltimos.find(s => diaLocal(s.fecha) <= hoy) || calUltimos[calUltimos.length - 1];
+                const f = diaLocal(pasado.fecha);
+                calAnio = +f.slice(0, 4); calMes = +f.slice(5, 7) - 1;
+                await cargarMes(); return;
+            }
         }
         pintarCalendario();
     }
@@ -709,7 +712,6 @@
 
         // Calendario de entrenos de este portal (con Descargar y hoy desplegado)
         filtroPortal = portal; calConDescarga = true; calUltimos = r.ultimos;
-        if (r.ultimos.length) { const f0 = diaLocal(r.ultimos[0].fecha); calAnio = +f0.slice(0, 4); calMes = +f0.slice(5, 7) - 1; }
         calSel = null; calAutoHoy = true;
         if (document.getElementById('latamCalendario')) cargarMes();
 
