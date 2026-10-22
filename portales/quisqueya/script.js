@@ -243,10 +243,12 @@ function renderizarResultados() {
         return;
     }
 
+    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg() : {};
+
     const modoCalculo = document.getElementById('selectModoCalculo').value;
     const temaVal = document.getElementById('selectTemaVisual').value;
     const inputFechaHora = document.getElementById('inputFechaHora').value;
-    
+
     const inputModerador = document.getElementById('inputModerador');
     let nombreModerador = inputModerador && inputModerador.value.trim() !== "" ? inputModerador.value.trim().toUpperCase() : "ERERRE";
 
@@ -342,11 +344,12 @@ function renderizarResultados() {
     });
 
     listaConsolidada.sort((a, b) => b.total - a.total);
+    if (_ed.maxEquipos > 0) listaConsolidada = listaConsolidada.slice(0, _ed.maxEquipos);
 
     let topKillers = Array.from(mapaJugadoresKills.values())
         .filter(k => k.kills > 0)
         .sort((a, b) => b.kills - a.kills)
-        .slice(0, 9);
+        .slice(0, _ed.maxKillers || 9);
 
     let cantidadSalas = salasProcesadas.length;
     let tienePuntosAscenso = false;
@@ -441,8 +444,11 @@ function renderizarResultados() {
         htmlBooyahs = `<p style="text-align:center; padding:5px; opacity:0.7; color:${colorTextoTabla}; font-size:calc(0.89rem * 1.10);">Sin registro de Booyahs</p>`;
     }
 
+    if (_ed.mostrarKillers === false) htmlTopKillers = '';
+    if (_ed.mostrarBooyah  === false) htmlBooyahs    = '';
+
     let htmlAscensoPanel = ``;
-    if (tienePuntosAscenso) {
+    if (tienePuntosAscenso && _ed.mostrarAscenso !== false) {
         let rowsAscenso = ``;
         equiposAscenso.forEach((eq, idx) => {
             rowsAscenso += `<tr><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;">#${idx + 1}</td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${eq.name}</strong> <i class="fa-solid fa-arrow-up" style="color: #4ade80;"></i></td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${eq.total}</strong></td></tr>`;
@@ -459,9 +465,11 @@ function renderizarResultados() {
         `;
     }
 
+    const _bgInline = _ed.fondoCustom ? `background-image:url('${_ed.fondoCustom}') !important;` : '';
+
     let htmlTerceraTablaCompleta = `
         <div style="width: 100%; overflow: hidden; display: flex; justify-content: center;">
-            <div id="tablaReducidaCaptura" class="tema-${temaVal}" style="width: 1280px !important; height: 720px !important; min-width: 1280px !important; min-height: 720px !important; max-width: 1280px !important; max-height: 720px !important; padding: 143px 45px 72px 45px !important; border-radius: 12px; box-sizing: border-box; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; transform: scale(0.65); transform-origin: top center; margin-bottom: -250px; flex-shrink: 0; position: relative; overflow: hidden;">
+            <div id="tablaReducidaCaptura" class="tema-${temaVal}" style="${_bgInline}width: 1280px !important; height: 720px !important; min-width: 1280px !important; min-height: 720px !important; max-width: 1280px !important; max-height: 720px !important; padding: 143px 45px 72px 45px !important; border-radius: 12px; box-sizing: border-box; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; transform: scale(0.65); transform-origin: top center; margin-bottom: -250px; flex-shrink: 0; position: relative; overflow: hidden;">
                 <div style="display: flex; flex-direction: row; gap: 15px; width: 100%; height: 100%; align-items: stretch; justify-content: flex-start; padding-right: 75%; MARGIN-TOP: 5%;">
                     
                     <div style="flex: 0 0 690px !important; width: 690px !important; height: 450px !important; max-width: 690px !important; max-height: 450px !important; overflow: hidden; border-radius: 6px; padding: 6px 10px; background: ${colorFondoBase}; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.3);">

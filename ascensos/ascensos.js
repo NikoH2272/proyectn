@@ -330,6 +330,16 @@
                         <div class="ed-grupo-titulo"><i class="fa-solid fa-palette"></i> Estilo</div>
                         <div class="ed-opts" id="edOptsEstilo">${estilos.map(([v,l,i]) => radio('edEstilo',v,l,i,editorCfg.estilo===v)).join('')}</div>
                     </div>
+                    <div class="ed-grupo">
+                        <div class="ed-grupo-titulo"><i class="fa-solid fa-image"></i> Fondo personalizado</div>
+                        <div style="padding:4px 0">
+                            <input type="file" id="edFondoAsc" accept="image/png,image/jpeg,image/webp" class="file-input-custom">
+                            <p class="muted" style="font-size:.8rem;margin-top:4px">Deja vacío para usar el fondo del tema.</p>
+                            <button type="button" id="edFondoAscQuitar" class="btn-access btn-outline" style="margin-top:6px;display:none">
+                                <i class="fa-solid fa-xmark"></i> Quitar fondo
+                            </button>
+                        </div>
+                    </div>
                     <div class="asc-acciones" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:18px">
                         <button class="btn-access" id="btnEdDescargar"><i class="fa-solid fa-download"></i> Descargar imagen</button>
                     </div>
@@ -345,6 +355,25 @@
         $('edOptsEstilo').addEventListener('change', e => { if (e.target.name==='edEstilo') { editorCfg.estilo = e.target.value; syncOpts(); renderizarEditor(); } });
         $('btnEdDescargar').addEventListener('click', descargarEditor);
         addEventListener('resize', escalarEditor);
+        const elFondoAsc   = $('edFondoAsc');
+        const elQuitarFond = $('edFondoAscQuitar');
+        if (elFondoAsc) {
+            elFondoAsc.addEventListener('change', function () {
+                const file = this.files[0];
+                if (!file) { editorCfg.fondoCustom = null; elQuitarFond.style.display = 'none'; renderizarEditor(); return; }
+                const r = new FileReader();
+                r.onload = e => { editorCfg.fondoCustom = e.target.result; elQuitarFond.style.display = 'inline-flex'; renderizarEditor(); };
+                r.readAsDataURL(file);
+            });
+        }
+        if (elQuitarFond) {
+            elQuitarFond.addEventListener('click', function () {
+                editorCfg.fondoCustom = null;
+                if (elFondoAsc) elFondoAsc.value = '';
+                this.style.display = 'none';
+                renderizarEditor();
+            });
+        }
         renderizarEditor();
     }
 
@@ -381,14 +410,15 @@
         const mvpHtml    = mvp ? bloqueEdMvp(mvp) : '';
         const booyahHtml = cfg.secciones.booyahs && booyahs.length ? bloqueEdBooyahs(booyahs, activas) : '';
         const ascHtml    = cfg.secciones.ascendidos ? bloqueEdAscendidos(clasificados) : '';
+        const bgAttr = cfg.fondoCustom ? ` style="background-image:url('${cfg.fondoCustom}') !important;"` : '';
         if (cfg.formato === 'horizontal') {
-            return `<div id="editorCaptura" class="ed-wrapper ed-horizontal ${estiloClass} ${temaClass}">
+            return `<div id="editorCaptura" class="ed-wrapper ed-horizontal ${estiloClass} ${temaClass}"${bgAttr}>
                 ${header}
                 <div class="ed-hori-body"><div class="ed-hori-izq">${tabla}</div>
                 <div class="ed-hori-der">${mvpHtml}${booyahHtml}${ascHtml}</div></div>
             </div>`;
         }
-        return `<div id="editorCaptura" class="ed-wrapper ${fmtClass} ${estiloClass} ${temaClass}">
+        return `<div id="editorCaptura" class="ed-wrapper ${fmtClass} ${estiloClass} ${temaClass}"${bgAttr}>
             ${header}${tabla}${dest}${mvpHtml}${booyahHtml}${ascHtml}
         </div>`;
     }
@@ -646,7 +676,7 @@
        Lo que lee la IA se revisa aquí y con "Pasar a la tabla" llena la anotación (queda en el borrador). */
     let iaDatos = null, iaModo = 'top_kill';
     let editorMontado = false;
-    let editorCfg = { formato: 'cuadrado', secciones: { tablaGeneral: true, topKiller: true, booyahs: true, destacados: true, ascendidos: true }, estilo: 'redondeado' };
+    let editorCfg = { formato: 'cuadrado', secciones: { tablaGeneral: true, topKiller: true, booyahs: true, destacados: true, ascendidos: true }, estilo: 'redondeado', fondoCustom: null };
 
     // Achica cada captura (máx. 1600 px, JPG) para que suba rápido y gaste menos
     async function comprimir(file) {

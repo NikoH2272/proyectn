@@ -18,12 +18,12 @@
     <!-- Orbitron se usa en la imagen que se descarga -->
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261013e">
-    <link rel="stylesheet" href="style.css?v=20261013e">
+    <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261022e">
+    <link rel="stylesheet" href="style.css?v=20261022e">
     <link rel="icon" href="imagenes/qfd.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../portal-kit/portal.js?v=20261013e" data-portal="ascensosqfd" data-modo="protegido"></script>
+    <script src="../../portal-kit/portal.js?v=20261022e" data-portal="ascensosqfd" data-modo="protegido"></script>
 </head>
 <body data-tema="qfd">
 
@@ -126,7 +126,9 @@
                     <div id="outputTablasLadoALado" class="result-box" style="margin-top: 30px;"></div>
                 </div>
 
-                <div style="margin-top: 40px; text-align: center;">
+                <div id="editorImagenQFD" class="panel-suave" style="margin-top: 30px;"></div>
+
+                <div style="margin-top: 24px; text-align: center;">
                     <button class="btn-access" id="btnDescargarImagen" onclick="descargarTablaReducida()">
                         <i class="fa-solid fa-download"></i> Descargar imagen reducida (1280x720)
                     </button>
@@ -177,14 +179,17 @@
         function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
         function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
     </script>
-    <script src="script.js?v=20261013e"></script>
-    <script src="../../portal-kit/guardado.js?v=20261013e"></script>
-    <script src="../../portal-kit/baneados.js?v=20261013e"></script>
-    <script src="../../portal-kit/cupos.js?v=20261013e"></script>
-    <script src="../../portal-kit/cupos-control.js?v=20261013e"></script>
-    <script src="../../portal-kit/usuarios-portal.js?v=20261013e"></script>
+    <script src="../../portal-kit/editor-imagen.js?v=20261022e"></script>
+    <script src="script.js?v=20261022e"></script>
+    <script src="../../portal-kit/guardado.js?v=20261022e"></script>
+    <script src="../../portal-kit/baneados.js?v=20261022e"></script>
+    <script src="../../portal-kit/cupos.js?v=20261022e"></script>
+    <script src="../../portal-kit/cupos-control.js?v=20261022e"></script>
+    <script src="../../portal-kit/usuarios-portal.js?v=20261022e"></script>
     <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'ascensosqfd'), { once: true });</script>
+    <script>PGEditorImagen.montar('editorImagenQFD', { onCambio: renderizarResultados });</script>
     <script>window.addEventListener('pg:sesion', () => PumasBaneados.montarAdmin('baneadosAdmin', 'ascensosqfd'), { once: true });</script>
+
     <script>window.addEventListener('pg:sesion', () => {
         const seccion = document.getElementById('gestionCuposSeccion');
         const montadas = new Set();

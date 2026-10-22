@@ -134,13 +134,15 @@ function _xL(tA, rM, mod = "ADMIN", fec = "", hor = "") {
 }
 
 function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hora = "") {
+    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg() : {};
     // Categoría elegida en la herramienta: mixto (zmf) o femenino (zmffem)
     const catZ = (document.getElementById('selectCategoria') || {}).value || 'zmf';
     let tC = catZ === 'zmffem' ? "ENTRENOS ZMF FEMENINO" : "ENTRENOS ZMF",
-        fU = catZ === 'zmffem' ? "imagenes/fondozmffem.png" : "imagenes/fondozmf.png";
-    
+        fU = _ed.fondoCustom || (catZ === 'zmffem' ? "imagenes/fondozmffem.png" : "imagenes/fondozmf.png");
+
     let eqO = [...eqs].sort((a, b) => b.totalScore - a.totalScore);
-    let tKL = [...tKs].slice(0, 15);
+    if (_ed.maxEquipos > 0) eqO = eqO.slice(0, _ed.maxEquipos);
+    let tKL = [...tKs].slice(0, _ed.maxKillers || 15);
     let rWData = window._rWGlobal || [];
 
     // Construimos la línea del subtítulo incluyendo la fecha y la hora si fueron seleccionadas
@@ -153,7 +155,8 @@ function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hor
         infoExtra = ` — ${hora}`;
     }
 
-    let h = `<div id="tablaCaptura" class="row-captura-container cat-${catZ}" style="background-image: url('${fU}');">` +
+    const _bgUrl = _ed.fondoCustom ? `url('${_ed.fondoCustom}')` : `url('${fU}')`;
+    let h = `<div id="tablaCaptura" class="row-captura-container cat-${catZ}" style="background-image: ${_bgUrl};">` +
     
     // Encabezado
     `<div class="row-header">` +
@@ -180,6 +183,7 @@ function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hor
     }).join('') + `</tbody></table></div>` +
 
     // ZONA INFERIOR 1: BOOYAH POR SALA
+    (_ed.mostrarBooyah === false ? '' :
     `<div class="row-box row-booyah-section">` +
     `<div class="row-box-title">BOOYAH POR SALA (VICTORIAS)</div>` +
     `<div class="row-booyah-grid">` +
@@ -190,11 +194,12 @@ function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hor
             `<div class="row-card-info">Pts: <strong style="color:#ffffff;">${rw.points}</strong> | K: <strong style="color:#ff3366;">${rw.kills}</strong></div>` +
         `</div>
     `).join('') : `<div style="color:#64748b;font-size:0.75rem;text-align:center;padding:6px;">No hay datos de Booyah registrados.</div>`) +
-    `</div></div>` +
+    `</div></div>`) +
 
-    // ZONA INFERIOR 2: TOP 15 KILLERS
+    // ZONA INFERIOR 2: TOP KILLERS
+    (_ed.mostrarKillers === false ? '' :
     `<div class="row-box row-killers-section">` +
-    `<div class="row-box-title">TOP 15 KILLERS MÁS LETALES</div>` +
+    `<div class="row-box-title">TOP ${_ed.maxKillers || 15} KILLERS MÁS LETALES</div>` +
     `<div class="row-killers-grid">` +
     tKL.map((tk, i) => {
         let cP = '#ffffff';
@@ -204,7 +209,7 @@ function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hor
             `<span style="color:#ff3366;font-weight:bold;font-size:0.75rem;">${tk.kills}</span>` +
         `</div>`;
     }).join('') +
-    `</div></div></div>`;
+    `</div></div>`) + `</div>`;
     
     let wrapperHtml = `
         <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px;">
