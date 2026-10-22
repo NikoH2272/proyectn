@@ -409,8 +409,25 @@
                     overrides[id].color2 = color2;
                     overrides[id].link   = link || null;
                     panel.hidden = true;
-                    // sync checkbox state before re-render
                     activos = [...cont.querySelectorAll('.chk-eq:checked')].map(el => el.dataset.id);
+                    renderGrid(cont);
+                    return;
+                }
+                if (e.target.closest('[data-agregar-custom]')) {
+                    const nombre = cont.querySelector('#inpCN').value.trim();
+                    const rawId  = cont.querySelector('#inpCI').value.trim().replace(/\s+/g, '_').toLowerCase();
+                    const id     = rawId || 'ev_' + nombre.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const color  = cont.querySelector('#inpCC').value  || '#B6FF00';
+                    const color2 = cont.querySelector('#inpCC2').value || color;
+                    const logo   = cont.querySelector('#inpCL').value.trim();
+                    const link   = cont.querySelector('#inpCLink').value.trim();
+                    const msg    = cont.querySelector('#msgCustom');
+                    if (!nombre) { if (msg) msg.textContent = 'El nombre es obligatorio.'; return; }
+                    if (customTeams.find(c => c.id === id) || window.ASC_CATEGORIAS.find(c => c.id === id)) {
+                        if (msg) msg.textContent = 'Ya existe un equipo con ese ID (' + id + ').'; return;
+                    }
+                    customTeams.push({ id, nombre, color, color2, logo: logo || null, link: link || null });
+                    if (!activos.includes(id)) activos.push(id);
                     renderGrid(cont);
                     return;
                 }
@@ -433,26 +450,9 @@
                     <div class="form-group"><label>URL del logo (opcional)</label><input id="inpCL" type="url" placeholder="https://..."></div>
                     <div class="form-group"><label>Link del grupo (WhatsApp / Discord, opcional)</label><input id="inpCLink" type="url" placeholder="https://chat.whatsapp.com/..."></div>
                 </div>
-                <button class="btn-access btn-mini" id="btnAgregarCustom" style="margin-top:8px"><i class="fa-solid fa-plus"></i> Agregar y activar</button>
+                <button class="btn-access btn-mini" data-agregar-custom style="margin-top:8px"><i class="fa-solid fa-plus"></i> Agregar y activar</button>
                 <p class="muted" style="margin-top:6px;font-size:.8rem" id="msgCustom"></p>
             </details>`;
-
-            cont.querySelector('#btnAgregarCustom').onclick = () => {
-                const nombre = cont.querySelector('#inpCN').value.trim();
-                const id = cont.querySelector('#inpCI').value.trim().replace(/\s+/g, '_').toLowerCase() || 'ev_' + nombre.toLowerCase().replace(/[^a-z0-9]/g, '');
-                const color  = cont.querySelector('#inpCC').value  || '#B6FF00';
-                const color2 = cont.querySelector('#inpCC2').value || color;
-                const logo   = cont.querySelector('#inpCL').value.trim();
-                const link   = cont.querySelector('#inpCLink').value.trim();
-                const msg    = cont.querySelector('#msgCustom');
-                if (!nombre || !id) { msg.textContent = 'Nombre e ID son obligatorios.'; return; }
-                if (customTeams.find(c => c.id === id) || window.ASC_CATEGORIAS.find(c => c.id === id)) {
-                    msg.textContent = 'Ya existe un equipo con ese ID.'; return;
-                }
-                customTeams.push({ id, nombre, color, color2, logo: logo || null, link: link || null });
-                if (!activos.includes(id)) activos.push(id);
-                renderGrid(cont);
-            };
         }
 
         async function guardarEquipos() {
