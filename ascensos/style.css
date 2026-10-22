@@ -292,6 +292,8 @@ input.celda[type=number] { -moz-appearance: textfield; }
 .asc-dia::first-letter { text-transform: uppercase; }
 .asc-dia .btn-mini { margin-left: auto; }
 .asc-mas { margin: 16px 0 0; text-align: center; }
+.eq-edit-panel { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-top: 10px; }
+.eq-edit-panel[hidden] { display: none; }
 
 /* Tarjeta de jornada compacta */
 .jornada-card { padding: 14px 16px; }

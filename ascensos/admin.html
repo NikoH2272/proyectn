@@ -333,7 +333,7 @@
                     <button class="btn-mini" data-editar-eq="${esc(c.id)}" title="Editar colores y WhatsApp"><i class="fa-solid fa-pen"></i></button>
                     ${esCustom ? `<button class="btn-mini" style="color:#ff6b6b;border-color:rgba(255,107,107,.4)" data-borrar-custom="${esc(c.id)}" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
-                <div class="eq-edit-panel" id="eq-edit-${esc(c.id)}" hidden style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+                <div class="eq-edit-panel" id="eq-edit-${esc(c.id)}" hidden>
                     <div class="form-group" style="margin:0">
                         <label style="font-size:.75rem">Color 1</label>
                         <input type="color" class="eq-color-inp" value="${esc(colorActual)}" style="width:60px;height:32px;padding:2px;border-radius:6px;cursor:pointer">
