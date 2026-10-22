@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@emilgroup/document-sdk": "^1.52.0",
     "motion": "^14.2.0"
   }
 }
