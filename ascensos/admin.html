@@ -273,7 +273,52 @@
                 btn.onclick = guardarEquipos;
             } catch (e) {
                 cont.innerHTML = `<p class="res-vacio pg-error">${esc(e.message || 'Error al cargar')}</p>`;
+                return;
             }
+            // Delegación de eventos: una sola vez por contenedor
+            cont.addEventListener('click', e => {
+                const borrar = e.target.closest('[data-borrar-custom]');
+                if (borrar) {
+                    const id = borrar.dataset.borrarCustom;
+                    // sync checkbox state before re-render
+                    activos = [...cont.querySelectorAll('.chk-eq:checked')].map(el => el.dataset.id).filter(x => x !== id);
+                    customTeams = customTeams.filter(c => c.id !== id);
+                    renderGrid(cont);
+                    return;
+                }
+                const editar = e.target.closest('[data-editar-eq]');
+                if (editar) {
+                    const id = editar.dataset.editarEq;
+                    const panel = cont.querySelector(`[id="eq-edit-${id}"]`);
+                    if (panel) { panel.hidden = !panel.hidden; }
+                    return;
+                }
+                const cancelar = e.target.closest('[data-cancelar-eq]');
+                if (cancelar) {
+                    const id = cancelar.dataset.cancelarEq;
+                    const panel = cont.querySelector(`[id="eq-edit-${id}"]`);
+                    if (panel) panel.hidden = true;
+                    return;
+                }
+                const guardar = e.target.closest('[data-guardar-eq]');
+                if (guardar) {
+                    const id = guardar.dataset.guardarEq;
+                    const panel = cont.querySelector(`[id="eq-edit-${id}"]`);
+                    if (!panel) return;
+                    const color  = panel.querySelector('.eq-color-inp').value;
+                    const color2 = panel.querySelector('.eq-color2-inp').value;
+                    const link   = panel.querySelector('.eq-link-inp').value.trim();
+                    if (!overrides[id]) overrides[id] = {};
+                    overrides[id].color  = color;
+                    overrides[id].color2 = color2;
+                    overrides[id].link   = link || null;
+                    panel.hidden = true;
+                    // sync checkbox state before re-render
+                    activos = [...cont.querySelectorAll('.chk-eq:checked')].map(el => el.dataset.id);
+                    renderGrid(cont);
+                    return;
+                }
+            });
         }
 
         function renderGrid(cont) {
@@ -287,9 +332,10 @@
                 <div class="form-grid" style="margin-top:14px">
                     <div class="form-group"><label>Nombre</label><input id="inpCN" maxlength="40" placeholder="Ej: SHADOW"></div>
                     <div class="form-group"><label>ID (sin espacios)</label><input id="inpCI" maxlength="24" placeholder="Ej: ev_shadow"></div>
-                    <div class="form-group"><label>Color</label><input id="inpCC" type="color" value="#B6FF00"></div>
+                    <div class="form-group"><label>Color 1</label><input id="inpCC" type="color" value="#B6FF00"></div>
+                    <div class="form-group"><label>Color 2</label><input id="inpCC2" type="color" value="#00E0C6"></div>
                     <div class="form-group"><label>URL del logo (opcional)</label><input id="inpCL" type="url" placeholder="https://..."></div>
-                    <div class="form-group" style="grid-column:span 2"><label>Link del grupo (WhatsApp / Discord, opcional)</label><input id="inpCLink" type="url" placeholder="https://chat.whatsapp.com/..."></div>
+                    <div class="form-group"><label>Link del grupo (WhatsApp / Discord, opcional)</label><input id="inpCLink" type="url" placeholder="https://chat.whatsapp.com/..."></div>
                 </div>
                 <button class="btn-access btn-mini" id="btnAgregarCustom" style="margin-top:8px"><i class="fa-solid fa-plus"></i> Agregar y activar</button>
                 <p class="muted" style="margin-top:6px;font-size:.8rem" id="msgCustom"></p>
@@ -298,60 +344,19 @@
             cont.querySelector('#btnAgregarCustom').onclick = () => {
                 const nombre = cont.querySelector('#inpCN').value.trim();
                 const id = cont.querySelector('#inpCI').value.trim().replace(/\s+/g, '_').toLowerCase() || 'ev_' + nombre.toLowerCase().replace(/[^a-z0-9]/g, '');
-                const color = cont.querySelector('#inpCC').value || '#B6FF00';
-                const logo  = cont.querySelector('#inpCL').value.trim();
-                const link  = cont.querySelector('#inpCLink').value.trim();
-                const msg   = cont.querySelector('#msgCustom');
+                const color  = cont.querySelector('#inpCC').value  || '#B6FF00';
+                const color2 = cont.querySelector('#inpCC2').value || color;
+                const logo   = cont.querySelector('#inpCL').value.trim();
+                const link   = cont.querySelector('#inpCLink').value.trim();
+                const msg    = cont.querySelector('#msgCustom');
                 if (!nombre || !id) { msg.textContent = 'Nombre e ID son obligatorios.'; return; }
                 if (customTeams.find(c => c.id === id) || window.ASC_CATEGORIAS.find(c => c.id === id)) {
                     msg.textContent = 'Ya existe un equipo con ese ID.'; return;
                 }
-                customTeams.push({ id, nombre, color, logo: logo || null, link: link || null });
+                customTeams.push({ id, nombre, color, color2, logo: logo || null, link: link || null });
                 if (!activos.includes(id)) activos.push(id);
                 renderGrid(cont);
-                msg.textContent = '';
             };
-
-            cont.addEventListener('click', e => {
-                const borrar = e.target.closest('[data-borrar-custom]');
-                if (borrar) {
-                    const id = borrar.dataset.borrarCustom;
-                    customTeams = customTeams.filter(c => c.id !== id);
-                    activos = activos.filter(x => x !== id);
-                    renderGrid(cont);
-                    return;
-                }
-                const editar = e.target.closest('[data-editar-eq]');
-                if (editar) {
-                    const id = editar.dataset.editarEq;
-                    const panel = document.getElementById('eq-edit-' + id);
-                    if (panel) { panel.hidden = !panel.hidden; }
-                    return;
-                }
-                const cancelar = e.target.closest('[data-cancelar-eq]');
-                if (cancelar) {
-                    const id = cancelar.dataset.cancelarEq;
-                    const panel = document.getElementById('eq-edit-' + id);
-                    if (panel) panel.hidden = true;
-                    return;
-                }
-                const guardar = e.target.closest('[data-guardar-eq]');
-                if (guardar) {
-                    const id = guardar.dataset.guardarEq;
-                    const panel = document.getElementById('eq-edit-' + id);
-                    if (!panel) return;
-                    const color  = panel.querySelector('.eq-color-inp').value;
-                    const color2 = panel.querySelector('.eq-color2-inp').value;
-                    const link   = panel.querySelector('.eq-link-inp').value.trim();
-                    if (!overrides[id]) overrides[id] = {};
-                    overrides[id].color  = color;
-                    overrides[id].color2 = color2;
-                    overrides[id].link   = link || null;
-                    panel.hidden = true;
-                    renderGrid(cont);
-                    return;
-                }
-            }, { capture: false });
         }
 
         async function guardarEquipos() {
