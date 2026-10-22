@@ -330,13 +330,15 @@
         const btn = $('btnGuardarJornada');
         btn.disabled = true;
         aviso('Guardando en la base de datos...');
+        let jornadaId = null;
         try {
-            await P.ascensos.guardar(PORTAL, {
+            const resultado = await P.ascensos.guardar(PORTAL, {
                 categoria: estado.categoria, titulo: tituloJornada(), fecha: fechaJornada().toISOString(),
                 horario: estado.horario, moderador: estado.moderador, salas: activas.length, modo: estado.modo,
                 equipos: filas.map(f => ({ n: f.n, t: f.t, tc: f.tc, p: f.p, k: estado.modo === 'top_kill' ? f.k : undefined, pts: f.pts, total: f.total, kills: f.kills })),
                 clasificados: clasificados.map(f => ({ n: f.n, t: f.t, pts: f.pts }))
             });
+            jornadaId = resultado?.id || null;
         } catch (e) {
             aviso('No se guardó: ' + e.message + ' · Tus datos siguen en el borrador.', 'error');
             btn.disabled = false;
@@ -347,7 +349,32 @@
         if (window.PumasControl && PORTAL === 'pruebas') {
             PumasControl.revisarSalas(PORTAL, filas.map(f => ({ equipo: f.n, salas: activas.map(i => f.p[i] !== null && f.p[i] !== undefined) })));
         }
-        try { await descargarImagen(); } catch (e) { aviso('✔ Jornada guardada, pero la imagen falló: ' + e.message + '. Descárgala con el otro botón antes de seguir.', 'error'); btn.disabled = false; return; }
+        try {
+            const canvas = await generarCanvas();
+            const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+            // Subir a storage y enlazar con la jornada (no bloquea el flujo si falla)
+            if (jornadaId) {
+                try {
+                    const path = `${PORTAL}/${jornadaId}.png`;
+                    const { error: upErr } = await P.db().storage.from('asc-imagenes').upload(path, blob, { upsert: true, contentType: 'image/png' });
+                    if (!upErr) {
+                        const pubUrl = P.db().storage.from('asc-imagenes').getPublicUrl(path).data?.publicUrl;
+                        if (pubUrl) await P.ascensos.actualizarImagen(PORTAL, jornadaId, pubUrl).catch(() => {});
+                    }
+                } catch (_) {}
+            }
+            // Descargar en el dispositivo (comportamiento existente)
+            const archivo = new File([blob], nombreArchivo(), { type: 'image/png' });
+            const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (ios && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                try { await navigator.share({ files: [archivo], title: archivo.name }); } catch (e) { if (e.name !== 'AbortError') throw e; }
+            } else {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = archivo.name;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+            }
+        } catch (e) { aviso('✔ Jornada guardada, pero la imagen falló: ' + e.message + '. Descárgala con el otro botón antes de seguir.', 'error'); btn.disabled = false; return; }
         // Jornada guardada: se limpia lo anotado (se mantienen equipos y configuración)
         estado.celdas = {}; estado.texto = '';
         $('inputTexto').value = '';
@@ -370,6 +397,7 @@
         cont.innerHTML = filas.map(j => {
             const c = window.ASC_CATEGORIA(j.categoria);
             return `<div class="jornada-fila" style="--cat:${c.color}">
+                ${j.imagen ? `<img src="${esc(j.imagen)}" class="jornada-fila-thumb" alt="" loading="lazy">` : ''}
                 <div><span class="cat-chip" style="--cat:${c.color}">${esc(c.nombre)}</span> <b>${esc(j.titulo)}</b><br>
                 <small>${new Date(j.fecha).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })} · ${j.equipos.length} equipos · ${j.salas} salas · ${j.clasificados.length} ascienden${j.moderador ? ' · ' + esc(j.moderador) : ''}</small></div>
                 <button class="btn-mini btn-borrar" data-borrar="${j.id}"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;

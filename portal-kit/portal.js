@@ -485,6 +485,7 @@
         jornadas: (portal, limite) => leerTabla(db().from('asc_jornadas').select('*').eq('portal', portal)
             .order('fecha', { ascending: false }).limit(limite || 60)),
         guardar: (portal, datos) => rpcAdmin('asc_guardar_jornada', { p_portal: portal, p_datos: datos }),
+        actualizarImagen: (portal, id, imagen) => rpcAdmin('asc_actualizar_imagen', { p_portal: portal, p_id: id, p_imagen: imagen }),
         borrar: (portal, id) => rpcAdmin('asc_borrar_jornada', { p_portal: portal, p_id: id }),
         // qué puede hacer el usuario: { jefe, moderador, ia, eventos (null = todos) } (sql/19)
         permisos: portal => rpcAdmin('asc_mis_permisos', { p_portal: portal }),
