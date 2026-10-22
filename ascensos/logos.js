@@ -17,8 +17,13 @@
         if (!items.length) return;
         const li = c => `<li title="${c.nombre}" style="--cat:${c.color}"><img src="${c.logo}" alt="${c.nombre}" loading="lazy" onerror="this.closest('li').remove()"></li>`;
         const fila = items.map(li).join('');
-        cont.innerHTML = `<ul class="carrusel-pista">${fila}</ul><ul class="carrusel-pista" aria-hidden="true">${fila}</ul>`;
-        cont.style.setProperty('--dur', Math.max(20, items.length * 3) + 's');
+        if (items.length < 5) {
+            cont.innerHTML = `<ul class="carrusel-pista carrusel-estatico">${fila}</ul>`;
+            cont.style.removeProperty('--dur');
+        } else {
+            cont.innerHTML = `<ul class="carrusel-pista">${fila}</ul><ul class="carrusel-pista" aria-hidden="true">${fila}</ul>`;
+            cont.style.setProperty('--dur', Math.max(20, items.length * 3) + 's');
+        }
     }
 
     let montado = false;

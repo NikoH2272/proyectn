@@ -56,6 +56,7 @@
             <button data-tab="panelBaneados"><i class="fa-solid fa-ban"></i> Baneados</button>
             <button data-tab="panelCupos"><i class="fa-solid fa-ticket"></i> Cupos</button>
             <button data-tab="panelModeradores" hidden><i class="fa-solid fa-user-shield"></i> Moderadores</button>
+            <button data-tab="panelPortales"    hidden><i class="fa-solid fa-sliders"></i> Portales</button>
             <button data-tab="panelEquipos"     hidden><i class="fa-solid fa-th-large"></i> Mini Portales</button>
         </div>
 
@@ -148,6 +149,12 @@
             <div id="moderadoresAdmin"></div>
         </div>
 
+        <!-- PORTALES: configuración de pasarela de ascensos por portal (solo superadmin) -->
+        <div class="tool-container asc-panel" id="panelPortales" hidden>
+            <p class="tool-desc">Activa el apartado de ascensos en cada portal del sitio. Cuando está activo, aparece una sección de pasarela (CTA) en ese portal con un enlace a los ascensos configurados.</p>
+            <div id="portalesAscAdmin"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p></div>
+        </div>
+
         <!-- MINI PORTALES: qué categorías aparecen en el inicio del portal público (solo superadmin) -->
         <div class="tool-container asc-panel" id="panelEquipos" hidden>
             <p class="tool-desc">Activa los equipos que aparecen en la sección "Equipos participantes" del portal público de Ascensos LATAM. Cada equipo activado tendrá su propio mini portal con sus jornadas y ranking.</p>
@@ -182,6 +189,96 @@
     <script>window.addEventListener('pg:sesion', () => {
         PumasControl.montarBaneos('baneosCuposAdmin', 'ascensosaza');
     }, { once: true });</script>
+    <script>
+    /* ── Panel Portales: pasarela de ascensos por portal (solo superadmin) ── */
+    (function () {
+        const P = window.PumasPortal;
+        const esc = P.escaparHtml;
+        let _tok = '';
+        function getToken() {
+            if (_tok) return _tok;
+            try { const r = localStorage.getItem('pg_session') || ''; const p = JSON.parse(r); return (typeof p === 'object' ? p.token : p) || ''; } catch { return ''; }
+        }
+
+        window.addEventListener('pg:sesion', function (e) {
+            const ses = e.detail;
+            _tok = ses.token || '';
+            if (!P.tiene(ses, 'gestionar')) return;
+            const tab = document.querySelector('.asc-tabs [data-tab="panelPortales"]');
+            if (!tab) return;
+            tab.hidden = false;
+            tab.addEventListener('click', cargarPortales, { once: true });
+        }, { once: true });
+
+        async function cargarPortales() {
+            const cont = document.getElementById('portalesAscAdmin');
+            if (!cont) return;
+            try {
+                const [{ data: portales, error }, { data: ascPortales }] = await Promise.all([
+                    P.db().rpc('admin_ascensos_portales_listar', { p_token: getToken() }),
+                    P.db().from('portales').select('id, nombre').eq('tipo', 'ascensos').order('nombre')
+                ]);
+                if (error) throw error;
+                const lista = portales || [];
+                const asc = ascPortales || [];
+                const optsAsc = '<option value="">— ninguno —</option>' +
+                    asc.map(a => `<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join('');
+
+                if (!lista.length) { cont.innerHTML = '<p class="res-vacio">Sin portales configurables.</p>'; return; }
+                cont.innerHTML = `<div class="roles-grid">${lista.map(p => `
+                    <article class="card-box" data-pid="${esc(p.id)}">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                            <span style="width:10px;height:10px;border-radius:50%;background:${esc(p.color)};flex-shrink:0;display:inline-block"></span>
+                            <div><strong>${esc(p.nombre)}</strong><br><small class="muted">${esc(p.id)} · ${esc(p.tipo)}</small></div>
+                        </div>
+                        <label class="chk" style="margin-bottom:10px">
+                            <input type="checkbox" class="chk-asc-activo"${p.asc_activo ? ' checked' : ''}> Mostrar pasarela de ascensos
+                        </label>
+                        <div class="form-grid" style="margin-top:8px">
+                            <div class="form-group">
+                                <label>Portal de ascensos</label>
+                                <select class="sel-asc-portal">${optsAsc.replace(`value="${esc(p.asc_portal)}"`, `value="${esc(p.asc_portal)}" selected`)}</select>
+                            </div>
+                            <div class="form-group">
+                                <label>Texto del botón (opcional)</label>
+                                <input class="inp-asc-btn" placeholder="Apartar cupo" maxlength="60" value="${esc(p.asc_btn || '')}">
+                            </div>
+                        </div>
+                        <div class="acciones" style="margin-top:10px">
+                            <button class="btn-access btn-mini" onclick="guardarPortalAsc(this)"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        </div>
+                        <p class="muted" style="margin-top:6px;font-size:.8rem;min-height:1.2em" role="status" data-msg></p>
+                    </article>`).join('')}</div>`;
+            } catch (e) {
+                cont.innerHTML = `<p class="res-vacio pg-error">${esc(e.message || 'Error al cargar portales')}</p>`;
+            }
+        }
+
+        window.guardarPortalAsc = async function (btn) {
+            const art = btn.closest('[data-pid]');
+            const msg = art.querySelector('[data-msg]');
+            btn.disabled = true;
+            msg.textContent = 'Guardando...';
+            try {
+                const { error } = await P.db().rpc('admin_ascensos_portal_config', {
+                    p_token: getToken(),
+                    p_portal:     art.dataset.pid,
+                    p_asc_activo: art.querySelector('.chk-asc-activo').checked,
+                    p_asc_portal: art.querySelector('.sel-asc-portal').value,
+                    p_asc_btn:    art.querySelector('.inp-asc-btn').value.trim()
+                });
+                if (error) throw error;
+                msg.textContent = '✔ Guardado';
+                msg.style.color = 'var(--primary)';
+            } catch (e) {
+                msg.textContent = e.message || 'Error';
+                msg.style.color = '#ff4d4d';
+            } finally {
+                btn.disabled = false;
+            }
+        };
+    })();
+    </script>
     <script>
     /* ── Panel Equipos AZA: qué categorías aparecen en el inicio (solo superadmin) ── */
     (function () {
