@@ -225,6 +225,8 @@ input.celda[type=number] { -moz-appearance: textfield; }
 .tema-leviatan { --tema-table-bg: rgba(13,27,42,.90); --tema-header-text: #90e0ef; --tema-text: #fff; background-image: url('imagenes/LEVIATAN.png'); }
 .tema-lyon { --tema-table-bg: rgba(230,215,204,.90); --tema-header-text: #3d261d; --tema-text: #3d261d; background-image: url('imagenes/LYON.png'); }
 .tema-pumasgg { --tema-table-bg: rgba(18,21,32,.95); --tema-header-text: #ffcc00; --tema-text: #fff; background-image: url('imagenes/PUMAS GG.png'); }
+.tema-rusheo    { --tema-table-bg: rgba(18,10,28,.88); --tema-header-text: #ff70a6; --tema-text: #fff; background-image: url('imagenes/fondoasc.png'); }
+.tema-rusheofem { --tema-table-bg: rgba(18,10,28,.88); --tema-header-text: #ffd166; --tema-text: #fff; background-image: url('imagenes/fondofemasc.png'); }
 
 /* ---------- Celular: portal y herramienta más compactos ---------- */
 @media (max-width: 760px) {

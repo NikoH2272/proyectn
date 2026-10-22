@@ -445,7 +445,8 @@
 
     /* ---------------- Motores de IA (función ascensos-ia + sql/18) ---------------- */
     async function invocarIA(cuerpo) {
-        const { data, error } = await db().functions.invoke('ascensos-ia', { body: cuerpo });
+        const fnIA = PORTAL === 'ascensosrusheo' ? 'ascensos-ia-rusheo' : 'ascensos-ia';
+        const { data, error } = await db().functions.invoke(fnIA, { body: cuerpo });
         if (error) {
             let msg = error.message;
             const res = error.context;
@@ -460,7 +461,7 @@
                 else if (estado === 546 || /WORKER_LIMIT|memory/i.test(texto)) msg = 'La función se quedó sin memoria con tantas capturas. Prueba con menos (ej. 1 de slots y 4 de resultados).';
                 else if (estado === 504 || estado === 408 || /timeout|timed out/i.test(texto)) msg = 'La IA tardó demasiado y Supabase cortó la lectura. Prueba con menos capturas.';
                 else msg = `La función respondió ${estado}${texto ? ': ' + texto.slice(0, 200) : ''}`;
-                if (estado === 404 && /NOT_FOUND|not found/i.test(texto)) msg = 'La función "ascensos-ia" no está publicada en Supabase (ver docs/IA_ASCENSOS.md).';
+                if (estado === 404 && /NOT_FOUND|not found/i.test(texto)) msg = `La función "${fnIA}" no está publicada en Supabase (ver docs/IA_ASCENSOS.md).`;
             } else if (/Failed to send/i.test(msg)) {
                 msg = 'No se pudo conectar con la función "ascensos-ia" (¿está publicada?). Revisa tu conexión e intenta de nuevo.';
             }
@@ -472,7 +473,7 @@
         motores: () => invocarIA({ accion: 'motores' }),
         leer: cuerpo => invocarIA(cuerpo),
         // superadmin: cuáles están activos y cuál va por defecto
-        guardarMotores: (activos, defecto) => rpcAdmin('admin_ia_motores', { p_activos: activos, p_defecto: defecto || null })
+        guardarMotores: (activos, defecto, portal) => rpcAdmin('admin_ia_motores', { p_activos: activos, p_defecto: defecto || null, p_portal: portal || 'ascensosaza' })
     };
 
     /* ---------------- Ascensos (base aparte) y baneados ---------------- */
@@ -490,12 +491,12 @@
         // qué puede hacer el usuario: { jefe, moderador, ia, eventos (null = todos) } (sql/19)
         permisos: portal => rpcAdmin('asc_mis_permisos', { p_portal: portal }),
         moderadores: {
-            listar: () => rpcAdmin('asc_mod_listar'),
-            guardar: m => rpcAdmin('asc_mod_guardar', {
-                p_usuario: m.usuario, p_nombre: m.nombre || null, p_clave: m.clave || null,
+            listar: (portal) => rpcAdmin('asc_mod_listar', { p_portal: portal }),
+            guardar: (m, portal) => rpcAdmin('asc_mod_guardar', {
+                p_portal: portal, p_usuario: m.usuario, p_nombre: m.nombre || null, p_clave: m.clave || null,
                 p_activo: m.activo !== false, p_ia: !!m.ia, p_eventos: m.eventos === undefined ? null : m.eventos
             }),
-            borrar: usuario => rpcAdmin('asc_mod_borrar', { p_usuario: usuario })
+            borrar: (usuario, portal) => rpcAdmin('asc_mod_borrar', { p_portal: portal, p_usuario: usuario })
         }
     };
     /* ---------------- Resultados completos (exportado de la sala, sql/23) ---------------- */

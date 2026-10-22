@@ -465,7 +465,7 @@
         return { media_type: 'image/jpeg', data: url.split(',')[1], vista: url };
     }
 
-    const CON_IA = PORTAL === 'ascensosaza';   // la IA es solo para Ascensos LATAM
+    const CON_IA = PORTAL === 'ascensosaza' || PORTAL === 'ascensosrusheo';
     function montarIA() {
         const cont = $('iaPanel');
         if (!cont) return;
@@ -746,7 +746,7 @@
             return marcados.length === eventos.length ? null : marcados;   // todos marcados = null (también los eventos nuevos)
         };
         let lista = [];
-        try { lista = await P.ascensos.moderadores.listar(); }
+        try { lista = await P.ascensos.moderadores.listar(PORTAL); }
         catch (e) { cont.innerHTML = `<p class="res-vacio">${esc(e.message)}</p>`; return; }
         cont.innerHTML = `
             <article class="card-box mod-nuevo">
@@ -791,7 +791,7 @@
                 await P.ascensos.moderadores.guardar({
                     usuario: $('modUsuario').value.trim().toLowerCase(), nombre: $('modNombre').value.trim(), clave: $('modClave').value,
                     ia: $('modIa').checked, eventos: leerEventos(cont, 'modEvNuevo')
-                });
+                }, PORTAL);
                 await montarModeradores();
                 const n = $('modMsg'); n.textContent = '✔ Moderador creado. Ya puede entrar en /ascensos/login.html'; n.className = 'asc-estado ok';
             } catch (err) { msg.textContent = err.message; msg.className = 'asc-estado error'; }
@@ -801,7 +801,7 @@
             const ok = await P.confirmar({ titulo: '¿Eliminar al moderador ' + u + '?', peligro: true, si: 'Sí, eliminar',
                 html: '<p>Se borra su usuario y ya no podrá entrar. Las jornadas y cupos que creó se quedan.</p><p class="muted">Si solo quieres quitarle el acceso un tiempo, desmarca "Activo".</p>' });
             if (!ok) return;
-            try { await P.ascensos.moderadores.borrar(u); await montarModeradores(); }
+            try { await P.ascensos.moderadores.borrar(u, PORTAL); await montarModeradores(); }
             catch (err) { fila.querySelector('[data-msg]').textContent = err.message; }
         }));
         cont.querySelectorAll('.mod-fila').forEach(fila => fila.querySelector('[data-guardar]').addEventListener('click', async () => {
@@ -810,7 +810,7 @@
             msg.textContent = 'Guardando...';
             try {
                 await P.ascensos.moderadores.guardar({ usuario: u, nombre: f('nombre').value.trim(), clave: f('clave').value || null,
-                    activo: f('activo').checked, ia: f('ia').checked, eventos: leerEventos(fila, 'ev_' + u) });
+                    activo: f('activo').checked, ia: f('ia').checked, eventos: leerEventos(fila, 'ev_' + u) }, PORTAL);
                 msg.textContent = '✔ Guardado';
                 f('clave').value = '';
             } catch (err) { msg.textContent = err.message; }

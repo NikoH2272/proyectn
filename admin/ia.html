@@ -57,9 +57,11 @@
     </header>
     <section>
         <h2 class="section-title">Motores de IA</h2>
-        <p class="tool-desc">Elige qué motores puede usar la pestaña <b>Con IA</b> de Ascensos LATAM y cuál sale por defecto.
-            Un motor solo se puede activar si ya tiene su clave en Supabase (ver <code>docs/IA_ASCENSOS.md</code>).</p>
-        <main id="raiz"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
+        <p class="tool-desc">Cada portal de ascensos tiene sus propias claves API y su propia configuración de motores. Activa los que ya tienen clave configurada en Supabase.</p>
+        <h3 class="subtitulo-bloque" style="max-width:760px;margin:24px auto 8px"><i class="fa-solid fa-wand-magic-sparkles"></i> Ascensos LATAM</h3>
+        <main id="raizLatam"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
+        <h3 class="subtitulo-bloque" style="max-width:760px;margin:32px auto 8px"><i class="fa-solid fa-wand-magic-sparkles"></i> Ascensos Rusheo</h3>
+        <main id="raizRusheo"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></main>
     </section>
     <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
 
@@ -70,31 +72,39 @@
         if (!s) return;
         document.querySelector('[data-pg-usuario]').textContent = s.nombre || s.usuario;
         document.getElementById('btnSalir').addEventListener('click', e => { e.preventDefault(); P.logout('login.html'); });
-        const raiz = document.getElementById('raiz');
-        const SECRETOS = {
-            gemini: 'GEMINI_API_KEY (y opcional GEMINI_MODELO)',
-            privado: 'IA_PRIVADA_URL e IA_PRIVADA_MODELO (y opcional IA_PRIVADA_KEY, IA_PRIVADA_NOMBRE)',
-            claude: 'ANTHROPIC_API_KEY'
-        };
 
-        async function pintar(msg) {
+        const PORTALES_IA = [
+            {
+                portal: 'ascensosaza', raizId: 'raizLatam', fn: 'ascensos-ia', cfgKey: 'ia_motores',
+                secretos: { gemini: 'GEMINI_API_KEY', privado: 'IA_PRIVADA_URL + IA_PRIVADA_MODELO', claude: 'ANTHROPIC_API_KEY' }
+            },
+            {
+                portal: 'ascensosrusheo', raizId: 'raizRusheo', fn: 'ascensos-ia-rusheo', cfgKey: 'ia_motores_rusheo',
+                secretos: { gemini: 'GEMINI_API_KEY_RUSHEO', privado: 'IA_PRIVADA_URL_RUSHEO + IA_PRIVADA_MODELO_RUSHEO', claude: 'ANTHROPIC_API_KEY_RUSHEO' }
+            }
+        ];
+
+        async function pintarPortal(cfg, msg) {
+            const raiz = document.getElementById(cfg.raizId);
             let r, aviso = '';
-            try { r = await P.ia.motores(); }
-            catch (e) {
-                // Sin la función publicada igual se puede dejar elegido qué motores se usarán (se guarda en la base)
-                aviso = e.message + ' Igual puedes dejar elegidos los motores: se usarán cuando la publiques.';
-                const { data, error } = await P.db().from('sitio_config').select('valor').eq('clave', 'ia_motores').maybeSingle();
-                if (error) { raiz.innerHTML = `<p class="res-vacio">${esc(P.faltaSql(error) ? 'Falta correr sql/18_roles_ascensos_ia.sql en Supabase.' : error.message)}</p>`; return; }
+            try {
+                // invocar la función de ese portal directamente
+                const { data, error } = await P.db().functions.invoke(cfg.fn, { body: { accion: 'motores' } });
+                if (error) throw new Error(error.message);
+                r = data;
+            } catch (e) {
+                aviso = e.message + ' Igual puedes dejar elegidos los motores.';
+                const { data, error } = await P.db().from('sitio_config').select('valor').eq('clave', cfg.cfgKey).maybeSingle();
+                if (error) { raiz.innerHTML = `<p class="res-vacio">${esc(error.message)}</p>`; return; }
                 const v = (data && data.valor) || {};
                 const activos = Array.isArray(v.activos) ? v.activos : [];
                 r = { defecto: v.defecto || null, todos: [['gemini', 'Gemini'], ['privado', 'Motor privado'], ['claude', 'Claude']]
                     .map(([id, nombre]) => ({ id, nombre, configurado: null, activo: activos.includes(id) })) };
             }
             const todos = r.todos || [];
-            // configurado: true (tiene clave) · false (falta) · null (no se sabe: la función no está publicada)
             const estado = m => m.configurado === true ? '<span class="estado si">● CLAVE CONFIGURADA</span>'
-                : m.configurado === false ? `<span class="estado no">● FALTA CONFIGURAR</span> · secretos: ${esc(SECRETOS[m.id] || '')}`
-                : `<span class="estado">● SIN VERIFICAR</span> · secretos: ${esc(SECRETOS[m.id] || '')}`;
+                : m.configurado === false ? `<span class="estado no">● FALTA CONFIGURAR</span> · <code>${esc(cfg.secretos[m.id] || '')}</code>`
+                : `<span class="estado">● SIN VERIFICAR</span> · <code>${esc(cfg.secretos[m.id] || '')}</code>`;
             raiz.innerHTML = `<div class="motores">
                 ${aviso ? `<p class="muted" style="padding:12px 14px;border:1px dashed rgba(255,213,74,.6);color:#FFE38A">${esc(aviso)}</p>` : ''}
                 ${todos.map(m => `
@@ -102,22 +112,23 @@
                     <label class="interruptor" title="${m.configurado === false ? 'Falta su clave en Supabase' : 'Activar / desactivar'}">
                         <input type="checkbox" data-activo ${m.activo ? 'checked' : ''} ${m.configurado === false ? 'disabled' : ''}><span></span></label>
                     <div><h3>${esc(m.nombre)}</h3><p>${estado(m)}</p></div>
-                    <label class="chk"><input type="radio" name="defecto" value="${esc(m.id)}" ${m.id === r.defecto ? 'checked' : ''} ${m.configurado === false ? 'disabled' : ''}> Por defecto</label>
+                    <label class="chk"><input type="radio" name="defecto_${esc(cfg.portal)}" value="${esc(m.id)}" ${m.id === r.defecto ? 'checked' : ''} ${m.configurado === false ? 'disabled' : ''}> Por defecto</label>
                 </article>`).join('')}
-                <div class="barra-guardar" style="margin-top:6px"><span class="muted" id="msg" role="status">${esc(msg || '')}</span>
-                    <button class="btn-access" id="guardar"><i class="fa-solid fa-floppy-disk"></i> Guardar</button></div></div>`;
-            raiz.querySelector('#guardar').addEventListener('click', async () => {
+                <div class="barra-guardar" style="margin-top:6px"><span class="muted" id="msg_${esc(cfg.portal)}" role="status">${esc(msg || '')}</span>
+                    <button class="btn-access" id="guardar_${esc(cfg.portal)}"><i class="fa-solid fa-floppy-disk"></i> Guardar</button></div></div>`;
+            raiz.querySelector(`#guardar_${cfg.portal}`).addEventListener('click', async () => {
                 const activos = [...raiz.querySelectorAll('[data-activo]:checked')].map(i => i.closest('[data-id]').dataset.id);
-                let defecto = (raiz.querySelector('input[name="defecto"]:checked') || {}).value || null;
+                let defecto = (raiz.querySelector(`input[name="defecto_${cfg.portal}"]:checked`) || {}).value || null;
                 if (defecto && !activos.includes(defecto)) defecto = activos[0] || null;
-                raiz.querySelector('#msg').textContent = 'Guardando...';
+                raiz.querySelector(`#msg_${cfg.portal}`).textContent = 'Guardando...';
                 try {
-                    await P.ia.guardarMotores(activos, defecto);
-                    await pintar(activos.length ? '✔ Guardado. La herramienta ya usa estos motores.' : '✔ Guardado: la IA quedó apagada (ningún motor activo).');
-                } catch (e) { raiz.querySelector('#msg').textContent = e.message; }
+                    await P.ia.guardarMotores(activos, defecto, cfg.portal);
+                    await pintarPortal(cfg, activos.length ? '✔ Guardado.' : '✔ Guardado: IA apagada.');
+                } catch (e) { raiz.querySelector(`#msg_${cfg.portal}`).textContent = e.message; }
             });
         }
-        pintar();
+
+        PORTALES_IA.forEach(cfg => pintarPortal(cfg));
     })();
     </script>
 </body>
