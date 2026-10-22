@@ -88,6 +88,10 @@ input.celda[type=number] { -moz-appearance: textfield; }
   border: 1px solid rgba(var(--primary-rgb), .15); border-left: 3px solid var(--cat, var(--primary)); background: rgba(14, 14, 14, .7); }
 .jornada-fila small { color: var(--gray); }
 .jornada-fila-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.jornada-fila-info { flex: 1 1 0; min-width: 0; }
+.jornada-fila-acc { display: flex; gap: 6px; flex-shrink: 0; }
+.jornada-img-form { flex: 1 1 100%; display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.07); }
+.jornada-img-inp { flex: 1 1 0; min-width: 0; padding: 6px 10px; border: 1px solid rgba(var(--primary-rgb),.35); border-radius: 4px; background: #0f0f0f; color: var(--light); font-size: .82rem; }
 
 /* Pestañas de la herramienta */
 .asc-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 1500px; margin: 0 auto 22px; }

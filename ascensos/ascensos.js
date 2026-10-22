@@ -398,16 +398,55 @@
             const c = window.ASC_CATEGORIA(j.categoria);
             return `<div class="jornada-fila" style="--cat:${c.color}">
                 ${j.imagen ? `<img src="${esc(j.imagen)}" class="jornada-fila-thumb" alt="" loading="lazy">` : ''}
-                <div><span class="cat-chip" style="--cat:${c.color}">${esc(c.nombre)}</span> <b>${esc(j.titulo)}</b><br>
+                <div class="jornada-fila-info"><span class="cat-chip" style="--cat:${c.color}">${esc(c.nombre)}</span> <b>${esc(j.titulo)}</b><br>
                 <small>${new Date(j.fecha).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })} · ${j.equipos.length} equipos · ${j.salas} salas · ${j.clasificados.length} ascienden${j.moderador ? ' · ' + esc(j.moderador) : ''}</small></div>
-                <button class="btn-mini btn-borrar" data-borrar="${j.id}"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
+                <div class="jornada-fila-acc">
+                    <button class="btn-mini" data-img-toggle="${j.id}" title="Cambiar imagen"><i class="fa-solid fa-image"></i></button>
+                    <button class="btn-mini btn-borrar" data-borrar="${j.id}"><i class="fa-solid fa-trash"></i> Borrar</button>
+                </div>
+                <div class="jornada-img-form" id="imgForm${j.id}" hidden>
+                    <input type="url" class="jornada-img-inp" placeholder="URL de la imagen (https://...)" value="${j.imagen ? esc(j.imagen) : ''}">
+                    <button class="btn-mini btn-access" data-img-guardar="${j.id}"><i class="fa-solid fa-check"></i> Guardar</button>
+                    <button class="btn-mini" data-img-cancelar="${j.id}">Cancelar</button>
+                </div>
+            </div>`;
         }).join('');
-        cont.querySelectorAll('[data-borrar]').forEach(b => b.addEventListener('click', async () => {
-            const j = filas.find(x => String(x.id) === b.dataset.borrar);
+        cont.addEventListener('click', async e => {
+            // Toggle form
+            const toggle = e.target.closest('[data-img-toggle]');
+            if (toggle) {
+                const form = document.getElementById('imgForm' + toggle.dataset.imgToggle);
+                if (form) form.hidden = !form.hidden;
+                return;
+            }
+            // Cancelar
+            const cancelar = e.target.closest('[data-img-cancelar]');
+            if (cancelar) {
+                const form = document.getElementById('imgForm' + cancelar.dataset.imgCancelar);
+                if (form) form.hidden = true;
+                return;
+            }
+            // Guardar imagen
+            const guardarImg = e.target.closest('[data-img-guardar]');
+            if (guardarImg) {
+                const id = Number(guardarImg.dataset.imgGuardar);
+                const form = document.getElementById('imgForm' + id);
+                const url = form ? form.querySelector('.jornada-img-inp').value.trim() : '';
+                guardarImg.disabled = true;
+                try {
+                    await P.ascensos.actualizarImagen(PORTAL, id, url || null);
+                    cargarJornadas();
+                } catch (err) { alert(err.message); guardarImg.disabled = false; }
+                return;
+            }
+            // Borrar jornada
+            const borrar = e.target.closest('[data-borrar]');
+            if (!borrar) return;
+            const j = filas.find(x => String(x.id) === borrar.dataset.borrar);
             const ok = await P.confirmar({ titulo: '¿Borrar esta jornada?', peligro: true, si: 'Sí, borrar', html: `<p><b>${esc(j.titulo)}</b> desaparece del portal. No se puede deshacer.</p>` });
             if (!ok) return;
-            try { await P.ascensos.borrar(PORTAL, j.id); cargarJornadas(); } catch (e) { alert(e.message); }
-        }));
+            try { await P.ascensos.borrar(PORTAL, j.id); cargarJornadas(); } catch (err) { alert(err.message); }
+        });
     }
 
     /* ---------------- Con IA (función de Supabase "ascensos-ia", sql/18) ----------------
