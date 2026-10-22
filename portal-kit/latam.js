@@ -127,7 +127,12 @@
     }
 
     /* ---------------- Semana: de LUNES a DOMINGO, hora Colombia (igual que Pumas) ---------------- */
-    const diaLocal = iso => new Date(iso).toLocaleDateString('en-CA', { timeZone: ZONA });
+    // Fechas date-only ('YYYY-MM-DD') se devuelven directas para evitar el desplazamiento UTC-5
+    const diaLocal = iso => {
+        const s = (iso instanceof Date) ? iso.toISOString() : String(iso);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        return new Date(s).toLocaleDateString('en-CA', { timeZone: ZONA });
+    };
     const inicioSemana = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() || 7) - 1));   // el lunes
     function semanaISO(d) {
         const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), n = t.getUTCDay() || 7;
