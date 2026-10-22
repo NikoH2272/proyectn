@@ -171,6 +171,8 @@
             else { const obj = typeof data === 'string' ? JSON.parse(data) : data; activos = obj.activos || []; custom = obj.custom || []; }
             // Registrar custom teams en ASC_CATEGORIAS para que CAT() los encuentre
             custom.forEach(c => { if (!window.ASC_CATEGORIAS.find(x => x.id === c.id)) window.ASC_CATEGORIAS.push(c); });
+            // Notificar al carrusel de logos cuáles equipos están activos
+            document.dispatchEvent(new CustomEvent('asc:activos', { detail: { activos, custom } }));
             if (!activos.length) { cont.closest('section').hidden = true; return; }
             cont.closest('section').hidden = false;
             cont.innerHTML = activos.map(id => {
