@@ -228,6 +228,16 @@ function formatearFechaHoraZonas(datetimeVal) {
     };
 }
 
+function togglePerdon(nombre) {
+    if (!window._equiposPerdonados) window._equiposPerdonados = new Set();
+    if (window._equiposPerdonados.has(nombre)) {
+        window._equiposPerdonados.delete(nombre);
+    } else {
+        window._equiposPerdonados.add(nombre);
+    }
+    renderizarResultados();
+}
+
 function obtenerTagBase(nombreEquipo) {
     let limpio = nombreEquipo.trim().split(/\s+/)[0].replace(/[^a-zA-Z0-9]/g, '');
     return limpio.toUpperCase();
@@ -243,7 +253,7 @@ function renderizarResultados() {
         return;
     }
 
-    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg() : {};
+    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg('quisqueya') : {};
 
     const modoCalculo = document.getElementById('selectModoCalculo').value;
     const temaVal = document.getElementById('selectTemaVisual').value;
@@ -261,6 +271,14 @@ function renderizarResultados() {
     if (temaVal === 'fdquisqueya') {
         colorFondoBase = "rgba(10, 34, 64, 0.75)";
         colorTituloTema = "#81d4fa";
+        colorTextoTabla = "#ffffff";
+    } else if (temaVal === 'fdquisqueyafem') {
+        colorFondoBase = "rgba(64, 10, 40, 0.75)";
+        colorTituloTema = "#f9a8d4";
+        colorTextoTabla = "#ffffff";
+    } else if (temaVal === 'fdquisqueyamascota') {
+        colorFondoBase = "rgba(10, 34, 64, 0.75)";
+        colorTituloTema = "#ffd54a";
         colorTextoTabla = "#ffffff";
     } else if (temaVal === 'dragonfest') {
         colorFondoBase = "rgba(15, 23, 42, 0.75)";
@@ -283,7 +301,7 @@ function renderizarResultados() {
             let nombreVisible = correccionesNombres[nombreOriginal] || nombreOriginal;
 
             if (eqData.rank === 1 && !eqData.isManual) {
-                booyahsPorSala.push({ sala: idxSala + 1, equipo: nombreVisible });
+                booyahsPorSala.push({ sala: idxSala + 1, equipo: nombreVisible, pts: eqData.totalScore, kills: eqData.killScore });
             }
 
             if (!mapaConsolidado.has(nombreVisible)) {
@@ -349,7 +367,7 @@ function renderizarResultados() {
     let topKillers = Array.from(mapaJugadoresKills.values())
         .filter(k => k.kills > 0)
         .sort((a, b) => b.kills - a.kills)
-        .slice(0, _ed.maxKillers || 9);
+        .slice(0, 15);
 
     let cantidadSalas = salasProcesadas.length;
     let tienePuntosAscenso = false;
@@ -386,12 +404,15 @@ function renderizarResultados() {
     });
     thead += `<th style="color: ${colorTextoTabla} !important; font-size: calc(0.85rem * 1.10);">TOTAL</th></tr>`;
 
+    const _colores = [_ed.color1||'#B6FF00', _ed.color2||'#FFD54A', _ed.color3||'#00C6FF'];
     let tbody = ``;
     listaConsolidada.forEach((item, index) => {
-        tbody += `<tr>
-            <td style="color: ${colorTextoTabla}; font-size: calc(0.85rem * 1.10);"><strong>#${index + 1}</strong></td>
-            <td style="color: ${colorTextoTabla}; font-size: calc(0.85rem * 1.10);"><strong>${item.name}</strong></td>`;
-        
+        const colorFila = index < 3 ? _colores[index] : colorTextoTabla;
+        const bgFila = index < 3 ? `background:rgba(255,255,255,${index===0?.08:.04});` : '';
+        tbody += `<tr style="${bgFila}">
+            <td style="color: ${colorFila}; font-size: calc(0.85rem * 1.10);"><strong>#${index + 1}</strong></td>
+            <td style="color: ${colorFila}; font-size: calc(0.85rem * 1.10);"><strong>${item.name}</strong></td>`;
+
         item.salas.forEach(val => {
             if (val === null) {
                 tbody += `<td class="sala-sin-registro" style="color: ${colorTextoTabla}; font-size: calc(0.85rem * 1.10);"><i class="fa-solid fa-skull" style="color: #ff6b6b !important;"></i></td>`;
@@ -400,7 +421,7 @@ function renderizarResultados() {
             }
         });
 
-        tbody += `<td style="color: ${colorTextoTabla}; font-size: calc(0.85rem * 1.10);"><strong>${item.total}</strong></td></tr>`;
+        tbody += `<td style="color: ${colorFila}; font-size: calc(0.85rem * 1.10);"><strong>${item.total}</strong></td></tr>`;
     });
 
     let tituloModo = "TABLA GENERAL";
@@ -422,26 +443,71 @@ function renderizarResultados() {
 
     contenedorSide.innerHTML = `<div class="side-by-side-wrapper">${htmlTablaGeneral}</div>`;
 
+    // Ban por faltar última sala o 2+ salas
+    if (!window._equiposPerdonados) window._equiposPerdonados = new Set();
+    const cantSalas = salasProcesadas.length;
+    const equiposSancionados = listaConsolidada.filter(item => {
+        const faltaUltima = cantSalas > 0 && item.salas[cantSalas - 1] === null;
+        const faltaDos = item.salas.filter(s => s === null).length >= 2;
+        return faltaUltima || faltaDos;
+    });
+    const banContainer = document.getElementById('imgBanPanel');
+    if (banContainer) {
+        if (equiposSancionados.length === 0) {
+            banContainer.innerHTML = '';
+        } else {
+            banContainer.innerHTML = `<div class="ban-panel-box">
+                <h4><i class="fa-solid fa-ban"></i> Equipos en riesgo de ban</h4>
+                <p class="ban-panel-nota">Faltó a la última sala o a 2+ salas. Los no perdonados aparecen marcados en la imagen.</p>
+                <div class="ban-panel-lista">
+                    ${equiposSancionados.map(item => {
+                        const faltaUltima = item.salas[cantSalas - 1] === null;
+                        const ausentes = item.salas.filter(s => s === null).length;
+                        const razon = faltaUltima ? `faltó S${cantSalas}` : `faltó ${ausentes} salas`;
+                        const perdonado = window._equiposPerdonados.has(item.name);
+                        return `<div class="ban-item">
+                            <span class="ban-equipo">${item.name}</span>
+                            <span class="ban-razon">${razon}</span>
+                            <button class="ban-btn ${perdonado ? 'perdonado' : ''}" onclick="togglePerdon('${item.name.replace(/'/g,"\\'")}')">
+                                ${perdonado ? '<i class="fa-solid fa-check"></i> Perdonado' : '<i class="fa-solid fa-ban"></i> Baneado'}
+                            </button>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>`;
+        }
+    }
+
     let htmlTopKillers = ``;
     if (topKillers.length > 0) {
-        htmlTopKillers = `<table style="width:100%; border-collapse:collapse; background:transparent;"><thead><tr><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.99rem * 1.10);">#</th><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.99rem * 1.10);">JUGADOR</th><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.99rem * 1.10);">KILLS</th></tr></thead><tbody>`;
+        htmlTopKillers = `<div class="img-killers-grid">`;
         topKillers.forEach((k, idx) => {
-            htmlTopKillers += `<tr><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;">#${idx + 1}</td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${k.name}</strong></td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${k.kills}</strong></td></tr>`;
+            htmlTopKillers += `<div class="img-killer-card">
+                <span class="img-killer-rank">#${idx + 1}</span>
+                <span class="img-killer-nombre">${k.name}</span>
+                <span class="img-killer-kills">${k.kills}</span>
+            </div>`;
         });
-        htmlTopKillers += `</tbody></table>`;
+        htmlTopKillers += `</div>`;
     } else {
-        htmlTopKillers = `<p style="text-align:center; padding:5px; opacity:0.7; color:${colorTextoTabla}; font-size:calc(0.89rem * 1.10);">Sin registro de kills</p>`;
+        htmlTopKillers = `<p class="img-sin-datos">Sin registro de kills</p>`;
     }
 
     let htmlBooyahs = ``;
     if (booyahsPorSala.length > 0) {
-        htmlBooyahs = `<table style="width:100%; border-collapse:collapse; background:transparent;"><thead><tr><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.99rem * 1.10);">SALA</th><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.99rem * 1.10);">BOOYAH</th></tr></thead><tbody>`;
+        htmlBooyahs = `<div class="img-booyah-row">`;
         booyahsPorSala.forEach(b => {
-            htmlBooyahs += `<tr><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;">Sala ${b.sala}</td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${b.equipo} <i class="fa-solid fa-crown" style="color: #ffd700;"></i></strong></td></tr>`;
+            htmlBooyahs += `<div class="img-booyah-card">
+                <span class="img-booyah-sala">S${b.sala}</span>
+                <span class="img-booyah-equipo">${b.equipo}</span>
+                <i class="fa-solid fa-crown img-booyah-icon"></i>
+                <span class="img-booyah-pts">${b.pts}pts</span>
+                <span class="img-booyah-kills">${b.kills}k</span>
+            </div>`;
         });
-        htmlBooyahs += `</tbody></table>`;
+        htmlBooyahs += `</div>`;
     } else {
-        htmlBooyahs = `<p style="text-align:center; padding:5px; opacity:0.7; color:${colorTextoTabla}; font-size:calc(0.89rem * 1.10);">Sin registro de Booyahs</p>`;
+        htmlBooyahs = `<p class="img-sin-datos">Sin registro de Booyahs</p>`;
     }
 
     if (_ed.mostrarKillers === false) htmlTopKillers = '';
@@ -451,72 +517,79 @@ function renderizarResultados() {
     if (tienePuntosAscenso && _ed.mostrarAscenso !== false) {
         let rowsAscenso = ``;
         equiposAscenso.forEach((eq, idx) => {
-            rowsAscenso += `<tr><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;">#${idx + 1}</td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${eq.name}</strong> <i class="fa-solid fa-arrow-up" style="color: #4ade80;"></i></td><td style="padding:2px 4px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.1); font-size:calc(0.89rem * 1.10); font-weight:bold; color:${colorTextoTabla}; background:transparent;"><strong>${eq.total}</strong></td></tr>`;
+            rowsAscenso += `<tr><td>#${idx + 1}</td><td><strong>${eq.name}</strong> <i class="fa-solid fa-arrow-up" style="color:#4ade80;"></i></td><td><strong>${eq.total}</strong></td></tr>`;
         });
-
         htmlAscensoPanel = `
-            <div style="margin-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 2px;">
-                <h4 style="font-family:'Orbitron'; font-size:calc(0.85rem * 1.10); color:${colorTituloTema}; text-align:center; margin-bottom:2px;"><i class="fa-solid fa-angles-up"></i> ASCENSO DIRECTO</h4>
-                <table style="width:100%; border-collapse:collapse; background:transparent;">
-                    <thead><tr><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:1px 3px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.8rem * 1.10);">#</th><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:1px 3px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.8rem * 1.10);">EQUIPO</th><th style="background:transparent !important; color:${colorTextoTabla} !important; padding:1px 3px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.2); font-family:'Orbitron'; font-size:calc(0.8rem * 1.10);">PUNTOS</th></tr></thead>
+            <div class="img-ascenso-wrapper">
+                <h4 class="img-ascenso-titulo"><i class="fa-solid fa-angles-up"></i> ASCENSO DIRECTO</h4>
+                <table class="img-subtabla img-subtabla-sm">
+                    <thead><tr><th>#</th><th>EQUIPO</th><th>PUNTOS</th></tr></thead>
                     <tbody>${rowsAscenso}</tbody>
                 </table>
-            </div>
-        `;
+            </div>`;
     }
 
+    const _coloresTop = [_colores[0] || '#B6FF00', _colores[1] || '#FFD54A', _colores[2] || '#00C6FF'];
     const _bgInline = _ed.fondoCustom ? `background-image:url('${_ed.fondoCustom}') !important;` : '';
 
     let htmlTerceraTablaCompleta = `
-        <div style="width: 100%; overflow: hidden; display: flex; justify-content: center;">
-            <div id="tablaReducidaCaptura" class="tema-${temaVal}" style="${_bgInline}width: 1280px !important; height: 720px !important; min-width: 1280px !important; min-height: 720px !important; max-width: 1280px !important; max-height: 720px !important; padding: 143px 45px 72px 45px !important; border-radius: 12px; box-sizing: border-box; background-size: 100% 100%; background-position: center; background-repeat: no-repeat; transform: scale(0.65); transform-origin: top center; margin-bottom: -250px; flex-shrink: 0; position: relative; overflow: hidden;">
-                <div style="display: flex; flex-direction: row; gap: 15px; width: 100%; height: 100%; align-items: stretch; justify-content: flex-start; padding-right: 75%; MARGIN-TOP: 5%;">
-                    
-                    <div style="flex: 0 0 690px !important; width: 690px !important; height: 450px !important; max-width: 690px !important; max-height: 450px !important; overflow: hidden; border-radius: 6px; padding: 6px 10px; background: ${colorFondoBase}; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                        <div style="text-align: center; margin-bottom: 3px;">
-                            <h3 style="font-size: calc(1.155rem * 1.10); font-family: 'Orbitron'; margin-bottom: 1px; color: ${colorTituloTema};">${tituloModo} - MODERADOR: <strong style="font-size:calc(1.155rem * 1.10); font-weight:900; color:${colorTituloTema};">${nombreModerador}</strong></h3>
-                            <!-- position: relative evita que la descarga pinte el fondo encima del texto -->
-                            <div style="position: relative; font-size: calc(0.89rem * 1.10) !important; font-weight: 700; line-height: 1.35; background: rgba(0, 0, 0, 0.6); display: inline-block; padding: 3px 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.25); margin-top: 2px; margin-bottom: 3px; color: #ffffff;">
-                                <span style="position: relative; display: inline-block; background: #111; color: #fff; padding: 1px 6px; border-radius: 3px; font-weight: bold; margin-right: 4px; font-size: calc(0.79rem * 1.10);">★ HORARIOS</span>
+        <div class="img-wrapper">
+            <div id="tablaReducidaCaptura" class="tema-${temaVal}" style="${_bgInline}--img-color-texto:${colorTextoTabla}; --img-fondo-base:${colorFondoBase}; --img-color-titulo:${colorTituloTema};">
+                <div id="imgContenedorFlex">
+
+                    <div id="imgSeccionTabla" class="img-panel">
+                        <div style="text-align: center; margin-bottom: 8px;">
+                            <h3 class="img-titulo-tabla">${tituloModo} - MODERADOR: <strong>${nombreModerador}</strong></h3>
+                            <div class="img-horarios-box">
+                                <span class="img-horarios-badge">★ HORARIOS</span>
                                 <strong>${horasZona.fecha}</strong> — ${horasZona.mex} | ${horasZona.col} | ${horasZona.arg}
                             </div>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse; background: transparent; color: ${colorTextoTabla};">
+                        <table class="img-tabla">
                             <thead>
                                 <tr>
-                                    <th style="background: transparent !important; color: ${colorTextoTabla} !important; padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); font-family: 'Orbitron'; font-size: calc(0.86rem * 1.10);">TOP</th>
-                                    <th style="background: transparent !important; color: ${colorTextoTabla} !important; padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); font-family: 'Orbitron'; font-size: calc(0.86rem * 1.10);">EQUIPO</th>
-                                    ${salasProcesadas.map((_, idx) => `<th style="background: transparent !important; color: ${colorTextoTabla} !important; padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); font-family: 'Orbitron'; font-size: calc(0.86rem * 1.10);">S${idx + 1}</th>`).join('')}
-                                    <th style="background: transparent !important; color: ${colorTextoTabla} !important; padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); font-family: 'Orbitron'; font-size: calc(0.86rem * 1.10);">TOTAL</th>
+                                    <th class="col-top">TOP</th>
+                                    <th>EQUIPO</th>
+                                    ${salasProcesadas.map((_, idx) => `<th class="col-sala">S${idx + 1}</th>`).join('')}
+                                    <th class="col-sala">KILL</th>
+                                    <th class="col-total">TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${listaConsolidada.map((item, index) => `
-                                    <tr>
-                                        <td style="padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: calc(0.82rem * 1.10); font-weight: bold; color: ${colorTextoTabla}; background: transparent;"><strong>#${index + 1}</strong></td>
-                                        <td style="padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: calc(0.82rem * 1.10); font-weight: bold; color: ${colorTextoTabla}; background: transparent;"><strong>${item.name}</strong></td>
-                                        ${item.salas.map(val => val === null ? `<td style="padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: calc(0.82rem * 1.10); font-weight: bold; color: ${colorTextoTabla}; background: transparent;" class="sala-sin-registro"><i class="fa-solid fa-skull" style="color: #ff6b6b !important; font-size: calc(0.82rem * 1.10);"></i></td>` : `<td style="padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: calc(0.82rem * 1.10); font-weight: bold; color: ${colorTextoTabla}; background: transparent;">${val}</td>`).join('')}
-                                        <td style="padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: calc(0.82rem * 1.10); font-weight: bold; color: ${colorTextoTabla}; background: transparent;"><strong>${item.total}</strong></td>
-                                    </tr>
-                                `).join('')}
+                                ${listaConsolidada.map((item, index) => {
+                                    const cFila = index < 3 ? _coloresTop[index] : '';
+                                    const esBaneado = equiposSancionados.some(s => s.name === item.name) && !window._equiposPerdonados.has(item.name);
+                                    const banStyle = esBaneado ? 'opacity:0.5; text-decoration:line-through;' : '';
+                                    const rStyle = cFila ? `style="--row-color:${cFila}; ${banStyle}"` : (banStyle ? `style="${banStyle}"` : '');
+                                    return `<tr ${rStyle}>
+                                        <td class="col-fila"><strong>#${index + 1}</strong></td>
+                                        <td class="col-fila" contenteditable="true"><strong>${item.name}</strong>${esBaneado ? ' <i class="fa-solid fa-ban" style="color:#ff4444;font-size:0.8em;"></i>' : ''}</td>
+                                        ${item.salas.map(val => val === null
+                                            ? `<td class="sala-sin-registro"><i class="fa-solid fa-skull"></i></td>`
+                                            : `<td contenteditable="true">${val}</td>`
+                                        ).join('')}
+                                        <td contenteditable="true">${item.killScoreAcumulado}</td>
+                                        <td class="col-fila" contenteditable="true"><strong>${item.total}</strong></td>
+                                    </tr>`;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 0px; flex: 0 0 342px !important; width: 342px !important; height: 450px !important; max-width: 342px !important; max-height: 450px !important;">
-                        
-                        <div style="flex: 0 0 270px !important; width: 100% !important; height: 270px !important; max-width: 100% !important; max-height: 270px !important; overflow: hidden; padding: 6px 10px; background: ${colorFondoBase}; border: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                    <div id="imgSeccionBooyah" class="img-panel">
+                        <h3 class="img-titulo-seccion"><i class="fa-solid fa-trophy"></i> BOOYAH</h3>
+                        ${htmlBooyahs}
+                    </div>
+
+                    <div id="imgSeccionPanelBajo">
+                        <div id="imgPanelKillers">
                             ${htmlAscensoPanel}
-                            <h3 style="font-family: 'Orbitron'; font-size: calc(0.95rem * 1.10); text-align: center; margin-bottom: 2px; color: ${colorTituloTema};"><i class="fa-solid fa-crosshairs"></i> TOP KILLER</h3>
+                            <h3 class="img-titulo-seccion"><i class="fa-solid fa-crosshairs"></i> TOP KILLER</h3>
                             ${htmlTopKillers}
                         </div>
-
-                        <div style="flex: 0 0 175px !important; width: 100% !important; height: 175px !important; max-width: 100% !important; max-height: 175px !important; overflow: hidden; padding: 6px 10px; background: ${colorFondoBase}; border: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                            <h3 style="font-family: 'Orbitron'; font-size: calc(0.95rem * 1.10); text-align: center; margin-bottom: 2px; color: ${colorTituloTema};"><i class="fa-solid fa-trophy"></i> BOOYAH</h3>
-                            ${htmlBooyahs}
-                        </div>
-
                     </div>
+
+                    <div style="position:absolute; bottom:18px; right:22px; font-size:0.72rem; letter-spacing:0.06em; opacity:0.55; color:#fff; font-family:'Orbitron',sans-serif; pointer-events:none;">by proyectn</div>
                 </div>
             </div>
         </div>`;
@@ -548,9 +621,9 @@ function descargarTablaReducida() {
     elemento.style.left = '-9999px';
 
     const opciones = {
-        scale: 2, 
-        width: 1280,
-        height: 720,
+        scale: 2,
+        width: 1080,
+        height: 1350,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#0a0b10',
@@ -573,7 +646,7 @@ function descargarTablaReducida() {
     html2canvas(elemento, opciones)
         .then(canvas => {
             const enlace = document.createElement('a');
-            enlace.download = 'resultados-proyectn.png';
+            enlace.download = 'proyectn-quisqueya.png';
             enlace.href = canvas.toDataURL('image/png', 1.0);
             document.body.appendChild(enlace);
             enlace.click();

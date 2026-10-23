@@ -39,6 +39,7 @@
                 <li><a href="#resultados" onclick="closeMenu()">Herramienta</a></li>
                 <li><a href="#gestionCupos" onclick="closeMenu()"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
                 <li><a href="#usuariosPortal" onclick="closeMenu()"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><a href="ascensos/admin.html"><i class="fa-solid fa-ranking-star"></i> Ascensos</a></li>
                 <li><a href="./"><i class="fa-solid fa-trophy"></i> Ver portal</a></li>
                 <li data-pg-hub hidden><a href="/admin/"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
                 <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
@@ -50,7 +51,7 @@
     <section class="portal-hero" data-marca="RSH">
         <div class="hero-copy">
             <div class="eyebrow">Entrenamientos · Free Fire</div>
-            <h1><span class="t-a">Rusheo</span><small>by <b>PUMAS</b></small></h1>
+            <h1><span class="t-a">Rusheo</span><small>by <b>PROYECTN</b></small></h1>
             <p>Carga los logs de cada sala, corrige nombres y descarga la tabla oficial en formato 4:5.</p>
         </div>
         <div class="hero-visual">
@@ -80,6 +81,14 @@
                     <label for="inputHoraTorneo">Hora</label>
                     <input type="time" id="inputHoraTorneo">
                 </div>
+            </div>
+
+            <div class="form-group" style="max-width:320px">
+                <label for="selectTemaVisual">Diseño de imagen</label>
+                <select id="selectTemaVisual" class="dropdown-select" onchange="if(window._gE&&_gE.length)renderizarResultados(_gE,_gTK,_gNS,document.getElementById('inputModerador').value||'ADMIN',document.getElementById('inputFechaTorneo').value,document.getElementById('inputHoraTorneo').value)">
+                    <option value="normal" selected>Rusheo — Normal</option>
+                    <option value="fem">Rusheo — Femenino</option>
+                </select>
             </div>
 
             <div class="form-group">

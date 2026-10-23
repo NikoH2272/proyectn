@@ -13,6 +13,7 @@
     const esc = P.escaparHtml;
     const PORTAL = P.portal;
     const CLAVE = 'pg_asc_borrador_' + PORTAL;
+    const CLAVE_EDITOR = 'pg_asc_editor_' + PORTAL;
     const $ = id => document.getElementById(id);
     const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const hoyISO = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
@@ -182,12 +183,13 @@
             </div>`;
     }
 
-    /* ---------------- Imagen 2000×2000 ---------------- */
+    /* ---------------- Imagen (preview) ---------------- */
     function pintarImagen() {
         const { filas, activas, clasificados } = resultado;
         const cat = window.ASC_CATEGORIA(estado.categoria);
         const previa = $('ascPrevia');
         if (!filas.length) { previa.innerHTML = ''; previa.style.height = '0'; return; }
+
         if (cat.tipo === 'evento') { previa.innerHTML = imagenEvento(cat); escalarPrevia(); return; }
         const mostrar = filas.slice(0, 15);
         while (mostrar.length < 10) mostrar.push(null);
@@ -271,11 +273,16 @@
     }
 
     function escalarPrevia() {
-        const previa = $('ascPrevia'), el = $('tablaReducidaCaptura');
+        const previa = $('ascPrevia');
+        if (!previa) return;
+        const el = previa.querySelector('#editorCaptura') || $('tablaReducidaCaptura');
         if (!el) return;
-        const esc2 = previa.clientWidth / 2000;
-        el.style.transform = `scale(${esc2})`;
-        previa.style.height = Math.ceil(2000 * esc2) + 'px';
+        const isEditor = el.id === 'editorCaptura';
+        const h = isEditor ? (editorCfg.formato === 'horizontal' ? 1060 : editorCfg.formato === 'vertical' ? 2600 : 2000) : 2000;
+        const sc = previa.clientWidth / 2000;
+        el.style.transform = `scale(${sc})`;
+        el.style.marginBottom = isEditor ? Math.ceil(h * (sc - 1)) + 'px' : '';
+        previa.style.height = Math.ceil(h * sc) + 'px';
     }
 
     async function generarCanvas() {
@@ -309,6 +316,7 @@
     function montarEditor() {
         const cont = $('editorPanel');
         if (!cont) return;
+        const multiCat = window.ASC_CATEGORIAS && window.ASC_CATEGORIAS.length > 1;
         const modos = [['cuadrado','Cuadrado 2000×2000','fa-square'],['vertical','Vertical 2000×2600','fa-mobile-screen'],['horizontal','Horizontal 2000×1060','fa-panorama']];
         const bloques = [['tablaGeneral','Tabla general','fa-table'],['topKiller','Top Killer','fa-trophy'],['booyahs','Booyahs','fa-fire'],['destacados','Top 3','fa-medal'],['ascendidos','Ascendidos','fa-arrow-up-right-dots']];
         const estilos = [['clasico','Clásico','fa-star'],['redondeado','Redondeado','fa-circle'],['minimal','Minimal','fa-minus'],['bold','Bold','fa-bold']];
@@ -318,6 +326,10 @@
             <p class="tool-desc">Elige formato, bloques y estilo. La imagen usa los datos de <b>Resultados</b> en tiempo real. Descarga a la resolución elegida.</p>
             <div class="asc-editor">
                 <div class="ed-controles card-box" style="max-width:none;padding:16px">
+                    ${multiCat ? `<div class="ed-grupo">
+                        <div class="ed-grupo-titulo"><i class="fa-solid fa-paint-brush"></i> Diseño</div>
+                        <div style="padding:4px 0"><select id="edSelectCategoria" class="dropdown-select">${window.ASC_OPCIONES(estado.categoria)}</select></div>
+                    </div>` : ''}
                     <div class="ed-grupo">
                         <div class="ed-grupo-titulo"><i class="fa-solid fa-image"></i> Formato</div>
                         <div class="ed-opts" id="edOptsFormato">${modos.map(([v,l,i]) => radio('edFormato',v,l,i,editorCfg.formato===v)).join('')}</div>
@@ -331,17 +343,21 @@
                         <div class="ed-opts" id="edOptsEstilo">${estilos.map(([v,l,i]) => radio('edEstilo',v,l,i,editorCfg.estilo===v)).join('')}</div>
                     </div>
                     <div class="ed-grupo">
-                        <div class="ed-grupo-titulo"><i class="fa-solid fa-image"></i> Fondo personalizado</div>
+                        <div class="ed-grupo-titulo"><i class="fa-solid fa-image"></i> Fondo</div>
                         <div style="padding:4px 0">
-                            <input type="file" id="edFondoAsc" accept="image/png,image/jpeg,image/webp" class="file-input-custom">
-                            <p class="muted" style="font-size:.8rem;margin-top:4px">Deja vacío para usar el fondo del tema.</p>
-                            <button type="button" id="edFondoAscQuitar" class="btn-access btn-outline" style="margin-top:6px;display:none">
-                                <i class="fa-solid fa-xmark"></i> Quitar fondo
-                            </button>
+                            ${multiCat && window.ASC_CATEGORIA(estado.categoria).imgEditor ? `<label class="ed-opt${editorCfg.usarFondoPortal ? ' activo' : ''}"><input type="checkbox" id="edUsarFondoPortal" ${editorCfg.usarFondoPortal ? 'checked' : ''}><i class="fa-solid fa-image"></i> Imagen del portal</label>` : ''}
+                            <div id="edFondoCustomWrap" style="margin-top:6px${editorCfg.usarFondoPortal ? ';display:none' : ''}">
+                                <input type="file" id="edFondoAsc" accept="image/png,image/jpeg,image/webp" class="file-input-custom">
+                                <p class="muted" style="font-size:.8rem;margin-top:4px">Sube una imagen o usa la del portal.</p>
+                                <button type="button" id="edFondoAscQuitar" class="btn-access btn-outline" style="margin-top:6px;display:none">
+                                    <i class="fa-solid fa-xmark"></i> Quitar fondo subido
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="asc-acciones" style="flex-direction:column;gap:8px;align-items:stretch;margin-top:18px">
-                        <button class="btn-access" id="btnEdDescargar"><i class="fa-solid fa-download"></i> Descargar imagen</button>
+                        <button class="btn-access" id="btnEdGuardar"><i class="fa-solid fa-cloud-arrow-up"></i> Generar imagen y guardar</button>
+                        <button class="btn-access btn-outline" id="btnEdDescargar"><i class="fa-solid fa-download"></i> Solo descargar imagen</button>
                     </div>
                     <p class="asc-estado" id="edEstado" role="status"></p>
                 </div>
@@ -350,10 +366,29 @@
         const syncOpts = () => cont.querySelectorAll('.ed-opt').forEach(el => {
             const inp = el.querySelector('input'); if (inp) el.classList.toggle('activo', inp.checked);
         });
+        if (multiCat && $('edSelectCategoria')) {
+            $('edSelectCategoria').addEventListener('change', e => {
+                estado.categoria = e.target.value;
+                const sc = $('selectCategoria');
+                if (sc) sc.value = estado.categoria;
+                guardarBorrador(); calcular();
+            });
+        }
         $('edOptsFormato').addEventListener('change', e => { if (e.target.name==='edFormato') { editorCfg.formato = e.target.value; syncOpts(); renderizarEditor(); } });
         $('edOptsSec').addEventListener('change', e => { if (e.target.name==='edSec') { editorCfg.secciones[e.target.value] = e.target.checked; syncOpts(); renderizarEditor(); } });
         $('edOptsEstilo').addEventListener('change', e => { if (e.target.name==='edEstilo') { editorCfg.estilo = e.target.value; syncOpts(); renderizarEditor(); } });
+        $('btnEdGuardar').addEventListener('click', () => generarYGuardar(true));
         $('btnEdDescargar').addEventListener('click', descargarEditor);
+        const elUsarPortal = $('edUsarFondoPortal');
+        if (elUsarPortal) {
+            elUsarPortal.addEventListener('change', function () {
+                editorCfg.usarFondoPortal = this.checked;
+                const wrap = $('edFondoCustomWrap');
+                if (wrap) wrap.style.display = this.checked ? 'none' : '';
+                this.closest('.ed-opt').classList.toggle('activo', this.checked);
+                guardarEditorCfg(); renderizarEditor();
+            });
+        }
         addEventListener('resize', escalarEditor);
         const elFondoAsc   = $('edFondoAsc');
         const elQuitarFond = $('edFondoAscQuitar');
@@ -380,6 +415,8 @@
     function renderizarEditor() {
         const previa = $('editorPrevia');
         if (!previa) return;
+        const edCat = $('edSelectCategoria');
+        if (edCat && edCat.value !== estado.categoria) edCat.value = estado.categoria;
         if (!resultado || !resultado.filas.length) {
             previa.innerHTML = '<div class="ed-vacio"><i class="fa-solid fa-circle-info"></i> Anota resultados en Resultados para ver la vista previa aquí.</div>';
             previa.style.height = '160px';
@@ -410,12 +447,15 @@
         const mvpHtml    = mvp ? bloqueEdMvp(mvp) : '';
         const booyahHtml = cfg.secciones.booyahs && booyahs.length ? bloqueEdBooyahs(booyahs, activas) : '';
         const ascHtml    = cfg.secciones.ascendidos ? bloqueEdAscendidos(clasificados) : '';
-        const bgAttr = cfg.fondoCustom ? ` style="background-image:url('${cfg.fondoCustom}') !important;"` : '';
+        const bgSrc = cfg.fondoCustom || (cfg.usarFondoPortal ? (cat.imgEditor || '') : '') || '';
+        const bgAttr = bgSrc ? ` style="background-image:url('${bgSrc}') !important;"` : '';
         if (cfg.formato === 'horizontal') {
+            const horiKillsRank = filas.map(f => ({ n: f.n, t: f.t, kills: activas.reduce((s, i) => s + (f.k[i] || 0), 0) })).sort((a, b) => b.kills - a.kills);
+            const horiMvp = cfg.secciones.topKiller && horiKillsRank.length ? bloqueEdMvp(horiKillsRank[0]) : '';
+            const horiBooyah = cfg.secciones.booyahs ? bloqueEdBooyahs(booyahs, activas) : '';
             return `<div id="editorCaptura" class="ed-wrapper ed-horizontal ${estiloClass} ${temaClass}"${bgAttr}>
-                ${header}
                 <div class="ed-hori-body"><div class="ed-hori-izq">${tabla}</div>
-                <div class="ed-hori-der">${mvpHtml}${booyahHtml}${ascHtml}</div></div>
+                <div class="ed-hori-der">${horiMvp}${horiBooyah}${ascHtml}${bloqueEdInfoFooter(cat)}</div></div>
             </div>`;
         }
         return `<div id="editorCaptura" class="ed-wrapper ${fmtClass} ${estiloClass} ${temaClass}"${bgAttr}>
@@ -426,15 +466,15 @@
     function bloqueEdHeader(cat) {
         const modTxt = (estado.categoria === 'leviatan' || estado.categoria === 'alca') ? '#000' : '#fff';
         return `<div class="ed-header">
-            <div class="ed-badge"><span class="ed-badge-label" style="background:#ff0055;color:#fff">★ HORARIO</span>
-                <b>${esc(estado.horario)}</b>${estado.texto ? `<span style="margin-left:12px;color:#ffcc00">| ${esc(estado.texto)}</span>` : ''}</div>
-            ${estado.moderador ? `<div class="ed-badge"><span class="ed-badge-label" style="background:#00ffcc;color:#0a0b10">🛡️ MOD</span>
+            <div class="ed-badge"><span class="ed-badge-label">HORARIO</span>
+                <b>${esc(estado.horario)}</b>${estado.texto ? `<span class="ed-badge-sep">| ${esc(estado.texto)}</span>` : ''}</div>
+            ${estado.moderador ? `<div class="ed-badge"><span class="ed-badge-label">MOD</span>
                 <b style="color:${modTxt}">${esc(estado.moderador)}</b></div>` : ''}
         </div>`;
     }
 
     function bloqueEdTabla(filas, activas, cat) {
-        const titulo = 'ASCENSOS ' + cat.corto;
+        const titulo = 'EQUIPOS';
         const mostrar = filas.slice(0, 15);
         while (mostrar.length < 8) mostrar.push(null);
         const head = `<tr><th style="width:90px">TOP</th><th class="nom">${esc(titulo)}</th><th style="width:88px">TAG</th>` +
@@ -448,21 +488,33 @@
     }
 
     function bloqueEdMvp(mvp) {
+        const killsTxt = mvp.kills > 0
+            ? `${mvp.kills} kills${mvp.t ? ' · ' + esc(mvp.t) : ''}`
+            : (mvp.t || 'Sin kills registrados');
         return `<div class="ed-bloque-mvp">
             <div class="ed-mvp-trofeo">🏆</div>
             <div><div class="ed-mvp-titulo">TOP KILLER</div>
             <div class="ed-mvp-nombre">${esc(mvp.n)}</div>
-            <div class="ed-mvp-kills">${mvp.kills} kills totales${mvp.t ? ' · ' + esc(mvp.t) : ''}</div></div>
+            <div class="ed-mvp-kills">${killsTxt}</div></div>
         </div>`;
     }
 
+    function bloqueEdInfoFooter(cat) {
+        const fecha = estado.fecha ? estado.fecha.split('-').reverse().join('/') : '';
+        const partes = [cat.nombre, fecha, estado.horario, estado.moderador].filter(Boolean);
+        return `<div class="ed-bloque-info"><span class="ed-info-texto">${partes.map(esc).join(' · ')}</span></div>`;
+    }
+
     function bloqueEdBooyahs(booyahs, activas) {
-        return `<div class="ed-bloque-booyah">
-            <div class="ed-bloque-titulo">🔥 BOOYAHS</div>
-            <div class="ed-booyah-lista">${booyahs.map(f => {
+        const lista = booyahs.length
+            ? `<div class="ed-booyah-lista">${booyahs.map(f => {
                 const salas = activas.filter(i => f.p[i] === 1).map(i => 'S'+(i+1)).join(', ');
                 return `<div class="ed-booyah-item">${esc(f.n)}<span class="ed-booyah-sala">${salas}</span></div>`;
-            }).join('')}</div>
+              }).join('')}</div>`
+            : `<div class="ed-booyah-vacio">Sin victorias en esta jornada</div>`;
+        return `<div class="ed-bloque-booyah">
+            <div class="ed-bloque-titulo">🔥 BOOYAHS</div>
+            ${lista}
         </div>`;
     }
 
@@ -491,6 +543,27 @@
         previa.style.height = Math.ceil(h * sc) + 'px';
     }
 
+    async function generarCanvasEditor() {
+        if (!resultado || !resultado.filas.length) throw new Error('Primero anota los resultados.');
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const h = editorCfg.formato==='horizontal' ? 1060 : editorCfg.formato==='vertical' ? 2600 : 2000;
+        let el = $('editorCaptura'), tmp = null;
+        if (!el) {
+            tmp = document.createElement('div');
+            tmp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;pointer-events:none;';
+            tmp.innerHTML = generarHtmlEditor();
+            document.body.appendChild(tmp);
+            el = tmp.querySelector('#editorCaptura');
+        }
+        try {
+            return await html2canvas(el, {
+                scale: 1, width: 2000, height: h, useCORS: true, backgroundColor: null, logging: false,
+                onclone: doc => { const c = doc.getElementById('editorCaptura'); if (c) { c.style.transform='none'; c.style.transformOrigin='0 0'; } }
+            });
+        } finally {
+            if (tmp) document.body.removeChild(tmp);
+        }
+    }
     async function descargarEditor() {
         const est = txt => { const n=$('edEstado'); if(n) n.textContent=txt; };
         if (!resultado || !resultado.filas.length) { est('Primero anota resultados en la pestaña Resultados.'); return; }
@@ -504,7 +577,7 @@
             const h = editorCfg.formato==='horizontal' ? 1060 : editorCfg.formato==='vertical' ? 2600 : 2000;
             const canvas = await html2canvas(el, {
                 scale: 1, width: 2000, height: h, useCORS: true, backgroundColor: null, logging: false,
-                onclone: doc => { const c = doc.getElementById('editorCaptura'); if (c) { c.style.transform='none'; c.style.position='static'; } }
+                onclone: doc => { const c = doc.getElementById('editorCaptura'); if (c) { c.style.transform='none'; c.style.transformOrigin='0 0'; } }
             });
             const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
             const cat  = window.ASC_CATEGORIA(estado.categoria);
@@ -537,7 +610,7 @@
     }
     function aviso(t, tipo) { const n = $('ascEstado'); n.textContent = t; n.className = 'asc-estado ' + (tipo || ''); }
 
-    async function generarYGuardar() {
+    async function generarYGuardar(usarEditor = false) {
         const { filas, activas, clasificados } = resultado || {};
         if (!filas || !filas.length || !activas.length) { aviso('Anota al menos una sala antes de guardar.', 'error'); return; }
         const cat = window.ASC_CATEGORIA(estado.categoria);
@@ -549,7 +622,7 @@
                 <p class="muted">Se guarda en la base de ${esc((P.PORTALES[PORTAL] || {}).nombre || PORTAL)} y se descarga la imagen. Después la tabla queda limpia para la próxima jornada (la lista de equipos se mantiene).</p>`
         });
         if (!ok) return;
-        const btn = $('btnGuardarJornada');
+        const btn = $('btnGuardarJornada') || $('btnEdGuardar');
         btn.disabled = true;
         aviso('Guardando en la base de datos...');
         let jornadaId = null;
@@ -567,12 +640,13 @@
             return;
         }
         aviso('✔ Jornada guardada. Generando la imagen...', 'ok');
+
         // GENERAR BANEO (solo donde se cargó cupos-control.js: módulo de Pruebas): equipos que no jugaron 2 salas o la última
         if (window.PumasControl && PORTAL === 'pruebas') {
             PumasControl.revisarSalas(PORTAL, filas.map(f => ({ equipo: f.n, salas: activas.map(i => f.p[i] !== null && f.p[i] !== undefined) })));
         }
         try {
-            const canvas = await generarCanvas();
+            const canvas = await (usarEditor ? generarCanvasEditor() : generarCanvas());
             const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
             // Subir a storage y enlazar con la jornada (no bloquea el flujo si falla)
             if (jornadaId) {
@@ -674,9 +748,33 @@
     /* ---------------- Con IA (función de Supabase "ascensos-ia", sql/18) ----------------
        1) capturas de SLOTS → equipos y jugadores · 2) capturas de RESULTADOS en orden → top y kills.
        Lo que lee la IA se revisa aquí y con "Pasar a la tabla" llena la anotación (queda en el borrador). */
-    let iaDatos = null, iaModo = 'top_kill';
+    let iaDatos = null, iaModo = 'top';
     let editorMontado = false;
-    let editorCfg = { formato: 'cuadrado', secciones: { tablaGeneral: true, topKiller: true, booyahs: true, destacados: true, ascendidos: true }, estilo: 'redondeado', fondoCustom: null };
+    let editorCfg = { formato: 'horizontal', secciones: { tablaGeneral: true, topKiller: true, booyahs: true, destacados: true, ascendidos: true }, estilo: 'redondeado', fondoCustom: null, fondoUrl: null, usarFondoPortal: true, usarPorDefecto: true };
+    try { const ec = JSON.parse(localStorage.getItem(CLAVE_EDITOR) || 'null'); if (ec && typeof ec === 'object') { Object.assign(editorCfg, ec); editorCfg.fondoCustom = null; } } catch (e) { }
+    function guardarEditorCfg() { try { const { fondoCustom: _, ...rest } = editorCfg; localStorage.setItem(CLAVE_EDITOR, JSON.stringify(rest)); } catch (e) { } }
+    function actualizarTituloImagen() {
+        const el = $('tituloImagen');
+        if (!el) return;
+        if (editorCfg.usarPorDefecto) {
+            const dim = editorCfg.formato === 'horizontal' ? '2000 × 1060' : editorCfg.formato === 'vertical' ? '2000 × 2600' : '2000 × 2000';
+            el.innerHTML = `<i class="fa-solid fa-image"></i> Imagen ${dim} <small class="muted" style="font-size:.75em;font-weight:400">(formato editor)</small>`;
+        } else {
+            el.innerHTML = '<i class="fa-solid fa-image"></i> Imagen 2000 × 2000';
+        }
+    }
+    function actualizarInfoFormato() {
+        const el = $('ascFormatoInfo');
+        if (!el) return;
+        if (editorCfg.usarPorDefecto) {
+            const fmt = editorCfg.formato === 'horizontal' ? 'Horizontal (2000×1060)' : editorCfg.formato === 'vertical' ? 'Vertical (2000×2600)' : 'Cuadrado (2000×2000)';
+            el.innerHTML = `<i class="fa-solid fa-paint-brush"></i> Formato activo del editor: <b>${fmt}</b> · <button class="btn-mini" id="btnResetFormato" style="margin-left:6px">Usar cuadrado estándar</button>`;
+            const rb = $('btnResetFormato');
+            if (rb) rb.onclick = () => { editorCfg.usarPorDefecto = false; guardarEditorCfg(); actualizarInfoFormato(); };
+        } else {
+            el.innerHTML = '<i class="fa-solid fa-square"></i> Formato: Cuadrado estándar (2000×2000)';
+        }
+    }
 
     // Achica cada captura (máx. 1600 px, JPG) para que suba rápido y gaste menos
     async function comprimir(file) {
@@ -710,11 +808,11 @@
             <div class="form-grid">
                 <div class="form-group"><label for="iaCategoria">Evento de estos resultados</label>
                     <select id="iaCategoria">${window.ASC_OPCIONES(estado.categoria, permisos.eventos)}</select></div>
-                <div class="form-group"><label for="iaModo">Modo de lectura</label>
-                    <select id="iaModo">
-                        <option value="top_kill"${estado.modo === 'top_kill' ? ' selected' : ''}>Top + kills (más preciso)</option>
-                        <option value="top"${estado.modo === 'top' ? ' selected' : ''}>Solo top (más rápido)</option>
-                    </select></div>
+                <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:6px">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.95rem">
+                        <input type="checkbox" id="iaKills"${estado.modo === 'top_kill' ? ' checked' : ''}>
+                        <span>Leer kills <span class="muted" style="font-size:.8rem">(consume más tokens)</span></span>
+                    </label></div>
                 <div class="form-group"><label for="iaMotor">Motor de IA</label>
                     <select id="iaMotor" disabled><option>Buscando motores...</option></select></div>
             </div>
@@ -754,13 +852,14 @@
             guardarBorrador(); calcular();
         });
         $('selectCategoria').addEventListener('change', () => { $('iaCategoria').value = $('selectCategoria').value; });
-        $('iaModo').addEventListener('change', e => {
-            estado.modo = e.target.value;
+        $('iaKills').addEventListener('change', e => {
+            estado.modo = e.target.checked ? 'top_kill' : 'top';
             $('selectModo').value = estado.modo;
             iaModo = estado.modo;
             guardarBorrador();
+            construirTabla();
         });
-        $('selectModo').addEventListener('change', () => { $('iaModo').value = $('selectModo').value; });
+        $('selectModo').addEventListener('change', () => { $('iaKills').checked = $('selectModo').value === 'top_kill'; });
         cargarMotores();
     }
 
@@ -784,9 +883,9 @@
     }
 
     // Caché de lecturas en este navegador (últimas 8)
-    const CLAVE_CACHE = 'pg_ia_cache_' + PORTAL;
+    const CLAVE_CACHE = 'pg_ia_cache_v2_' + PORTAL;
     async function huellaLectura(c) {
-        const txt = [c.motor || '', ...c.equipos, '#', ...c.slots.map(i => i.data), '#', ...c.resultados.map(i => i.data)].join('|');
+        const txt = [c.motor || '', c.modo || '', ...c.equipos, '#', ...c.slots.map(i => i.data), '#', ...c.resultados.map(i => i.data)].join('|');
         const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
         return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('');
     }
@@ -812,7 +911,7 @@
         try {
             est('Preparando ' + (slots.length + res.length) + ' capturas...');
             const prep = async l => (await Promise.all(l.map(comprimir))).map(({ media_type, data }) => ({ media_type, data }));
-            const modoActual = $('iaModo') ? $('iaModo').value : (estado.modo || 'top_kill');
+            const modoActual = $('iaKills') ? ($('iaKills').checked ? 'top_kill' : 'top') : (estado.modo || 'top');
             const cuerpo = {
                 token: ses.token, portal: PORTAL, motor: $('iaMotor').value || undefined,
                 modo: modoActual,
@@ -857,7 +956,6 @@
                     <b>🏆 MVP:</b> ${esc(mvp.nombre)} — ${mvp.kills} kills totales</div>`;
         }
         $('iaResultado').innerHTML = `
-            ${(d.avisos || []).length ? `<div class="asc-aviso-ban"><b>Revisa:</b><br>${d.avisos.map(esc).join('<br>')}</div>` : ''}
             <div class="tabla-anotar"><table><thead><tr><th>Equipo</th><th>Tag</th><th>Jug.</th>${heads}</tr></thead>
             <tbody>${d.equipos.map(e => `<tr><td class="eq">${esc(e.nombre)}</td><td>${esc(e.tag || '')}</td><td title="${esc((e.jugadores || []).join(', '))}">${(e.jugadores || []).length}</td>
                 ${Array.from({ length: n }, (_, i) => celda(e, i + 1)).join('')}</tr>`).join('')}</tbody></table></div>
@@ -866,12 +964,11 @@
         $('iaPasar').addEventListener('click', () => aplicarIA(n));
     }
 
-    async function aplicarIA(n) {
+    function aplicarIA(n) {
         const d = iaDatos;
-        if (Object.values(estado.celdas).some(v => v !== '' && v != null)) {
-            const ok = await P.confirmar({ titulo: '¿Reemplazar lo anotado?', si: 'Sí, reemplazar',
-                html: '<p>Ya hay datos en la tabla. Se reemplazan los tops y kills por lo que leyó la IA (la lista de equipos se completa, no se borra).</p>' });
-            if (!ok) return;
+        if (!d || !d.equipos || d.equipos.length === 0) {
+            aviso('La IA no encontró equipos. Revisa que subiste las capturas correctas e intenta de nuevo.', 'error');
+            return;
         }
         const salas = Math.min(6, Math.max(3, n));
         const lista = equipos();
@@ -942,6 +1039,8 @@
             if (inp) { inp.focus(); inp.select(); }
         });
         $('btnGuardarJornada').addEventListener('click', generarYGuardar);
+        actualizarInfoFormato();
+        actualizarTituloImagen();
         $('btnSoloImagen').addEventListener('click', async () => {
             aviso('Generando imagen...');
             try { await descargarImagen(); aviso('✔ Imagen descargada (no se guardó en la base).', 'ok'); } catch (e) { aviso(e.message, 'error'); }

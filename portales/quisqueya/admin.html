@@ -19,7 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../portal-kit/portal.css?v=20261022e">
-    <link rel="stylesheet" href="style.css?v=20261022e">
+    <link rel="stylesheet" href="style.css?v=20261022g">
     <link rel="icon" href="imagenes/qfd.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -53,7 +53,7 @@
     <section class="portal-hero" data-marca="QFD">
         <div class="hero-copy">
             <div class="eyebrow">Herramienta oficial · Free Fire</div>
-            <h1><span class="t-a">Ascensos</span> <span class="t-b">QFD</span><small>by <b>PUMAS</b></small></h1>
+            <h1><span class="t-a">Ascensos</span> <span class="t-b">QFD</span><small>by <b>PROYECTN</b></small></h1>
             <p>Procesa las salas, corrige nombres y genera la tabla de ascensos lista para publicar en 1280×720.</p>
         </div>
         <div class="hero-visual">
@@ -81,10 +81,12 @@
                         <option value="kill">SOLO KILL (Kill Score)</option>
                     </select>
                 </div>
-                <!-- QFD tiene un solo diseño. Dragon Fest (mixto/femenino) está en /dragonfest/ -->
-                <div class="form-group" hidden>
+                <div class="form-group">
+                    <label for="selectTemaVisual">Diseño de imagen</label>
                     <select id="selectTemaVisual" class="dropdown-select" onchange="renderizarResultados()">
-                        <option value="fdquisqueya" selected>FD QUISQUEYA (Celeste)</option>
+                        <option value="fdquisqueya" selected>FD Quisqueya — Mixto</option>
+                        <option value="fdquisqueyafem">FD Quisqueya — Femenino</option>
+                        <option value="fdquisqueyamascota">FD Quisqueya — Mascota</option>
                     </select>
                 </div>
             </div>
@@ -126,13 +128,13 @@
                     <div id="outputTablasLadoALado" class="result-box" style="margin-top: 30px;"></div>
                 </div>
 
-                <div id="editorImagenQFD" class="panel-suave" style="margin-top: 30px;"></div>
 
                 <div style="margin-top: 24px; text-align: center;">
                     <button class="btn-access" id="btnDescargarImagen" onclick="descargarTablaReducida()">
                         <i class="fa-solid fa-download"></i> Descargar imagen reducida (1280x720)
                     </button>
                 </div>
+                <div id="imgBanPanel"></div>
                 <div id="outputTablaReducida" class="result-box"></div>
             </div>
 
@@ -187,7 +189,7 @@
     <script src="../../portal-kit/cupos-control.js?v=20261022e"></script>
     <script src="../../portal-kit/usuarios-portal.js?v=20261022e"></script>
     <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'ascensosqfd'), { once: true });</script>
-    <script>PGEditorImagen.montar('editorImagenQFD', { onCambio: renderizarResultados });</script>
+
     <script>window.addEventListener('pg:sesion', () => PumasBaneados.montarAdmin('baneadosAdmin', 'ascensosqfd'), { once: true });</script>
 
     <script>window.addEventListener('pg:sesion', () => {

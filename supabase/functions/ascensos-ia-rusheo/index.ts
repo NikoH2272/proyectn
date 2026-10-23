@@ -17,8 +17,8 @@ import Anthropic from "npm:@anthropic-ai/sdk";
 const MAX_IMAGENES = 8;
 const TIPOS = ["image/jpeg", "image/png", "image/webp"];
 const env = (k: string) => (Deno.env.get(k) || "").trim();
-const VERSION = "2026-10-22a";
-const MODELO_GEMINI = () => env("GEMINI_MODELO_RUSHEO") || "gemini-3.8-flash";
+const VERSION = "2026-10-23b";
+const MODELO_GEMINI = () => env("GEMINI_MODELO_RUSHEO") || "gemini-2.5-flash";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -32,86 +32,65 @@ class ErrorIA extends Error {
   constructor(mensaje: string, public estado = 502) { super(mensaje); }
 }
 
-// Prompt modo "solo top": no pide kills (ahorra tokens de entrada y salida)
-const SISTEMA_TOP = `Lees capturas de Free Fire (salas de ascensos). Devuelve la posición final (top) de cada equipo en cada partida.
-SLOTS: alineación (número de escuadra, nombre/tag del equipo, jugadores).
-RESULTADOS: capturas en orden; muestran el puesto final por escuadra.
-- Cruza el número de escuadra con los tags de jugadores para identificar equipos.
-- Si recibes "Slot N: NOMBRE - TAG", usa esos nombres exactos.
-- No inventes; lo dudoso va en "avisos" (español, una línea por problema).
-Responde SOLO con JSON válido.`;
+const SISTEMA = `<rol>
+Eres un extractor de datos de salas personalizadas de Free Fire. Lees capturas
+de pantalla y devuelves SOLO un objeto JSON válido, sin texto adicional,
+sin markdown y sin comentarios.
+</rol>
 
-// Prompt modo "top + kills": extrae posición y kills
-const SISTEMA_KILL = `Lees capturas de Free Fire (salas de ascensos). Devuelve la posición y kills de cada equipo en cada partida.
-SLOTS: alineación (número de escuadra, nombre/tag del equipo, jugadores).
-RESULTADOS: capturas en orden; muestran el puesto final y kills por escuadra.
-- Cruza el número de escuadra con los tags de jugadores para identificar equipos.
-- Si recibes "Slot N: NOMBRE - TAG", usa esos nombres exactos.
-- No inventes; lo dudoso va en "avisos" (español, una línea por problema).
-Responde SOLO con JSON válido.`;
+<entradas>
+Recibirás en el mensaje del usuario:
+- EQUIPOS: lista de nombres oficiales, en orden de slot (1.º nombre = slot 1).
+- LOBBY_n: capturas de la sala (identifica qué equipo está en cada slot).
+- PARTIDA_n: capturas de resultados (PARTIDA_1 = P1, PARTIDA_2 = P2, etc.).
+</entradas>
 
-const getSistema = (modo?: string) => modo === 'top' ? SISTEMA_TOP : SISTEMA_KILL;
+<paso_1_slots>
+- Con EQUIPOS y LOBBY, mapea cada slot → nombre oficial del equipo.
+- tag = tag de clan del slot; "MIX" si hay tags mezclados; "—" si no hay.
+- No listes jugadores individuales.
+</paso_1_slots>
 
-const ESQUEMA = {
-  type: "object",
-  properties: {
-    equipos: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          nombre: { type: "string" },
-          tag: { type: "string" },
-          jugadores: { type: "array", items: { type: "string" } },
-          partidas: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: { partida: { type: "integer" }, top: { type: "integer" }, kills: { type: "integer" } },
-              required: ["partida", "top", "kills"],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ["nombre", "tag", "jugadores", "partidas"],
-        additionalProperties: false,
-      },
-    },
-    partidas_detectadas: { type: "integer" },
-    avisos: { type: "array", items: { type: "string" } },
-  },
-  required: ["equipos", "partidas_detectadas", "avisos"],
-  additionalProperties: false,
-};
+<paso_2_resultados>
+- En cada PARTIDA identifica la posición final de cada equipo (1.º, 2.º, …).
+- Si un equipo no aparece (posición cortada), su posición en esa partida es null.
+- No registres ni uses kills.
+</paso_2_resultados>
 
-const ESQUEMA_GEMINI = {
-  type: "OBJECT",
-  properties: {
-    equipos: {
-      type: "ARRAY",
-      items: {
-        type: "OBJECT",
-        properties: {
-          nombre: { type: "STRING" },
-          tag: { type: "STRING" },
-          jugadores: { type: "ARRAY", items: { type: "STRING" } },
-          partidas: {
-            type: "ARRAY",
-            items: {
-              type: "OBJECT",
-              properties: { partida: { type: "INTEGER" }, top: { type: "INTEGER" }, kills: { type: "INTEGER" } },
-              required: ["partida", "top", "kills"],
-            },
-          },
-        },
-        required: ["nombre", "tag", "jugadores", "partidas"],
-      },
-    },
-    partidas_detectadas: { type: "INTEGER" },
-    avisos: { type: "ARRAY", items: { type: "STRING" } },
-  },
-  required: ["equipos", "partidas_detectadas", "avisos"],
-};
+<paso_3_puntos>
+- Puntos por posición: 1=12, 2=9, 3=8, 4=7, 5=6, 6=5, 7=4, 8=3, 9=2, 10=1,
+  11=0, 12=0.
+- Por cada partida, puntos = puntos de su posición; posición null → puntos null.
+- jug = partidas en las que el equipo aparece.
+- total = suma de puntos no nulos.
+- Ordena por total descendente. Desempate: 1) más booyahs; 2) mejor posición.
+</paso_3_puntos>
+
+<reglas>
+- Nunca inventes datos. Si algo no se lee, usa null y anótalo en "avisos".
+- Crea tantas claves "P1", "P2"... como partidas recibas.
+- Responde únicamente con el JSON del formato de salida.
+</reglas>
+
+<formato_salida>
+{
+  "equipos": [{"slot": 1, "equipo": "", "tag": ""}],
+  "partidas": [{"partida": "P1", "posiciones": [{"posicion": 1, "slot": 12}]}],
+  "tabla": [
+    {
+      "rank": 1,
+      "equipo": "",
+      "tag": "",
+      "jug": 4,
+      "puntos": {"P1": 12, "P2": null},
+      "booyahs": 0,
+      "total": 0
+    }
+  ],
+  "desempates": [],
+  "avisos": []
+}
+</formato_salida>`;
 
 type Imagen = { media_type: string; data: string };
 type Pedido = { slots: Imagen[]; resultados: Imagen[]; conocidos: string[]; modo: string };
@@ -119,15 +98,16 @@ type Lectura = { datos: unknown; modelo: string };
 
 function piezas(p: Pedido): Array<{ texto: string } | { imagen: Imagen }> {
   const l: Array<{ texto: string } | { imagen: Imagen }> = [];
-  if (p.slots.length) {
-    l.push({ texto: `SLOTS (alineación de la sala): ${p.slots.length} captura(s).` });
-    p.slots.forEach((imagen) => l.push({ imagen }));
+  if (p.conocidos.length) {
+    l.push({ texto: `EQUIPOS:\n${p.conocidos.join("\n")}` });
   }
-  l.push({ texto: `RESULTADOS: ${p.resultados.length} captura(s), en el orden en que se jugaron las partidas.` });
-  p.resultados.forEach((imagen, i) => { l.push({ texto: `Captura de resultados ${i + 1}:` }); l.push({ imagen }); });
-  l.push({
-    texto: (p.conocidos.length ? `Equipos de la sala (${p.conocidos.length}):\n${p.conocidos.join("\n")}\n\n` : "") +
-      "Devuelve los equipos con su top y kills en cada partida.",
+  p.slots.forEach((imagen, i) => {
+    l.push({ texto: `LOBBY_${i + 1}` });
+    l.push({ imagen });
+  });
+  p.resultados.forEach((imagen, i) => {
+    l.push({ texto: `PARTIDA_${i + 1}` });
+    l.push({ imagen });
   });
   return l;
 }
@@ -142,7 +122,97 @@ function leerJson(texto: string) {
   }
 }
 
+// Puntos de posición → número de posición (fallback cuando no hay posicionMap)
+const PTS_A_TOP: Record<number, number> = { 12: 1, 9: 2, 8: 3, 7: 4, 6: 5, 5: 6, 4: 7, 3: 8, 2: 9, 1: 10, 0: 12 };
+
 function normalizar(d: any) {
+  // Nuevo formato (tiene "tabla" con "equipo")
+  if (Array.isArray(d?.tabla) && (d.tabla.length === 0 || d.tabla[0]?.equipo !== undefined)) {
+    // Mapa slot → info del equipo
+    const slotInfo: Record<number, { nombre: string; tag: string; jugadores: string[] }> = {};
+    if (Array.isArray(d?.equipos)) {
+      for (const e of d.equipos) {
+        const slot = parseInt(String(e?.slot ?? 0), 10);
+        if (slot >= 1) {
+          slotInfo[slot] = {
+            nombre: String(e?.equipo ?? "").trim(),
+            tag: String(e?.tag ?? "").trim(),
+            jugadores: [],
+          };
+        }
+      }
+    }
+    // Mapa partida (número) → slot → posición
+    const posMap: Record<number, Record<number, number>> = {};
+    let maxP = 0;
+    if (Array.isArray(d?.partidas)) {
+      for (const p of d.partidas) {
+        const n = parseInt(String(p?.partida ?? "").replace(/^P/i, ""), 10);
+        if (!isNaN(n) && n >= 1) {
+          maxP = Math.max(maxP, n);
+          posMap[n] = {};
+          if (Array.isArray(p?.posiciones)) {
+            for (const pos of p.posiciones) {
+              const slot = parseInt(String(pos?.slot ?? 0), 10);
+              const posicion = parseInt(String(pos?.posicion ?? 0), 10);
+              if (slot >= 1 && posicion >= 1) posMap[n][slot] = posicion;
+            }
+          }
+        }
+      }
+    }
+    // Infiero maxP también desde puntos de la tabla
+    if (Array.isArray(d?.tabla)) {
+      for (const t of d.tabla) {
+        if (t?.puntos && typeof t.puntos === "object") {
+          for (const key of Object.keys(t.puntos)) {
+            const n = parseInt(key.replace(/^P/i, ""), 10);
+            if (!isNaN(n) && n >= 1) maxP = Math.max(maxP, n);
+          }
+        }
+      }
+    }
+
+    const equipos = (Array.isArray(d?.tabla) ? d.tabla : []).map((t: any) => {
+      const nombre = String(t?.equipo ?? "").trim();
+      if (!nombre) return null;
+      // Buscar slot por nombre
+      const slot = (() => {
+        for (const [s, info] of Object.entries(slotInfo)) {
+          if (info.nombre.toLowerCase() === nombre.toLowerCase()) return parseInt(s, 10);
+        }
+        return 0;
+      })();
+      const info = slotInfo[slot];
+      const puntos: Record<string, number | null> = t?.puntos ?? {};
+
+      const partidas: Array<{ partida: number; top: number; kills: number }> = [];
+      for (let n = 1; n <= maxP; n++) {
+        const pKey = `P${n}`;
+        const puntoN = puntos[pKey];
+        if (puntoN === null || puntoN === undefined) continue; // no jugó → celda vacía
+        const posDeMap = slot >= 1 ? posMap[n]?.[slot] : undefined;
+        const top = (posDeMap !== undefined && posDeMap >= 1)
+          ? posDeMap
+          : (PTS_A_TOP[puntoN] ?? 12);
+        partidas.push({ partida: n, top, kills: 0 });
+      }
+      return {
+        nombre,
+        tag: String(t?.tag ?? info?.tag ?? "").trim(),
+        jugadores: info?.jugadores ?? [],
+        partidas,
+      };
+    }).filter(Boolean) as Array<{ nombre: string; tag: string; jugadores: string[]; partidas: Array<{ partida: number; top: number; kills: number }> }>;
+
+    return {
+      equipos,
+      partidas_detectadas: maxP,
+      avisos: (Array.isArray(d?.avisos) ? d.avisos : []).map((x: unknown) => String(x)).filter(Boolean),
+    };
+  }
+
+  // Formato viejo (compatibilidad con Gemini que puede devolver el esquema anterior)
   const ent = (v: unknown) => Math.max(0, Math.round(Number(v) || 0));
   const equipos = (Array.isArray(d?.equipos) ? d.equipos : []).map((e: any) => ({
     nombre: String(e?.nombre ?? "").trim(),
@@ -167,45 +237,56 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
     listo: () => !!env("GEMINI_API_KEY_RUSHEO"),
     leer: async (p) => {
       const parts = piezas(p).map((x) => "texto" in x ? { text: x.texto } : { inline_data: { mime_type: x.imagen.media_type, data: x.imagen.data } });
-      const pedir = (modelo: string) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY_RUSHEO") },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: getSistema(p.modo) }] },
-          contents: [{ role: "user", parts }],
-          generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: ESQUEMA_GEMINI },
-        }),
-      });
+      const pedir = (modelo: string) => {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 40_000);
+        return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
+          method: "POST", signal: ctrl.signal,
+          headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY_RUSHEO") },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SISTEMA }] },
+            contents: [{ role: "user", parts }],
+            generationConfig: { temperature: 0, responseMimeType: "application/json", maxOutputTokens: 24000 },
+          }),
+        }).finally(() => clearTimeout(tid));
+      };
       let modelo = MODELO_GEMINI();
       const saturado = (st: number, m: string) => st === 503 || st === 500 || /high demand|overloaded|unavailable|try again later/i.test(m);
       const esperar = (ms: number) => new Promise((ok) => setTimeout(ok, ms));
-      let r = await pedir(modelo);
+      const pedirSeguro = async (m: string) => {
+        try { return await pedir(m); }
+        catch (e: unknown) {
+          if ((e as Error)?.name === "AbortError") throw new ErrorIA(`Gemini (${m}) no respondió a tiempo. Intenta de nuevo o cambia el modelo con el secreto GEMINI_MODELO_RUSHEO.`, 503);
+          throw e;
+        }
+      };
+      let r = await pedirSeguro(modelo);
       let j = await r.json().catch(() => ({}));
       for (const ms of [2500, 6000]) {
         if (r.ok || !saturado(r.status, j?.error?.message || "")) break;
         await esperar(ms);
-        r = await pedir(modelo);
+        r = await pedirSeguro(modelo);
         j = await r.json().catch(() => ({}));
       }
       const respaldo = env("GEMINI_MODELO_RESPALDO_RUSHEO");
       if (!r.ok && respaldo && respaldo !== modelo && saturado(r.status, j?.error?.message || "")) {
         modelo = respaldo;
-        r = await pedir(modelo);
+        r = await pedirSeguro(modelo);
         j = await r.json().catch(() => ({}));
       }
       const sugerido = !r.ok && /no longer available|not found|deprecated|is not supported/i.test(j?.error?.message || "")
         ? (/models\/(gemini-[\w.-]+)/.exec(String(j.error.message).split(/use|usar/i).slice(1).join(" ")) || [])[1] : null;
       if (sugerido && sugerido !== modelo) {
         modelo = sugerido;
-        r = await pedir(modelo);
+        r = await pedirSeguro(modelo);
         j = await r.json().catch(() => ({}));
       }
       if (!r.ok) {
         const msg = j?.error?.message || `HTTP ${r.status}`;
-        if (saturado(r.status, msg)) throw new ErrorIA(`Gemini (${modelo}) está saturado en este momento. Intenta en unos minutos.`, 503);
+        if (saturado(r.status, msg)) throw new ErrorIA(`Gemini (${modelo}) está saturado en este momento. Intenta en unos minutos o cambia el modelo con el secreto GEMINI_MODELO_RUSHEO.`, 503);
         throw new ErrorIA(r.status === 429 ? "Gemini está ocupado o llegaste a tu cuota. Intenta en un minuto." :
           r.status === 400 && /API key/i.test(msg) ? "La clave GEMINI_API_KEY_RUSHEO no es válida" :
-          `Error de Gemini (${modelo}): ${msg}`, r.status === 429 ? 429 : 502);
+          `Error de Gemini (${modelo}): ${msg} · Cambia el modelo con el secreto GEMINI_MODELO_RUSHEO.`, r.status === 429 ? 429 : 502);
       }
       const cand = j?.candidates?.[0];
       if (!cand || cand.finishReason === "SAFETY" || j?.promptFeedback?.blockReason) {
@@ -233,12 +314,11 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
         body: JSON.stringify({
           model: env("IA_PRIVADA_MODELO_RUSHEO"),
           temperature: 0,
-          messages: [{ role: "system", content: getSistema(p.modo) }, { role: "user", content }],
+          messages: [{ role: "system", content: SISTEMA }, { role: "user", content }],
           ...(formato ? { response_format: formato } : {}),
         }),
       });
-      let r = await pedir({ type: "json_schema", json_schema: { name: "resultados", strict: true, schema: ESQUEMA } });
-      if (r.status === 400 || r.status === 422) r = await pedir({ type: "json_object" });
+      let r = await pedir({ type: "json_object" });
       if (r.status === 400 || r.status === 422) r = await pedir(null);
       const j = await r.json().catch(() => ({}));
       if (!r.ok) {
@@ -260,12 +340,13 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
         ? { type: "text" as const, text: x.texto }
         : { type: "image" as const, source: { type: "base64" as const, media_type: x.imagen.media_type as "image/png", data: x.imagen.data } });
       try {
-        const respuesta = await client.messages.create({
+        const stream = client.messages.stream({
           model: "claude-haiku-5-5",
-          max_tokens: 4096,
-          system: getSistema(p.modo),
+          max_tokens: 32000,
+          system: SISTEMA,
           messages: [{ role: "user", content: contenido }],
         });
+        const respuesta = await stream.finalMessage();
         if (respuesta.stop_reason === "max_tokens") throw new ErrorIA("Demasiadas capturas para una sola lectura. Prueba con menos.", 422);
         const texto = respuesta.content.find((b) => b.type === "text");
         if (!texto || texto.type !== "text") throw new ErrorIA("Claude no devolvió resultados");
@@ -357,7 +438,7 @@ Deno.serve(async (req) => {
   const autorizado = await permiso.json();
 
   try {
-    const pedido: Pedido = { slots, resultados, conocidos: (cuerpo.equipos ?? []).filter(Boolean).slice(0, 80), modo: cuerpo.modo || 'top_kill' };
+    const pedido: Pedido = { slots, resultados, conocidos: (cuerpo.equipos ?? []).filter(Boolean).slice(0, 80), modo: cuerpo.modo || "top" };
     const orden = [id, ...usables.map((m) => m.id).filter((x) => x !== id)];
     let ultimo: unknown = null;
     for (const mid of orden) {

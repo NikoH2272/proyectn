@@ -134,7 +134,7 @@ function _xL(tA, rM, mod = "ADMIN", fec = "", hor = "") {
 }
 
 function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hora = "") {
-    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg() : {};
+    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg('row') : {};
     let tC = "ENTRENOS ROW X MAYA",
         fU = "row.png";
 
@@ -228,7 +228,7 @@ function descargar() {
     
     html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#050814', logging: false }).then(canvas => {
         let link = document.createElement('a');
-        link.download = 'Entrenos_Row_x_Maya.png';
+        link.download = 'proyectn-row.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     }).catch(err => {

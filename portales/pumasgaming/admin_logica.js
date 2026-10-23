@@ -409,7 +409,7 @@ function descargar() {
 
     html2canvas(elemento, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null }).then(canvas => {
         let link = document.createElement('a');
-        link.download = 'Tabla_PROYECTN.png';
+        link.download = 'proyectn-pumasgaming.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     });
@@ -1032,7 +1032,7 @@ function descargarMetricas() {
 
     html2canvas(elemento, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null }).then(canvas => {
         let link = document.createElement('a');
-        link.download = 'Metricas_PROYECTN.png';
+        link.download = 'proyectn-pumasgaming.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     });

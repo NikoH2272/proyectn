@@ -57,6 +57,7 @@ input.celda[type=number] { -moz-appearance: textfield; }
 /* Vista previa de la imagen: se escala sola al ancho disponible */
 .asc-previa { position: relative; width: 100%; overflow: hidden; margin-top: 18px; border: 1px solid rgba(var(--primary-rgb), .2); background: #070707; }
 .asc-previa > .table-reduced-wrapper { position: absolute; top: 0; left: 0; transform-origin: top left; }
+.asc-previa > #editorCaptura { position: relative; transform-origin: top center; margin: 0 auto; display: block; }
 .asc-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 22px; }
 .asc-acciones .btn-access { min-width: 240px; }
 .asc-estado { min-height: 1.3em; margin: 10px 0 0; text-align: center; font-size: .9rem; }
@@ -225,7 +226,7 @@ input.celda[type=number] { -moz-appearance: textfield; }
 .tema-leviatan { --tema-table-bg: rgba(13,27,42,.90); --tema-header-text: #90e0ef; --tema-text: #fff; background-image: url('imagenes/LEVIATAN.png'); }
 .tema-lyon { --tema-table-bg: rgba(230,215,204,.90); --tema-header-text: #3d261d; --tema-text: #3d261d; background-image: url('imagenes/LYON.png'); }
 .tema-pumasgg { --tema-table-bg: rgba(18,21,32,.95); --tema-header-text: #ffcc00; --tema-text: #fff; background-image: url('imagenes/PUMAS GG.png'); }
-.tema-rusheo    { --tema-table-bg: rgba(18,10,28,.88); --tema-header-text: #ff70a6; --tema-text: #fff; background-image: url('imagenes/fondoasc.png'); }
+.tema-rusheo    { --tema-table-bg: rgba(12,8,22,.90); --tema-header-text: #e05500; --tema-text: #fff; background-image: url('imagenes/fondoasc.png'); }
 .tema-rusheofem { --tema-table-bg: rgba(18,10,28,.88); --tema-header-text: #ffd166; --tema-text: #fff; background-image: url('imagenes/fondofemasc.png'); }
 
 /* =========================================================
@@ -251,19 +252,22 @@ input.celda[type=number] { -moz-appearance: textfield; }
 .ed-wrapper h2, .ed-wrapper h3, .ed-wrapper th, .ed-wrapper .ed-badge-label { font-family: 'Orbitron', sans-serif; }
 .ed-wrapper i { font-family: "Font Awesome 6 Free" !important; font-weight: 900; }
 .ed-wrapper { position: relative; width: 2000px; height: 2000px; padding: 60px 70px;
-  background-size: 100% 100%; background-position: center; background-color: #0b0b0b;
-  color: #fff; display: flex; flex-direction: column; gap: 22px; }
+  background-size: cover; background-position: center; background-color: #0b0b0b;
+  color: #fff; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
 .ed-vertical  { height: 2600px; }
-.ed-horizontal { height: 1060px; padding: 38px 60px; gap: 16px; }
+.ed-horizontal { height: 1060px; padding: 50px 60px 10px; gap: 16px; justify-content: flex-end; }
 .ed-hori-body { display: flex; gap: 28px; flex: 1; min-height: 0; }
 .ed-hori-izq  { flex: 0 0 1040px; }
-.ed-hori-der  { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+.ed-hori-izq .ed-bloque-tabla { margin-top: 200px; }
+.ed-hori-der  { flex: 1; min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
 
 /* ── Header de badges ── */
 .ed-header { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+.ed-hori-der .ed-header { justify-content: flex-start; gap: 8px; }
 .ed-badge { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; border: 2px solid rgba(255,255,255,.3);
   border-radius: 40px; background: rgba(0,0,0,.6); color: #fff; font-size: 2rem; }
-.ed-badge-label { margin-right: 6px; padding: 4px 10px; border-radius: 4px; font-weight: 900; font-size: 1.5rem; }
+.ed-badge-label { margin-right: 6px; padding: 4px 10px; border-radius: 4px; font-weight: 900; font-size: 1.5rem; background: rgba(255,255,255,.14); color: rgba(255,255,255,.8); }
+.ed-badge-sep { margin-left: 12px; color: rgba(255,255,255,.5); }
 .ed-badge b { font-size: 2rem; }
 
 /* ── Tabla General ── */
@@ -287,10 +291,14 @@ input.celda[type=number] { -moz-appearance: textfield; }
 /* ── Booyahs ── */
 .ed-bloque-booyah { padding: 22px 28px; background: var(--tema-table-bg, rgba(0,0,0,.7)); border-radius: 12px; }
 .ed-bloque-titulo { font: 900 1.9rem 'Orbitron', sans-serif; color: var(--tema-header-text, #fff); margin-bottom: 12px; text-transform: uppercase; }
-.ed-booyah-lista { display: flex; flex-wrap: wrap; gap: 10px; }
+.ed-booyah-lista { display: flex; flex-wrap: wrap; gap: 10px; overflow: hidden; }
 .ed-booyah-item { display: flex; align-items: center; gap: 8px; padding: 10px 18px;
   border: 2px solid rgba(255,180,0,.4); border-radius: 8px; background: rgba(255,180,0,.08); font-size: 1.75rem; font-weight: 700; }
 .ed-booyah-sala { color: rgba(255,255,255,.5); font-size: 1.4rem; margin-left: 4px; }
+.ed-booyah-vacio { color: rgba(255,255,255,.35); font-size: 1.65rem; padding: 10px 0; }
+.ed-bloque-info { margin-top: auto; text-align: center; padding: 12px 20px;
+  background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; }
+.ed-info-texto { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: rgba(255,255,255,.5); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 
 /* ── Destacados top 3 ── */
 .ed-bloque-dest { display: flex; gap: 14px; }

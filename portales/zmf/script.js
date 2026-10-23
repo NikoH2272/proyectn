@@ -134,7 +134,7 @@ function _xL(tA, rM, mod = "ADMIN", fec = "", hor = "") {
 }
 
 function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hora = "") {
-    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg() : {};
+    const _ed = window.PGEditorImagen ? window.PGEditorImagen.cfg('zmf') : {};
     // Categoría elegida en la herramienta: mixto (zmf) o femenino (zmffem)
     const catZ = (document.getElementById('selectCategoria') || {}).value || 'zmf';
     let tC = catZ === 'zmffem' ? "ENTRENOS ZMF FEMENINO" : "ENTRENOS ZMF",
@@ -230,7 +230,7 @@ function descargar() {
     
     html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#050814', logging: false }).then(canvas => {
         let link = document.createElement('a');
-        link.download = ((document.getElementById('selectCategoria') || {}).value === 'zmffem' ? 'ZMF_Femenino' : 'ZMF_Mixto') + '_Resultados.png';
+        link.download = 'proyectn-zmf.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     }).catch(err => {

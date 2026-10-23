@@ -586,7 +586,7 @@ function descargarTablaReducida() {
     html2canvas(elemento, opciones)
         .then(canvas => {
             const enlace = document.createElement('a');
-            enlace.download = 'resultados-proyectn.png';
+            enlace.download = 'proyectn-quisqueya.png';
             enlace.href = canvas.toDataURL('image/png', 1.0);
             document.body.appendChild(enlace);
             enlace.click();

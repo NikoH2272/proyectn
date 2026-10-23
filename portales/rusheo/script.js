@@ -132,8 +132,9 @@ function _xL(tA, rM, mod = "ADMIN", fec = "", hor = "") {
 }
 
 function renderizarResultados(eqs, tKs, nS, moderador = "ADMIN", fecha = "", hora = "") {
+    const temaVisual = (document.getElementById('selectTemaVisual') || {}).value || 'normal';
     let tC = "",
-        fU = "row.png";
+        fU = temaVisual === 'fem' ? "rowfem.png" : "row.png";
     
     let eqO = [...eqs].sort((a, b) => b.totalScore - a.totalScore);
     let tKL = [...tKs].slice(0, 15);
@@ -216,7 +217,7 @@ function descargar() {
     
     html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#050814', logging: false }).then(canvas => {
         let link = document.createElement('a');
-        link.download = 'Rusheo_Resultados.png';
+        link.download = 'proyectn-rusheo.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     }).catch(err => {

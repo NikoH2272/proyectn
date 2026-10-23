@@ -76,15 +76,117 @@
     overflow: hidden;
 }
 
+/* ── IMAGEN 4:5 (1080×1350) ──────────────────────────────── */
+[contenteditable="true"] { cursor: text; outline: none; }
+[contenteditable="true"]:not(td):not(th) { min-width: 20px; display: inline-block; }
+[contenteditable="true"]:hover { background: rgba(255,255,255,0.07) !important; border-radius: 3px; }
+[contenteditable="true"]:focus { background: rgba(255,255,255,0.12) !important; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255,255,255,0.35); }
+.img-wrapper { width: 100%; overflow: hidden; display: flex; justify-content: center; }
+#tablaReducidaCaptura {
+    width: 1080px !important; height: 1350px !important;
+    min-width: 1080px !important; min-height: 1350px !important;
+    max-width: 1080px !important; max-height: 1350px !important;
+    padding: 250px 45px 40px 45px !important;
+    border-radius: 12px; box-sizing: border-box;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    transform: scale(0.5); transform-origin: top center;
+    margin-bottom: -675px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+}
+#tablaReducidaCaptura {
+    --fz-titulo:    1.35rem;
+    --fz-th:        1.25rem;
+    --fz-td:        1.25rem;
+    --fz-seccion:   1.15rem;
+    --fz-killer:    0.98rem;
+    --fz-horarios:  1.05rem;
+    --fz-ascenso:   0.95rem;
+}
+#imgContenedorFlex { display: flex; flex-direction: column; gap: 10px; width: 100%; height: 100%; align-items: stretch; }
+.img-panel { background: var(--img-fondo-base); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.3); border-radius: 6px; }
+#imgSeccionTabla  { padding: 8px 12px; flex: 1; margin-top: 100px; }
+#imgSeccionBooyah { flex: 0 0 130px; min-height: 130px; max-height: 130px; padding: 8px 14px; }
+#imgSeccionPanelBajo {
+    display: flex; flex-direction: column;
+    flex: 0 0 200px; min-height: 200px; max-height: 200px;
+    margin-top: 40px;
+}
+#imgPanelKillers {
+    flex: 1; overflow: hidden; padding: 10px 14px; box-sizing: border-box;
+    background: var(--img-fondo-base);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border-radius: 6px;
+}
+.img-titulo-tabla   { font-size: var(--fz-titulo, 1.35rem); font-family: 'Orbitron'; margin-bottom: 4px; text-align: center; color: var(--img-color-titulo); }
+.img-titulo-seccion { font-family: 'Orbitron'; font-size: var(--fz-seccion, 1.15rem); text-align: center; margin-bottom: 6px; color: var(--img-color-titulo); }
+.img-ascenso-titulo { font-family: 'Orbitron'; font-size: var(--fz-ascenso, 0.95rem); text-align: center; margin-bottom: 2px; color: var(--img-color-titulo); }
+.img-horarios-box {
+    position: relative; font-size: var(--fz-horarios, 1.05rem) !important; font-weight: 700; line-height: 1.3;
+    background: rgba(0,0,0,0.6); display: inline-block; padding: 3px 10px;
+    border-radius: 15px; border: 1px solid rgba(255,255,255,0.25);
+    margin-top: 2px; margin-bottom: 4px; color: #ffffff;
+}
+.img-horarios-badge { position: relative; display: inline-block; background: #111; color: #fff; padding: 1px 8px; border-radius: 3px; font-weight: bold; margin-right: 6px; }
+.img-tabla { width: 100%; table-layout: fixed; border-collapse: collapse; background: transparent; }
+.img-tabla th {
+    background: transparent !important; padding: 2px 3px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-family: 'Orbitron'; font-size: var(--fz-th, 1.25rem);
+    color: var(--img-color-texto) !important;
+}
+.img-tabla th.col-top   { width: 50px; }
+.img-tabla th.col-sala  { width: 75px; }
+.img-tabla th.col-total { width: 75px; }
+.img-tabla td {
+    padding: 1px 3px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: var(--fz-td, 1.25rem); font-weight: bold;
+    background: transparent; color: var(--img-color-texto);
+}
+.img-tabla td.col-fila { color: var(--row-color, var(--img-color-texto)); }
+.sala-sin-registro { color: rgba(255,100,100,0.7) !important; }
+.img-killers-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 6px; }
+.img-killer-card  { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 3px; background: rgba(255,255,255,0.04); overflow: hidden; }
+.img-killer-rank  { font-family: 'Orbitron'; font-size: var(--fz-killer, 0.98rem); font-weight: 900; color: var(--img-color-titulo); flex-shrink: 0; min-width: 22px; }
+.img-killer-nombre { font-size: var(--fz-killer, 0.98rem); font-weight: bold; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--img-color-texto); }
+.img-killer-kills { font-family: 'Orbitron'; font-size: var(--fz-killer, 0.98rem); font-weight: 900; color: #ff6b6b; flex-shrink: 0; }
+.img-booyah-row  { display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 8px; justify-content: center; }
+.img-booyah-card { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); overflow: hidden; }
+.img-booyah-sala  { font-family: 'Orbitron'; font-size: var(--fz-killer, 0.98rem); font-weight: 900; color: var(--img-color-titulo); flex-shrink: 0; min-width: 28px; }
+.img-booyah-equipo { font-size: var(--fz-killer, 0.98rem); font-weight: bold; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--img-color-texto); }
+.img-booyah-icon  { color: #ffd700; flex-shrink: 0; }
+.img-booyah-pts   { font-family: 'Orbitron'; font-size: var(--fz-killer, 0.98rem); font-weight: 900; color: #ffd700; flex-shrink: 0; }
+.img-booyah-kills { font-family: 'Orbitron'; font-size: var(--fz-killer, 0.98rem); font-weight: 900; color: #ff6b6b; flex-shrink: 0; }
+.img-sin-datos   { text-align: center; padding: 5px; opacity: 0.7; font-size: var(--fz-killer, 0.98rem); color: var(--img-color-texto); }
+.img-subtabla { width: 100%; border-collapse: collapse; background: transparent; }
+.img-subtabla th { background: transparent !important; padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2); font-family: 'Orbitron'; font-size: var(--fz-ascenso, 0.95rem); color: var(--img-color-texto) !important; }
+.img-subtabla td { padding: 2px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: var(--fz-ascenso, 0.95rem); font-weight: bold; color: var(--img-color-texto); background: transparent; }
+.img-subtabla-sm th { padding: 1px 3px; }
+.img-subtabla-sm td { padding: 1px 3px; }
+.img-ascenso-wrapper { margin-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 2px; }
+.ban-panel-box { background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.3); border-radius: 8px; padding: 14px 18px; margin: 16px 0 8px; }
+.ban-panel-box h4 { color: #ff6b6b; font-size: 1rem; margin-bottom: 4px; }
+.ban-panel-nota { font-size: 0.82rem; color: #aaa; margin-bottom: 10px; }
+.ban-panel-lista { display: flex; flex-direction: column; gap: 6px; }
+.ban-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: rgba(0,0,0,0.25); border-radius: 5px; }
+.ban-equipo { font-weight: bold; flex: 1; }
+.ban-razon  { font-size: 0.78rem; color: #ff9999; background: rgba(255,68,68,0.15); padding: 2px 8px; border-radius: 10px; }
+.ban-btn { padding: 4px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: bold; background: #ff4444; color: #fff; transition: background 0.2s; }
+.ban-btn.perdonado { background: #22c55e; }
+
 /* TEMAS VISUALES PARA LA IMAGEN (no cambiar: definen la descarga) */
 .tema-fdquisqueya {
-    --tema-table-bg: transparent;
-    --tema-cell-bg: transparent;
-    --tema-header-bg: rgba(0, 140, 200, 0.85);
-    --tema-text: #ffffff;
-    --tema-header-text: #80e5ff;
-    --tema-border: rgba(0, 191, 255, 0.35);
-    background-image: url('imagenes/fd.png');
+    background-image: url('imagenes/fd.png?v=20261022g');
+    background-size: cover; background-position: center;
+}
+.tema-fdquisqueyafem {
+    background-image: url('imagenes/fdfem.png?v=20261022g');
+    background-size: cover; background-position: center;
+}
+.tema-fdquisqueyamascota {
+    background-image: url('imagenes/mascota.png?v=20261022g');
+    background-size: cover; background-position: center;
 }
 
 @media (max-width: 900px) {

@@ -51,7 +51,7 @@
     <section class="portal-hero" data-marca="ZMF">
         <div class="hero-copy">
             <div class="eyebrow">Entrenamientos · Free Fire</div>
-            <h1><span class="t-a">ZMF</span><small>by <b>PUMAS</b> · <span id="heroCategoria">Mixto</span></small></h1>
+            <h1><span class="t-a">ZMF</span><small>by <b>PROYECTN</b> · <span id="heroCategoria">Mixto</span></small></h1>
             <p>Carga los logs de cada sala, corrige nombres y descarga la tabla oficial en formato 4:5.</p>
         </div>
         <div class="hero-visual">
@@ -105,7 +105,7 @@
             </div>
 
             <div class="results-wrapper">
-                <div id="editorImagenZMF" class="panel-suave" style="margin-bottom: 20px;"></div>
+
                 <div id="outputTablasLadoALado" class="result-box"></div>
             </div>
 
@@ -169,7 +169,7 @@
     <script src="../../portal-kit/cupos-control.js?v=20261022e"></script>
     <script src="../../portal-kit/usuarios-portal.js?v=20261022e"></script>
     <script>window.addEventListener('pg:sesion', () => PumasUsuariosPortal.montar('usuariosPortalAdmin', 'zmf'), { once: true });</script>
-    <script>PGEditorImagen.montar('editorImagenZMF', { onCambio: function() { if (window._gE && window._gE.length) renderizarResultados(_gE, _gTK, _gNS); } });</script>
+
     <script>
         // Botón "Cargar a la base de datos" (usa los logs subidos y los nombres corregidos)
         PumasGuardado.montar({

@@ -178,31 +178,43 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
     listo: () => !!env("GEMINI_API_KEY"),
     leer: async (p) => {
       const parts = piezas(p).map((x) => "texto" in x ? { text: x.texto } : { inline_data: { mime_type: x.imagen.media_type, data: x.imagen.data } });
-      const pedir = (modelo: string) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY") },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SISTEMA }] },
-          contents: [{ role: "user", parts }],
-          generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: ESQUEMA_GEMINI },
-        }),
-      });
+      const pedir = (modelo: string) => {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 40_000);
+        return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`, {
+          method: "POST", signal: ctrl.signal,
+          headers: { "Content-Type": "application/json", "x-goog-api-key": env("GEMINI_API_KEY") },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SISTEMA }] },
+            contents: [{ role: "user", parts }],
+            generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: ESQUEMA_GEMINI },
+          }),
+        }).finally(() => clearTimeout(tid));
+      };
       let modelo = MODELO_GEMINI();
-      // Saturado (503 / "high demand"): reintenta 2 veces y luego prueba el modelo de respaldo (secreto GEMINI_MODELO_RESPALDO)
+      // Saturado (503 / "high demand") o timeout (AbortError): reintenta 2 veces y luego prueba el modelo de respaldo
       const saturado = (st: number, m: string) => st === 503 || st === 500 || /high demand|overloaded|unavailable|try again later/i.test(m);
       const esperar = (ms: number) => new Promise((ok) => setTimeout(ok, ms));
-      let r = await pedir(modelo);
+      const pedirSeguro = async (m: string) => {
+        try { return await pedir(m); }
+        catch (e: unknown) {
+          // 502 (no 503) para que el loop no caiga al motor de respaldo (facturación separada)
+          if ((e as Error)?.name === "AbortError") throw new ErrorIA(`Gemini (${m}) no respondió a tiempo. Intenta de nuevo o cambia el modelo con el secreto GEMINI_MODELO.`, 502);
+          throw e;
+        }
+      };
+      let r = await pedirSeguro(modelo);
       let j = await r.json().catch(() => ({}));
       for (const ms of [2500, 6000]) {
         if (r.ok || !saturado(r.status, j?.error?.message || "")) break;
         await esperar(ms);
-        r = await pedir(modelo);
+        r = await pedirSeguro(modelo);
         j = await r.json().catch(() => ({}));
       }
       const respaldo = env("GEMINI_MODELO_RESPALDO");
       if (!r.ok && respaldo && respaldo !== modelo && saturado(r.status, j?.error?.message || "")) {
         modelo = respaldo;
-        r = await pedir(modelo);
+        r = await pedirSeguro(modelo);
         j = await r.json().catch(() => ({}));
       }
       // Si Google retiró el modelo y sugiere otro ("...use models/gemini-X..."), se reintenta solo con ese
@@ -210,7 +222,7 @@ const MOTORES: Record<string, { nombre: string; listo: () => boolean; leer: (p: 
         ? (/models\/(gemini-[\w.-]+)/.exec(String(j.error.message).split(/use|usar/i).slice(1).join(" ")) || [])[1] : null;
       if (sugerido && sugerido !== modelo) {
         modelo = sugerido;
-        r = await pedir(modelo);
+        r = await pedirSeguro(modelo);
         j = await r.json().catch(() => ({}));
       }
       if (!r.ok) {

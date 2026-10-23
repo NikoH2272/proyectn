@@ -27,6 +27,7 @@
         ascensosqfd:    { nombre: 'Ascensos QFD',     url: '/portales/quisqueya/',       admin: '/portales/quisqueya/admin.html' },
         row:            { nombre: 'ROW x Maya',       url: '/portales/row/',             admin: '/portales/row/admin.html' },
         rusheo:         { nombre: 'Rusheo',           url: '/portales/rusheo/',          admin: '/portales/rusheo/admin.html' },
+        ascensosrusheo: { nombre: 'Ascensos Rusheo',  url: '/portales/rusheo/ascensos/', admin: '/portales/rusheo/ascensos/admin.html' },
         zmf:            { nombre: 'ZMF',              url: '/portales/zmf/',             admin: '/portales/zmf/admin.html' },
         zmffem:         { nombre: 'ZMF Femenino',     url: '/portales/zmf/femenino.html', admin: '/portales/zmf/admin.html' },
         // Dragon Fest: dos portales públicos (mixto y femenino) con UNA herramienta compartida
@@ -350,6 +351,9 @@
         if (p.subtitulo) {
             const par = document.querySelector('.portal-hero .hero-copy > p');
             if (par) par.textContent = p.subtitulo;
+        }
+        if (p.link) {
+            document.querySelectorAll('[data-pg-link]').forEach(a => { a.href = p.link; });
         }
     }
 

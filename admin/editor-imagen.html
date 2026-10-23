@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C79JND219Y"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-C79JND219Y');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Editor de imagen | PROYECTN Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../portal-kit/portal.css?v=20261022e">
+    <link rel="icon" type="image/x-icon" href="../imagenes/proyectn.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../portal-kit/portal.js?v=20261022e" data-modo="login" data-sin-efecto></script>
+    <style>
+        .ed-layout {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+            align-items: start;
+            max-width: 1520px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
+        .ed-panel { position: sticky; top: 80px; }
+        .ed-tabs  { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .ed-pane  { display: none; }
+        .ed-pane.activa { display: block; }
+
+        /* Preview */
+        .prev-area { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 12px 12px 16px; }
+        .prev-label { font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; color: var(--text-muted,#A8ADB6); margin-bottom: 10px; }
+        #prevOuter { overflow: hidden; border-radius: 4px; border: 1px solid rgba(255,255,255,.15); transition: width .2s, height .2s; width: 100%; }
+        #prevInner { position: relative; }
+
+        /* Preview: estilos internos */
+        .pv-head  { padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .pv-title { font-family: Michroma, monospace; font-weight: 700; letter-spacing: .05em; }
+        .pv-sub   { font-size: .65em; opacity: .6; }
+        .pv-body  { display: flex; padding: 0 16px 16px; gap: 12px; box-sizing: border-box; }
+        .pv-body.v { flex-direction: column; }
+        .pv-table { flex: 1.6; overflow: hidden; }
+        .pv-side  { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .pv-box   { border: 1px solid rgba(255,255,255,.12); border-radius: 4px; overflow: hidden; padding-bottom: 6px; }
+        .pv-box-t { font-size: .65em; font-weight: 700; letter-spacing: .1em; padding: 5px 10px; }
+        .pv-row   { display: flex; align-items: center; font-size: .7em; padding: 3px 10px; gap: 6px; }
+        .pv-pos   { font-weight: 700; min-width: 22px; }
+        .pv-nm    { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .9; }
+        .pv-pts   { font-weight: 700; min-width: 28px; text-align: right; }
+        .pv-k     { opacity: .6; min-width: 24px; text-align: right; font-size: .9em; }
+        .pv-kill-item { display: flex; align-items: center; padding: 3px 10px; font-size: .65em; gap: 5px; }
+        .pv-kill-n    { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pv-kill-k    { font-weight: 700; min-width: 22px; text-align: right; }
+        .pv-sala-grid { display: flex; flex-wrap: wrap; gap: 5px; padding: 6px 10px; }
+        .pv-sala-card { flex: 0 0 calc(33%-4px); background: rgba(255,255,255,.06); border-radius: 3px; padding: 4px 6px; font-size: .6em; text-align: center; }
+
+        /* Estilo 2: podio */
+        .pv-podio { display: flex; gap: 6px; padding: 0 16px 12px; }
+        .pv-podio-item { flex: 1; border-radius: 4px; padding: 10px 6px; text-align: center; font-size: .7em; }
+        .pv-podio-rank { font-size: 1.6em; font-weight: 900; line-height: 1; }
+        .pv-podio-nm   { font-size: .85em; margin: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pv-podio-pts  { font-size: 1.1em; font-weight: 700; }
+
+        /* Estilo 3: moderno */
+        .pv-head3 { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 2px solid; }
+        .pv-row3-alt { background: rgba(255,255,255,.04); }
+        .pv-badge { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: .75em; font-weight: 700; }
+
+        @media (max-width: 1100px) {
+            .ed-layout { grid-template-columns: 1fr; }
+            .ed-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../imagenes/proyectn.png" alt="PROYECTN" class="logo-img">
+            <div class="logo"><span class="t-a">PROYECTN</span> ADMIN</div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="document.getElementById('mainNav').classList.toggle('is-active')">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="./"><i class="fa-solid fa-table-cells-large"></i> Portales</a></li>
+                <li><a href="usuarios.html"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                <li><span class="pg-user"><i class="fa-solid fa-user-shield"></i> <span data-pg-usuario></span></span></li>
+                <li><a href="#" class="pg-salir" data-pg-salir><i class="fa-solid fa-right-from-bracket"></i> Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section style="padding:24px 24px 12px;max-width:1568px;margin:0 auto">
+        <h2 class="section-title" style="margin-bottom:6px"><i class="fa-solid fa-image"></i> Editor de imagen de resultados</h2>
+        <p class="tool-desc" style="margin:0 0 4px">
+            Configura fondo, texto, estilo y colores de cada portal. Los ajustes se guardan en este navegador y se aplican automáticamente al generar resultados.
+            El fondo personalizado (imagen) no persiste al cerrar el navegador — vuelve a cargarlo cuando lo necesites.
+        </p>
+    </section>
+
+    <div class="ed-layout">
+        <!-- ── Panel de controles ────────────────────────────── -->
+        <div class="ed-panel">
+            <div class="ed-tabs" id="tabsEditor"></div>
+            <div id="panelesEditor"></div>
+        </div>
+
+        <!-- ── Preview ──────────────────────────────────────── -->
+        <div>
+            <div class="prev-area">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+                    <div class="prev-label" style="margin:0"><i class="fa-solid fa-eye"></i> Previsualización</div>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <label style="font-size:.78rem;color:var(--text-muted,#A8ADB6);display:flex;align-items:center;gap:5px;cursor:pointer">
+                            <input type="checkbox" id="prevUsarLog"> Usar log real
+                        </label>
+                        <div id="prevLogWrap" style="display:none">
+                            <input type="file" id="prevLogFile" accept=".log,.txt" multiple style="font-size:.75rem;max-width:240px">
+                        </div>
+                    </div>
+                </div>
+                <div id="prevOuter"><div id="prevInner"></div></div>
+                <p class="muted" id="prevNote" style="font-size:.75rem;margin-top:10px">Vista previa con datos de muestra. Activa «Usar log real» para cargar archivos .log/.txt de sala.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2026 <b>PROYECTN</b> · Panel de administración</p></footer>
+
+    <script src="../portal-kit/editor-imagen.js?v=20261022e"></script>
+    <script>
+    (function () {
+        var P = window.PumasPortal;
+        var PORTALES = [
+            { id: 'pruebas', nombre: 'Pruebas', color: '#00C6FF', fondo: null, fondoFem: null }
+        ];
+        var NOMBRES = { pruebas:'PRUEBAS', dragonfest:'DRAGON FEST', quisqueya:'QUISQUEYA', zmf:'ZMF', row:'ROW x MAYA' };
+        var portalActivo = PORTALES[0].id;
+
+        document.documentElement.classList.add('pg-verificando');
+
+        async function arrancar() {
+            var s = await P.guard('principal', 'login.html', 'gestionar');
+            if (!s) return;
+            document.querySelectorAll('[data-pg-usuario]').forEach(function (n) { n.textContent = s.nombre || s.usuario; });
+            document.querySelectorAll('[data-pg-salir]').forEach(function (n) { n.addEventListener('click', function (e) { e.preventDefault(); P.logout('login.html'); }); });
+            montar();
+        }
+
+        function montar() {
+            var tabsEl  = document.getElementById('tabsEditor');
+            var panesEl = document.getElementById('panelesEditor');
+
+            PORTALES.forEach(function (p) {
+                // Pane
+                var pane = document.createElement('div');
+                pane.id = 'pane_' + p.id;
+                pane.className = 'panel-suave ed-pane' + (p.id === portalActivo ? ' activa' : '');
+                panesEl.appendChild(pane);
+                PGEditorImagen.montar('pane_' + p.id, {
+                    portal: p.id,
+                    fondoDefault: p.fondo || null,
+                    fondoDefaultFem: p.fondoFem || null,
+                    onCambio: (function (pid) {
+                        return function () { if (pid === portalActivo) renderPreview(pid, PGEditorImagen.cfg(pid)); };
+                    })(p.id)
+                });
+
+                // Tab
+                var btn = document.createElement('button');
+                btn.className = 'btn-access' + (p.id === portalActivo ? '' : ' btn-outline');
+                btn.textContent = p.nombre;
+                btn.style.borderColor = p.color;
+                if (p.id === portalActivo) btn.style.background = p.color;
+                btn.addEventListener('click', (function (p2) {
+                    return function () {
+                        portalActivo = p2.id;
+                        tabsEl.querySelectorAll('button').forEach(function (b, i) {
+                            var cp = PORTALES[i];
+                            var isA = cp.id === portalActivo;
+                            b.className = 'btn-access' + (isA ? '' : ' btn-outline');
+                            b.style.background = isA ? cp.color : '';
+                        });
+                        panesEl.querySelectorAll('.ed-pane').forEach(function (el) {
+                            el.classList.toggle('activa', el.id === 'pane_' + portalActivo);
+                        });
+                        renderPreview(portalActivo, PGEditorImagen.cfg(portalActivo));
+                    };
+                })(p));
+                tabsEl.appendChild(btn);
+            });
+
+            renderPreview(portalActivo, PGEditorImagen.cfg(portalActivo));
+        }
+
+        // ── Mock data ────────────────────────────────────────────────────────
+        var M_EQ = [
+            {n:'ALPHA WOLVES',p:95,k:28},{n:'BETA STORM',p:82,k:35},
+            {n:'GAMMA RUSH',p:74,k:22},{n:'DELTA FORCE',p:61,k:18},
+            {n:'EPSILON PRO',p:55,k:14},{n:'ZETA GAMING',p:48,k:20},
+            {n:'ETA SQUAD',p:43,k:16},{n:'THETA CLAN',p:38,k:12}
+        ];
+        var M_KL = [
+            {n:'SNIPER_G',k:15},{n:'RUSH_K',k:12},{n:'PRO_PL',k:11},
+            {n:'ELITE_F',k:9},{n:'ACE_FF',k:8},{n:'GODLIKE',k:7},
+            {n:'BEAST_M',k:7},{n:'PHANTOM',k:6},{n:'EAGLE_E',k:5}
+        ];
+        var M_SA = [{s:1,t:'ALPHA WOLVES'},{s:2,t:'BETA STORM'},{s:3,t:'GAMMA RUSH'}];
+
+        // ── Render preview ───────────────────────────────────────────────────
+        function renderPreview(portal, cfg) {
+            var outer = document.getElementById('prevOuter');
+            var inner = document.getElementById('prevInner');
+            if (!outer || !inner) return;
+
+            var ori = cfg.orientacion || 'h';
+            var isV = ori !== 'h';
+            // Virtual canvas sizes: h=16:9, v=4:5, s=9:16 (story), c=1:1 (square)
+            var W = 1280;
+            var H = ori === 'v' ? 1600 : ori === 's' ? 2276 : ori === 'c' ? 1280 : 720;
+            var cW = outer.clientWidth || (outer.parentElement.clientWidth - 24);
+            if (cW < 100) cW = 600;
+            // Always fill the full available width — no cap at scale=1
+            var scale = cW / W;
+
+            outer.style.width  = Math.round(W * scale) + 'px';
+            outer.style.height = Math.round(H * scale) + 'px';
+
+            var _src = _logData || { equipos: M_EQ, killers: M_KL, booyahs: M_SA };
+            var maxEq = cfg.maxEquipos > 0 ? cfg.maxEquipos : _src.equipos.length;
+            var eqs = _src.equipos.slice(0, maxEq);
+            var kls = _src.killers.slice(0, Math.min(cfg.maxKillers || 9, 20));
+            var fecha = cfg.textoFecha || '22/10/2026';
+            var mod   = cfg.textoMod  || 'ADMIN';
+            var c1 = cfg.color1 || '#B6FF00', c2 = cfg.color2 || '#FFD54A', c3 = cfg.color3 || '#00C6FF';
+            var nombre = NOMBRES[portal] || portal.toUpperCase();
+
+            var _fondo = cfg.fondoCustom || cfg.fondoDefault || null;
+            var bgStyle = _fondo
+                ? 'background-image:url(\'' + _fondo + '\');background-size:cover;background-position:center;'
+                : 'background:linear-gradient(135deg,#0a0a12 0%,#14141e 60%,#0a0c14 100%);';
+
+            var pad = cfg.padding != null ? cfg.padding : 16;
+            var fScale = cfg.escalaFuente || 1;
+            var headH = ori === 'h' ? 70 : 90, bodyH = H - headH;
+            var fTitle = Math.round((ori === 'h' ? 28 : 38) * fScale);
+            var fSub = Math.round((ori === 'h' ? 11 : 14) * fScale);
+
+            var html = '';
+            if (cfg.estilo === 2) html = buildEstilo2(W, H, isV, eqs, kls, cfg, c1, c2, c3, nombre, fecha, mod, headH, bodyH, fTitle, fSub);
+            else if (cfg.estilo === 3) html = buildEstilo3(W, H, isV, eqs, kls, cfg, c1, c2, c3, nombre, fecha, mod, headH, bodyH, fTitle, fSub);
+            else html = buildEstilo1(W, H, isV, eqs, kls, cfg, c1, c2, c3, nombre, fecha, mod, headH, bodyH, fTitle, fSub);
+
+            inner.setAttribute('style',
+                bgStyle +
+                'width:' + W + 'px;height:' + H + 'px;' +
+                'transform:scale(' + scale + ');transform-origin:top left;' +
+                'font-family:Rajdhani,Michroma,sans-serif;color:#fff;overflow:hidden;position:relative;box-sizing:border-box;font-size:' + Math.round(16 * fScale) + 'px;'
+            );
+            inner.innerHTML = html;
+        }
+
+        // ── Estilo 1: Clásico ────────────────────────────────────────────────
+        function buildEstilo1(W, H, isV, eqs, kls, cfg, c1, c2, c3, nombre, fecha, mod, headH, bodyH, fTitle, fSub) {
+            var pad = cfg.padding != null ? cfg.padding : 16;
+            var overlay = 'background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.25) 100%);position:absolute;inset:0;';
+            var tableRows = eqs.map(function (eq, i) {
+                var col = i === 0 ? c1 : i === 1 ? c2 : i === 2 ? c3 : '#fff';
+                var bg  = i < 3 ? 'background:rgba(255,255,255,' + (i === 0 ? '.12' : '.06') + ')' : '';
+                return '<div class="pv-row" style="' + bg + '">' +
+                    '<span class="pv-pos" style="color:' + col + '">#' + (i+1) + '</span>' +
+                    '<span class="pv-nm">' + eq.n + '</span>' +
+                    '<span class="pv-k">' + eq.k + 'K</span>' +
+                    '<span class="pv-pts" style="color:' + col + '">' + eq.p + '</span>' +
+                '</div>';
+            }).join('');
+            var killRows = cfg.mostrarKillers ? kls.map(function (kl, i) {
+                return '<div class="pv-kill-item">' +
+                    '<span style="color:' + (i === 0 ? c1 : '#fff') + ';font-weight:700;min-width:16px">#' + (i+1) + '</span>' +
+                    '<span class="pv-kill-n">' + kl.n + '</span>' +
+                    '<span class="pv-kill-k" style="color:' + c1 + '">' + kl.k + '</span>' +
+                '</div>';
+            }).join('') : '';
+            var _booyahs1 = (_logData ? _logData.booyahs : M_SA);
+            var booyahCards = cfg.mostrarBooyah ? _booyahs1.map(function (sa) {
+                return '<div class="pv-sala-card"><div style="opacity:.5;font-size:.85em">S' + sa.s + '</div><div style="font-weight:700;font-size:1.05em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sa.t + '</div></div>';
+            }).join('') : '';
+
+            var _ord1 = Array.isArray(cfg.ordenSecciones) ? cfg.ordenSecciones : ['killers','booyah','ascenso'];
+            var _secMap1 = {
+                killers: cfg.mostrarKillers ? '<div class="pv-box" style="flex:1"><div class="pv-box-t" style="color:' + c1 + ';background:rgba(255,255,255,.06)">TOP KILLERS</div>' + killRows + '</div>' : '',
+                booyah:  cfg.mostrarBooyah  ? '<div class="pv-box"><div class="pv-box-t" style="color:' + c1 + ';background:rgba(255,255,255,.06)">BOOYAH</div><div class="pv-sala-grid">' + booyahCards + '</div></div>' : ''
+            };
+            var sideHtml = _ord1.map(function(k){ return _secMap1[k]||''; }).join('').trim();
+
+            return '<div style="' + overlay + '"></div>' +
+                '<div class="pv-head" style="height:' + headH + 'px;border-bottom:2px solid ' + c1 + ';position:relative;z-index:1">' +
+                    '<span class="pv-title" style="font-size:' + fTitle + 'px;color:' + c1 + '">' + nombre + '</span>' +
+                    '<span class="pv-sub" style="font-size:' + fSub + 'px;text-align:right">RESULTADOS OFICIALES<br>' + fecha + ' · MOD: ' + mod + '</span>' +
+                '</div>' +
+                '<div class="pv-body ' + (isV ? 'v' : '') + '" style="height:' + bodyH + 'px;padding:' + pad + 'px;box-sizing:border-box;position:relative;z-index:1">' +
+                    '<div class="pv-table pv-box">' +
+                        '<div class="pv-box-t" style="color:' + c1 + ';background:rgba(255,255,255,.06)">TABLA GENERAL</div>' +
+                        '<div class="pv-row" style="background:rgba(255,255,255,.04);opacity:.5;font-size:.55em">' +
+                            '<span style="min-width:22px">#</span><span style="flex:1">EQUIPO</span><span style="min-width:28px;text-align:right">K</span><span style="min-width:28px;text-align:right">PTS</span>' +
+                        '</div>' +
+                        tableRows +
+                    '</div>' +
+                    (sideHtml ? '<div class="pv-side" style="' + (isV ? 'flex-direction:row' : '') + '">' + sideHtml + '</div>' : '') +
+                '</div>';
+        }
+
+        // ── Estilo 2: Podio ──────────────────────────────────────────────────
+        function buildEstilo2(W, H, isV, eqs, kls, cfg, c1, c2, c3, nombre, fecha, mod, headH, bodyH, fTitle, fSub) {
+            var pad = cfg.padding != null ? cfg.padding : 16;
+            var overlay = 'background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.2) 100%);position:absolute;inset:0;';
+            var podiumEqs = eqs.slice(0, 3);
+            var podioHTML = podiumEqs.map(function (eq, i) {
+                var cs = [c1, c2, c3][i];
+                var sz = [1.2, 1, 0.9][i];
+                return '<div class="pv-podio-item" style="background:rgba(255,255,255,.07);border:1px solid ' + cs + ';transform:scale(' + sz + ')">' +
+                    '<div class="pv-podio-rank" style="color:' + cs + '">' + ['🥇','🥈','🥉'][i] + '</div>' +
+                    '<div class="pv-podio-nm">' + eq.n + '</div>' +
+                    '<div class="pv-podio-pts" style="color:' + cs + '">' + eq.p + ' pts</div>' +
+                    '<div style="font-size:.6em;opacity:.6">' + eq.k + ' kills</div>' +
+                '</div>';
+            }).join('');
+            var restRows = eqs.slice(3).map(function (eq, i) {
+                return '<div class="pv-row">' +
+                    '<span class="pv-pos" style="color:#fff">#' + (i+4) + '</span>' +
+                    '<span class="pv-nm">' + eq.n + '</span>' +
+                    '<span class="pv-k">' + eq.k + 'K</span>' +
+                    '<span class="pv-pts">' + eq.p + '</span>' +
+                '</div>';
+            }).join('');
+            var killRows = cfg.mostrarKillers ? kls.slice(0,5).map(function (kl, i) {
+                return '<div class="pv-kill-item"><span style="color:' + (i===0?c1:'#fff') + ';font-weight:700;min-width:16px">#' + (i+1) + '</span>' +
+                    '<span class="pv-kill-n">' + kl.n + '</span>' +
+                    '<span class="pv-kill-k" style="color:' + c1 + '">' + kl.k + '</span></div>';
+            }).join('') : '';
+
+            return '<div style="' + overlay + '"></div>' +
+                '<div class="pv-head" style="height:' + headH + 'px;border-bottom:2px solid ' + c1 + ';position:relative;z-index:1">' +
+                    '<span class="pv-title" style="font-size:' + fTitle + 'px;color:' + c1 + '">' + nombre + '</span>' +
+                    '<span class="pv-sub" style="font-size:' + fSub + 'px;text-align:right">RESULTADOS OFICIALES<br>' + fecha + ' · MOD: ' + mod + '</span>' +
+                '</div>' +
+                '<div style="padding:12px 16px;position:relative;z-index:1">' +
+                    '<div class="pv-box-t" style="color:' + c1 + ';font-size:.6em;margin-bottom:8px">TOP 3 · PODIO</div>' +
+                    '<div class="pv-podio">' + podioHTML + '</div>' +
+                '</div>' +
+                '<div class="pv-body ' + (isV ? 'v' : '') + '" style="height:' + (bodyH - (isV?200:130)) + 'px;padding:' + pad + 'px;box-sizing:border-box;position:relative;z-index:1">' +
+                    '<div class="pv-table pv-box">' +
+                        '<div class="pv-box-t" style="color:#fff;opacity:.5;background:rgba(255,255,255,.04)">POSICIONES 4+</div>' +
+                        restRows +
+                    '</div>' +
+                    (cfg.mostrarKillers ? '<div class="pv-side"><div class="pv-box" style="flex:1">' +
+                        '<div class="pv-box-t" style="color:' + c1 + ';background:rgba(255,255,255,.06)">KILLERS</div>' +
+                        killRows + '</div></div>' : '') +
+                '</div>';
+        }
+
+        // ── Estilo 3: Moderno ────────────────────────────────────────────────
+        function buildEstilo3(W, H, isV, eqs, kls, cfg, c1, c2, c3, nombre, fecha, mod, headH, bodyH, fTitle, fSub) {
+            var pad = cfg.padding != null ? cfg.padding : 16;
+            var headBg = 'background:linear-gradient(90deg,' + c1 + '22 0%,transparent 80%);border-bottom:2px solid ' + c1 + '55;';
+            var tableRows = eqs.map(function (eq, i) {
+                var col = i === 0 ? c1 : i === 1 ? c2 : i === 2 ? c3 : '#fff';
+                var badgeBg = i < 3 ? 'background:' + col + ';color:#000' : 'background:rgba(255,255,255,.1);color:#fff';
+                return '<div class="pv-row ' + (i%2===1?'pv-row3-alt':'') + '">' +
+                    '<span class="pv-badge" style="' + badgeBg + '">' + (i+1) + '</span>' +
+                    '<span class="pv-nm" style="color:' + (i<3?col:'#fff') + '">' + eq.n + '</span>' +
+                    '<span class="pv-k">' + eq.k + 'K</span>' +
+                    '<span class="pv-pts" style="color:' + (i<3?col:'#fff') + '">' + eq.p + '</span>' +
+                '</div>';
+            }).join('');
+            var killRows = cfg.mostrarKillers ? kls.map(function (kl, i) {
+                return '<div class="pv-kill-item ' + (i%2===1?'pv-row3-alt':'') + '">' +
+                    '<span class="pv-badge" style="background:' + (i===0?c1:'rgba(255,255,255,.1)') + ';color:' + (i===0?'#000':'#fff') + '">' + (i+1) + '</span>' +
+                    '<span class="pv-kill-n">' + kl.n + '</span>' +
+                    '<span class="pv-kill-k" style="color:' + c1 + '">' + kl.k + '</span>' +
+                '</div>';
+            }).join('') : '';
+            var booyahCards = cfg.mostrarBooyah ? (_logData ? _logData.booyahs : M_SA).map(function (sa) {
+                return '<div class="pv-sala-card" style="border-left:2px solid ' + c1 + '"><div style="opacity:.5;font-size:.85em">SALA ' + sa.s + '</div><div style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + sa.t + '</div></div>';
+            }).join('') : '';
+
+            return '<div style="' + headBg + 'height:' + headH + 'px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-sizing:border-box">' +
+                    '<span style="font-family:Michroma,monospace;font-size:' + fTitle + 'px;font-weight:700;color:' + c1 + ';letter-spacing:.08em">' + nombre + '</span>' +
+                    '<span style="font-size:' + fSub + 'px;opacity:.7;text-align:right">RESULTADOS OFICIALES · ' + fecha + '<br>MODERADOR: ' + mod + '</span>' +
+                '</div>' +
+                '<div class="pv-body ' + (isV ? 'v' : '') + '" style="height:' + bodyH + 'px;padding:' + pad + 'px;box-sizing:border-box">' +
+                    '<div class="pv-table pv-box" style="border-color:' + c1 + '33">' +
+                        '<div class="pv-box-t" style="color:' + c1 + ';background:' + c1 + '18;letter-spacing:.15em">TABLA GENERAL</div>' +
+                        tableRows +
+                    '</div>' +
+                    ((cfg.mostrarKillers || cfg.mostrarBooyah) ? '<div class="pv-side" style="' + (isV ? 'flex-direction:row' : '') + '">' +
+                        (cfg.mostrarKillers ? '<div class="pv-box" style="flex:1;border-color:' + c1 + '33">' +
+                            '<div class="pv-box-t" style="color:' + c1 + ';background:' + c1 + '18;letter-spacing:.15em">TOP KILLERS</div>' +
+                            killRows + '</div>' : '') +
+                        (cfg.mostrarBooyah ? '<div class="pv-box" style="border-color:' + c1 + '33">' +
+                            '<div class="pv-box-t" style="color:' + c1 + ';background:' + c1 + '18;letter-spacing:.15em">BOOYAH</div>' +
+                            '<div class="pv-sala-grid">' + booyahCards + '</div></div>' : '') +
+                    '</div>' : '') +
+                '</div>';
+        }
+
+        window.addEventListener('resize', function () {
+            renderPreview(portalActivo, PGEditorImagen.cfg(portalActivo));
+        });
+
+        // ── Log real para preview ─────────────────────────────────────────────
+        var _logData = null; // parsed from real log files
+
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'prevUsarLog') {
+                var usar = e.target.checked;
+                document.getElementById('prevLogWrap').style.display = usar ? 'block' : 'none';
+                if (!usar) { _logData = null; document.getElementById('prevNote').textContent = 'Vista previa con datos de muestra.'; }
+                renderPreview(portalActivo, PGEditorImagen.cfg(portalActivo));
+            }
+            if (e.target.id === 'prevLogFile') {
+                var files = Array.from(e.target.files);
+                if (!files.length) return;
+                var pendiente = files.length;
+                var salas = [];
+                files.forEach(function(f, fi) {
+                    var r = new FileReader();
+                    r.onload = function(ev) {
+                        salas[fi] = ev.target.result;
+                        if (--pendiente === 0) {
+                            _logData = _parseLogs(salas);
+                            document.getElementById('prevNote').textContent =
+                                'Log real: ' + _logData.equipos.length + ' equipos, ' + files.length + ' sala(s).';
+                            renderPreview(portalActivo, PGEditorImagen.cfg(portalActivo));
+                        }
+                    };
+                    r.readAsText(f);
+                });
+            }
+        });
+
+        function _parseLogs(textos) {
+            var mapaEq = {}, mapaK = {}, booyahs = [];
+            textos.forEach(function(txt, si) {
+                var lineas = txt.split(/\r?\n/);
+                var actualEq = null;
+                var booyahSala = null;
+                lineas.forEach(function(l) {
+                    // Formato real FF: TeamName: X Rank: N KillScore: N RankScore: N TotalScore: N
+                    var t = l.match(/TeamName:\s*(.+?)\s+Rank:\s*(\d+)\s+KillScore:\s*(\d+)\s+RankScore:\s*(\d+)\s+TotalScore:\s*(\d+)/i);
+                    if (t) {
+                        var nm = t[1].trim(), rank = parseInt(t[2]), kills = parseInt(t[3]), pts = parseInt(t[5]);
+                        if (!mapaEq[nm]) mapaEq[nm] = { n: nm, p: 0, k: 0 };
+                        mapaEq[nm].p += pts;
+                        mapaEq[nm].k += kills;
+                        if (rank === 1 && !booyahSala) booyahSala = nm;
+                        actualEq = nm;
+                        return;
+                    }
+                    // Jugadores: NAME: X ID: N ... KILL: N
+                    var p = l.match(/NAME:\s*(.+?)\s+ID:\s*\d+.*?KILL:\s*(\d+)/i);
+                    if (p) {
+                        var pnm = p[1].trim(), pk = parseInt(p[2]);
+                        if (!mapaK[pnm] || mapaK[pnm] < pk) mapaK[pnm] = pk;
+                    }
+                });
+                if (booyahSala) booyahs.push({ s: si+1, t: booyahSala });
+            });
+            var equipos = Object.values(mapaEq).sort(function(a,b){ return b.p-a.p; });
+            var killers = Object.keys(mapaK).map(function(n){ return { n:n, k:mapaK[n] }; }).sort(function(a,b){ return b.k-a.k; });
+            return { equipos: equipos, killers: killers, booyahs: booyahs };
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar); else arrancar();
+    })();
+    </script>
+</body>
+</html>
