@@ -498,7 +498,8 @@
             listar: (portal) => rpcAdmin('asc_mod_listar', { p_portal: portal }),
             guardar: (m, portal) => rpcAdmin('asc_mod_guardar', {
                 p_portal: portal, p_usuario: m.usuario, p_nombre: m.nombre || null, p_clave: m.clave || null,
-                p_activo: m.activo !== false, p_ia: !!m.ia, p_eventos: m.eventos === undefined ? null : m.eventos
+                p_activo: m.activo !== false, p_ia: !!m.ia, p_eventos: m.eventos === undefined ? null : m.eventos,
+                p_ia_limite: m.ia_limite != null ? parseInt(m.ia_limite, 10) || null : null
             }),
             borrar: (usuario, portal) => rpcAdmin('asc_mod_borrar', { p_portal: portal, p_usuario: usuario })
         }

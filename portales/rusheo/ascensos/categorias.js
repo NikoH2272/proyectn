@@ -2,8 +2,8 @@
 (function () {
     const fondo = (id, nombre, color, color2, logo) => ({ id, nombre, corto: nombre.toUpperCase(), color, color2, logo, tipo: 'fondo' });
     window.ASC_CATEGORIAS = [
-        fondo('rusheo',    'Rusheo',     '#ff70a6', '#cc3d77', '../imagenes/rusheo.png'),
-        fondo('rusheofem', 'Rusheo FEM', '#ffd166', '#cc9900', '../imagenes/rusheo.png'),
+        fondo('rusheo',    'Rusheo',     '#ffd166', '#cc9900', '../imagenes/rusheo.png'),
+        fondo('rusheofem', 'Rusheo FEM', '#ff70a6', '#cc3d77', '../imagenes/rusheo.png'),
     ];
     window.ASC_CATEGORIA = id => window.ASC_CATEGORIAS.find(c => c.id === id)
         || { id: id || 'general', nombre: String(id || 'General').toUpperCase(), corto: String(id || 'GENERAL').toUpperCase(), color: '#9AA0A6', tipo: 'fondo' };

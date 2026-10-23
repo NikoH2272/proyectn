@@ -1172,7 +1172,13 @@
                         <div class="form-group"><label for="modUsuario">Usuario (sin @)</label><input id="modUsuario" required autocapitalize="none" spellcheck="false" placeholder="modjuan" pattern="[a-zA-Z0-9._\-]{3,30}"></div>
                         <div class="form-group"><label for="modNombre">Nombre (sale como moderador)</label><input id="modNombre" required maxlength="40" placeholder="Mod · Juan"></div>
                         <div class="form-group"><label for="modClave">Contraseña</label><input id="modClave" type="password" required minlength="6" autocomplete="new-password"></div>
-                        <div class="form-group"><label>&nbsp;</label><label class="chk"><input type="checkbox" id="modIa"> Puede usar la IA</label></div>
+                        <div class="form-group"><label>&nbsp;</label>
+                            <label class="chk"><input type="checkbox" id="modIa"> Puede usar la IA</label>
+                            <div id="modIaLimiteWrap" style="margin-top:6px;display:none">
+                                <label style="font-size:.82rem;color:var(--gray)">Lecturas IA / día</label>
+                                <input id="modIaLimite" type="number" min="1" max="9999" placeholder="default" style="width:90px;margin-top:4px">
+                            </div>
+                        </div>
                     </div>
                     <label>Eventos que puede hacer</label>
                     <div class="mod-eventos">${checks(null, 'modEvNuevo')}</div>
@@ -1187,6 +1193,11 @@
                     <div><b>${esc(m.nombre || m.usuario)}</b> <code>${esc(m.usuario)}</code>${m.activo ? '' : ' <span class="cupo-estado e-cerrado">INACTIVO</span>'}</div>
                     <div class="mod-opc">
                         <label class="chk"><input type="checkbox" data-f="ia" ${m.ia ? 'checked' : ''}> IA</label>
+                        <div class="mod-ia-lim" style="display:${m.ia ? 'flex' : 'none'};align-items:center;gap:6px">
+                            <span style="font-size:.8rem;color:var(--gray);white-space:nowrap">Lect/día</span>
+                            <input type="number" data-f="ia_limite" min="1" max="9999" placeholder="default" style="width:80px"
+                                value="${m.ia_limite_diario != null ? m.ia_limite_diario : ''}">
+                        </div>
                         <label class="chk"><input type="checkbox" data-f="activo" ${m.activo ? 'checked' : ''}> Activo</label>
                         <input type="text" data-f="nombre" value="${esc(m.nombre || '')}" maxlength="40" aria-label="Nombre">
                         <input type="password" data-f="clave" placeholder="Nueva clave (opcional)" autocomplete="new-password" aria-label="Nueva clave">
@@ -1199,14 +1210,25 @@
                     <span class="muted" data-msg></span></div>
             </article>`).join('') : '<p class="res-vacio">Todavía no hay moderadores.</p>'}`;
 
+        $('modIa').addEventListener('change', () => {
+            $('modIaLimiteWrap').style.display = $('modIa').checked ? '' : 'none';
+        });
+        // toggle lect/día en filas existentes
+        cont.querySelectorAll('.mod-fila [data-f="ia"]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                cb.closest('.mod-opc').querySelector('.mod-ia-lim').style.display = cb.checked ? 'flex' : 'none';
+            });
+        });
         $('modForm').addEventListener('submit', async e => {
             e.preventDefault();
             const msg = $('modMsg');
             msg.textContent = 'Creando...'; msg.className = 'asc-estado';
+            const limVal = $('modIaLimite').value.trim();
             try {
                 await P.ascensos.moderadores.guardar({
                     usuario: $('modUsuario').value.trim().toLowerCase(), nombre: $('modNombre').value.trim(), clave: $('modClave').value,
-                    ia: $('modIa').checked, eventos: leerEventos(cont, 'modEvNuevo')
+                    ia: $('modIa').checked, eventos: leerEventos(cont, 'modEvNuevo'),
+                    ia_limite: $('modIa').checked && limVal ? parseInt(limVal, 10) : null
                 }, PORTAL);
                 await montarModeradores();
                 const n = $('modMsg'); n.textContent = '✔ Moderador creado. Ya puede entrar en /ascensos/login.html'; n.className = 'asc-estado ok';
@@ -1225,8 +1247,10 @@
             const msg = fila.querySelector('[data-msg]');
             msg.textContent = 'Guardando...';
             try {
+                const iaLimEl = f('ia_limite'), iaLimVal = iaLimEl ? iaLimEl.value.trim() : '';
                 await P.ascensos.moderadores.guardar({ usuario: u, nombre: f('nombre').value.trim(), clave: f('clave').value || null,
-                    activo: f('activo').checked, ia: f('ia').checked, eventos: leerEventos(fila, 'ev_' + u) }, PORTAL);
+                    activo: f('activo').checked, ia: f('ia').checked, eventos: leerEventos(fila, 'ev_' + u),
+                    ia_limite: iaLimVal ? parseInt(iaLimVal, 10) : null }, PORTAL);
                 msg.textContent = '✔ Guardado';
                 f('clave').value = '';
             } catch (err) { msg.textContent = err.message; }
