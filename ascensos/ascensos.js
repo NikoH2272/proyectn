@@ -20,7 +20,7 @@
     const EQUIPOS_EJEMPLO = Array.from({ length: 12 }, (_, i) => `EQUIPO ${i + 1} - EQ${i + 1}`).join('\n');
 
     const BASE = () => ({
-        salas: 5, modo: 'top', categoria: 'ev_9z', moderador: '', horario: '6PM MEXICO', texto: '',
+        salas: 5, modo: PORTAL === 'ascensosrusheo' ? 'top_kill' : 'top', categoria: 'ev_9z', moderador: '', horario: '6PM MEXICO', texto: '',
         fecha: hoyISO(), equiposTxt: EQUIPOS_EJEMPLO, celdas: {}, guardado: null
     });
     let estado = BASE();
@@ -748,7 +748,7 @@
     /* ---------------- Con IA (función de Supabase "ascensos-ia", sql/18) ----------------
        1) capturas de SLOTS → equipos y jugadores · 2) capturas de RESULTADOS en orden → top y kills.
        Lo que lee la IA se revisa aquí y con "Pasar a la tabla" llena la anotación (queda en el borrador). */
-    let iaDatos = null, iaModo = 'top';
+    let iaDatos = null, iaModo = PORTAL === 'ascensosrusheo' ? 'top_kill' : 'top';
     let editorMontado = false;
     let editorCfg = { formato: 'horizontal', secciones: { tablaGeneral: true, topKiller: true, booyahs: true, destacados: true, ascendidos: true }, estilo: 'redondeado', fondoCustom: null, fondoUrl: null, usarFondoPortal: true, usarPorDefecto: true };
     try { const ec = JSON.parse(localStorage.getItem(CLAVE_EDITOR) || 'null'); if (ec && typeof ec === 'object') { Object.assign(editorCfg, ec); editorCfg.fondoCustom = null; } } catch (e) { }
@@ -809,10 +809,16 @@
                 <div class="form-group"><label for="iaCategoria">Evento de estos resultados</label>
                     <select id="iaCategoria">${window.ASC_OPCIONES(estado.categoria, permisos.eventos)}</select></div>
                 <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:6px">
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.95rem">
-                        <input type="checkbox" id="iaKills"${estado.modo === 'top_kill' ? ' checked' : ''}>
-                        <span>Leer kills <span class="muted" style="font-size:.8rem">(consume más tokens)</span></span>
-                    </label></div>
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.95rem">
+                            <input type="checkbox" id="iaKills"${estado.modo === 'top_kill' ? ' checked' : ''}>
+                            <span>Leer kills <span class="muted" style="font-size:.8rem">(consume más tokens)</span></span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--gray)">
+                            <span>pts/kill</span>
+                            <input type="number" id="iaPtsKill" min="0" max="99" value="1" style="width:54px;padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:inherit;font-size:.88rem">
+                        </label>
+                    </div></div>
                 <div class="form-group"><label for="iaMotor">Motor de IA</label>
                     <select id="iaMotor" disabled><option>Buscando motores...</option></select></div>
             </div>
@@ -883,7 +889,7 @@
     }
 
     // Caché de lecturas en este navegador (últimas 8)
-    const CLAVE_CACHE = 'pg_ia_cache_v2_' + PORTAL;
+    const CLAVE_CACHE = 'pg_ia_cache_v3_' + PORTAL;
     async function huellaLectura(c) {
         const txt = [c.motor || '', c.modo || '', ...c.equipos, '#', ...c.slots.map(i => i.data), '#', ...c.resultados.map(i => i.data)].join('|');
         const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
@@ -915,6 +921,7 @@
             const cuerpo = {
                 token: ses.token, portal: PORTAL, motor: $('iaMotor').value || undefined,
                 modo: modoActual,
+                puntos_kill: Math.max(0, parseInt($('iaPtsKill')?.value ?? '1', 10) || 0),
                 slots: await prep(slots), resultados: await prep(res),
                 // "Slot 1: DCN ACD - DCN" → la IA cruza el número de escuadra y el tag de los jugadores
                 equipos: equipos().map(e => `Slot ${e.slot}: ${e.nombre}${e.tag ? ' - ' + e.tag : ''}`)

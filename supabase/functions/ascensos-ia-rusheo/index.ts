@@ -17,7 +17,7 @@ import Anthropic from "npm:@anthropic-ai/sdk";
 const MAX_IMAGENES = 8;
 const TIPOS = ["image/jpeg", "image/png", "image/webp"];
 const env = (k: string) => (Deno.env.get(k) || "").trim();
-const VERSION = "2026-10-23b";
+const VERSION = "2026-10-23d";
 const MODELO_GEMINI = () => env("GEMINI_MODELO_RUSHEO") || "gemini-2.5-flash";
 
 const CORS = {
@@ -41,50 +41,72 @@ sin markdown y sin comentarios.
 <entradas>
 Recibirás en el mensaje del usuario:
 - EQUIPOS: lista de nombres oficiales, en orden de slot (1.º nombre = slot 1).
-- LOBBY_n: capturas de la sala (identifica qué equipo está en cada slot).
-- PARTIDA_n: capturas de resultados (PARTIDA_1 = P1, PARTIDA_2 = P2, etc.).
+- PUNTOS_POR_KILL: número (ej. 1). Si es 0, las kills se muestran pero no suman.
+- LOBBY_n: capturas de la sala con los jugadores de cada slot.
+- PARTIDA_n: capturas de resultados. Cada imagen es una partida
+  (PARTIDA_1 = P1/K1, PARTIDA_2 = P2/K2, etc.).
 </entradas>
 
-<paso_1_slots>
-- Con EQUIPOS y LOBBY, mapea cada slot → nombre oficial del equipo.
-- tag = tag de clan del slot; "MIX" si hay tags mezclados; "—" si no hay.
-- No listes jugadores individuales.
-</paso_1_slots>
+<paso_1_base_temporal>
+- Extrae de LOBBY: nombre de sala, ID, mapa, modo y jugadores (ej. "47/48").
+- Por cada slot, lista sus jugadores y asígnale el nombre oficial según EQUIPOS.
+- tag = tag de clan más repetido; "MIX" si hay tags mezclados; "—" si no hay.
+- Marca cupos vacíos y nombres dudosos en "observaciones".
+</paso_1_base_temporal>
 
 <paso_2_resultados>
-- En cada PARTIDA identifica la posición final de cada equipo (1.º, 2.º, …).
-- Si un equipo no aparece (posición cortada), su posición en esa partida es null.
-- No registres ni uses kills.
+- En cada PARTIDA, identifica la posición de cada equipo comparando sus
+  jugadores con la base del paso 1.
+- Lee las kills ("Eliminaciones") de cada jugador visible.
+- Jugadores que no estaban en el lobby: regístralos como suplentes del equipo
+  con el que aparecen; sus kills cuentan para ese equipo.
+- Si un equipo no aparece en la imagen: posición null y kills null.
+- Si el equipo aparece pero algún jugador está cortado o no se lee:
+  suma solo las kills visibles, marca "kills_completas": false y anótalo
+  en "avisos".
 </paso_2_resultados>
 
 <paso_3_puntos>
 - Puntos por posición: 1=12, 2=9, 3=8, 4=7, 5=6, 6=5, 7=4, 8=3, 9=2, 10=1,
   11=0, 12=0.
-- Por cada partida, puntos = puntos de su posición; posición null → puntos null.
-- jug = partidas en las que el equipo aparece.
-- total = suma de puntos no nulos.
-- Ordena por total descendente. Desempate: 1) más booyahs; 2) mejor posición.
+- Por cada partida n:
+  Pn = puntos de su posición (null si no aparece; celda vacía, NO 0).
+  Kn = kills totales del equipo (null si no aparece).
+- jug = cantidad de partidas en las que el equipo aparece.
+- total_top = suma de P no nulos.
+- total_kills = suma de K no nulos.
+- total = total_top + (total_kills × PUNTOS_POR_KILL).
+- Ordena por total descendente. Desempate: 1) más booyahs (posición 1);
+  2) más total_kills; 3) mejor posición individual.
+  Explica cada empate en "desempates".
 </paso_3_puntos>
 
 <reglas>
 - Nunca inventes datos. Si algo no se lee, usa null y anótalo en "avisos".
-- Crea tantas claves "P1", "P2"... como partidas recibas.
+- Crea tantas claves P1, P2... y K1, K2... como partidas recibas.
 - Responde únicamente con el JSON del formato de salida.
 </reglas>
 
 <formato_salida>
 {
-  "equipos": [{"slot": 1, "equipo": "", "tag": ""}],
-  "partidas": [{"partida": "P1", "posiciones": [{"posicion": 1, "slot": 12}]}],
+  "sala": {"nombre": "", "id": "", "mapa": "", "modo": "", "jugadores": ""},
+  "equipos": [
+    {"slot": 1, "equipo": "", "tag": "", "jugadores": [], "suplentes": [], "observaciones": ""}
+  ],
+  "partidas": [
+    {
+      "partida": 1,
+      "resultados": [
+        {"posicion": 1, "slot": 12, "jugadores": [{"nombre": "", "kills": 0}], "kills_equipo": 0, "kills_completas": true}
+      ]
+    }
+  ],
   "tabla": [
     {
-      "rank": 1,
-      "equipo": "",
-      "tag": "",
-      "jug": 4,
-      "puntos": {"P1": 12, "P2": null},
-      "booyahs": 0,
-      "total": 0
+      "rank": 1, "equipo": "", "tag": "", "jug": 4,
+      "top": {"P1": 12, "P2": null},
+      "kills": {"K1": 16, "K2": null},
+      "booyahs": 0, "total_top": 0, "total_kills": 0, "total": 0
     }
   ],
   "desempates": [],
@@ -93,13 +115,13 @@ Recibirás en el mensaje del usuario:
 </formato_salida>`;
 
 type Imagen = { media_type: string; data: string };
-type Pedido = { slots: Imagen[]; resultados: Imagen[]; conocidos: string[]; modo: string };
+type Pedido = { slots: Imagen[]; resultados: Imagen[]; conocidos: string[]; modo: string; puntos_kill: number };
 type Lectura = { datos: unknown; modelo: string };
 
 function piezas(p: Pedido): Array<{ texto: string } | { imagen: Imagen }> {
   const l: Array<{ texto: string } | { imagen: Imagen }> = [];
   if (p.conocidos.length) {
-    l.push({ texto: `EQUIPOS:\n${p.conocidos.join("\n")}` });
+    l.push({ texto: `EQUIPOS:\n${p.conocidos.join("\n")}\nPUNTOS_POR_KILL: ${p.puntos_kill}` });
   }
   p.slots.forEach((imagen, i) => {
     l.push({ texto: `LOBBY_${i + 1}` });
@@ -122,97 +144,124 @@ function leerJson(texto: string) {
   }
 }
 
-// Puntos de posición → número de posición (fallback cuando no hay posicionMap)
+// Puntos de posición → número de posición (fallback cuando no hay posMap)
 const PTS_A_TOP: Record<number, number> = { 12: 1, 9: 2, 8: 3, 7: 4, 6: 5, 5: 6, 4: 7, 3: 8, 2: 9, 1: 10, 0: 12 };
 
+type SlotInfo = { nombre: string; tag: string };
+type PosEntry = { pos: number; kills: number };
+
+function buildSlotInfo(equipos: any[]): Record<number, SlotInfo> {
+  const m: Record<number, SlotInfo> = {};
+  for (const e of (equipos ?? [])) {
+    const slot = parseInt(String(e?.slot ?? 0), 10);
+    if (slot >= 1) m[slot] = { nombre: String(e?.equipo ?? e?.nombre ?? "").trim(), tag: String(e?.tag ?? "").trim() };
+  }
+  return m;
+}
+
+function slotDe(nombre: string, slotInfo: Record<number, SlotInfo>): number {
+  for (const [s, info] of Object.entries(slotInfo)) {
+    if (info.nombre.toLowerCase() === nombre.toLowerCase()) return parseInt(s, 10);
+  }
+  return 0;
+}
+
 function normalizar(d: any) {
-  // Nuevo formato (tiene "tabla" con "equipo")
-  if (Array.isArray(d?.tabla) && (d.tabla.length === 0 || d.tabla[0]?.equipo !== undefined)) {
-    // Mapa slot → info del equipo
-    const slotInfo: Record<number, { nombre: string; tag: string; jugadores: string[] }> = {};
-    if (Array.isArray(d?.equipos)) {
-      for (const e of d.equipos) {
-        const slot = parseInt(String(e?.slot ?? 0), 10);
-        if (slot >= 1) {
-          slotInfo[slot] = {
-            nombre: String(e?.equipo ?? "").trim(),
-            tag: String(e?.tag ?? "").trim(),
-            jugadores: [],
-          };
-        }
-      }
-    }
-    // Mapa partida (número) → slot → posición
-    const posMap: Record<number, Record<number, number>> = {};
+  const avs = (arr: unknown) => (Array.isArray(arr) ? arr : []).map((x: unknown) => String(x)).filter(Boolean);
+
+  // ── Formato v2: tabla con "top" (P1/P2) y "kills" (K1/K2) ──────────────
+  if (Array.isArray(d?.tabla) && d.tabla.length > 0 && d.tabla[0]?.top !== undefined) {
+    const slotInfo = buildSlotInfo(d.equipos);
+
+    // posMap desde partidas[n].resultados[i]
+    const posMap: Record<number, Record<number, PosEntry>> = {};
     let maxP = 0;
-    if (Array.isArray(d?.partidas)) {
-      for (const p of d.partidas) {
-        const n = parseInt(String(p?.partida ?? "").replace(/^P/i, ""), 10);
-        if (!isNaN(n) && n >= 1) {
-          maxP = Math.max(maxP, n);
-          posMap[n] = {};
-          if (Array.isArray(p?.posiciones)) {
-            for (const pos of p.posiciones) {
-              const slot = parseInt(String(pos?.slot ?? 0), 10);
-              const posicion = parseInt(String(pos?.posicion ?? 0), 10);
-              if (slot >= 1 && posicion >= 1) posMap[n][slot] = posicion;
-            }
-          }
+    for (const p of (d.partidas ?? [])) {
+      const n = parseInt(String(p?.partida ?? 0), 10);
+      if (!isNaN(n) && n >= 1) {
+        maxP = Math.max(maxP, n);
+        posMap[n] = {};
+        for (const r of (p?.resultados ?? [])) {
+          const slot = parseInt(String(r?.slot ?? 0), 10);
+          const pos = parseInt(String(r?.posicion ?? 0), 10);
+          const kills = Math.max(0, parseInt(String(r?.kills_equipo ?? 0), 10) || 0);
+          if (slot >= 1 && pos >= 1) posMap[n][slot] = { pos, kills };
         }
       }
     }
-    // Infiero maxP también desde puntos de la tabla
-    if (Array.isArray(d?.tabla)) {
-      for (const t of d.tabla) {
-        if (t?.puntos && typeof t.puntos === "object") {
-          for (const key of Object.keys(t.puntos)) {
-            const n = parseInt(key.replace(/^P/i, ""), 10);
-            if (!isNaN(n) && n >= 1) maxP = Math.max(maxP, n);
-          }
-        }
-      }
+    // también inferir maxP desde tabla.top y tabla.kills
+    for (const t of d.tabla) {
+      for (const key of Object.keys(t?.top ?? {})) { const n = parseInt(key.replace(/^P/i, ""), 10); if (!isNaN(n) && n >= 1) maxP = Math.max(maxP, n); }
+      for (const key of Object.keys(t?.kills ?? {})) { const n = parseInt(key.replace(/^K/i, ""), 10); if (!isNaN(n) && n >= 1) maxP = Math.max(maxP, n); }
     }
 
-    const equipos = (Array.isArray(d?.tabla) ? d.tabla : []).map((t: any) => {
+    const equipos = d.tabla.map((t: any) => {
       const nombre = String(t?.equipo ?? "").trim();
       if (!nombre) return null;
-      // Buscar slot por nombre
-      const slot = (() => {
-        for (const [s, info] of Object.entries(slotInfo)) {
-          if (info.nombre.toLowerCase() === nombre.toLowerCase()) return parseInt(s, 10);
-        }
-        return 0;
-      })();
-      const info = slotInfo[slot];
-      const puntos: Record<string, number | null> = t?.puntos ?? {};
+      const slot = slotDe(nombre, slotInfo);
+      const topObj: Record<string, number | null> = t?.top ?? {};
+      const killsObj: Record<string, number | null> = t?.kills ?? {};
+      const partidas: Array<{ partida: number; top: number; kills: number }> = [];
+      for (let n = 1; n <= maxP; n++) {
+        const pKey = `P${n}`, kKey = `K${n}`;
+        const puntoN = topObj[pKey];
+        if (puntoN === null || puntoN === undefined) continue;
+        const enMap = slot >= 1 ? posMap[n]?.[slot] : undefined;
+        const top = enMap?.pos ?? (PTS_A_TOP[puntoN] ?? 12);
+        const kills = enMap?.kills ?? (killsObj[kKey] != null ? Math.max(0, Number(killsObj[kKey]) || 0) : 0);
+        partidas.push({ partida: n, top, kills });
+      }
+      return { nombre, tag: String(t?.tag ?? slotInfo[slot]?.tag ?? "").trim(), jugadores: [], partidas };
+    }).filter(Boolean);
 
+    return { equipos, partidas_detectadas: maxP, avisos: avs(d.avisos) };
+  }
+
+  // ── Formato v1: tabla con "puntos" (P1/P2) y "kills" (P1/P2) ──────────
+  if (Array.isArray(d?.tabla) && (d.tabla.length === 0 || d.tabla[0]?.equipo !== undefined)) {
+    const slotInfo = buildSlotInfo(d.equipos);
+    const posMap: Record<number, Record<number, PosEntry>> = {};
+    let maxP = 0;
+    for (const p of (d.partidas ?? [])) {
+      const n = parseInt(String(p?.partida ?? "").replace(/^P/i, ""), 10);
+      if (!isNaN(n) && n >= 1) {
+        maxP = Math.max(maxP, n);
+        posMap[n] = {};
+        for (const pos of (p?.posiciones ?? [])) {
+          const slot = parseInt(String(pos?.slot ?? 0), 10);
+          const posicion = parseInt(String(pos?.posicion ?? 0), 10);
+          const kills = Math.max(0, parseInt(String(pos?.kills ?? 0), 10) || 0);
+          if (slot >= 1 && posicion >= 1) posMap[n][slot] = { pos: posicion, kills };
+        }
+      }
+    }
+    for (const t of (d.tabla ?? [])) {
+      for (const key of Object.keys(t?.puntos ?? {})) { const n = parseInt(key.replace(/^P/i, ""), 10); if (!isNaN(n) && n >= 1) maxP = Math.max(maxP, n); }
+    }
+
+    const equipos = (d.tabla ?? []).map((t: any) => {
+      const nombre = String(t?.equipo ?? "").trim();
+      if (!nombre) return null;
+      const slot = slotDe(nombre, slotInfo);
+      const puntosObj: Record<string, number | null> = t?.puntos ?? {};
+      const killsTabla: Record<string, number | null> = t?.kills ?? {};
       const partidas: Array<{ partida: number; top: number; kills: number }> = [];
       for (let n = 1; n <= maxP; n++) {
         const pKey = `P${n}`;
-        const puntoN = puntos[pKey];
-        if (puntoN === null || puntoN === undefined) continue; // no jugó → celda vacía
-        const posDeMap = slot >= 1 ? posMap[n]?.[slot] : undefined;
-        const top = (posDeMap !== undefined && posDeMap >= 1)
-          ? posDeMap
-          : (PTS_A_TOP[puntoN] ?? 12);
-        partidas.push({ partida: n, top, kills: 0 });
+        const puntoN = puntosObj[pKey];
+        if (puntoN === null || puntoN === undefined) continue;
+        const enMap = slot >= 1 ? posMap[n]?.[slot] : undefined;
+        const top = enMap?.pos ?? (PTS_A_TOP[puntoN] ?? 12);
+        const kills = enMap?.kills ?? (killsTabla[pKey] != null ? Math.max(0, Number(killsTabla[pKey]) || 0) : 0);
+        partidas.push({ partida: n, top, kills });
       }
-      return {
-        nombre,
-        tag: String(t?.tag ?? info?.tag ?? "").trim(),
-        jugadores: info?.jugadores ?? [],
-        partidas,
-      };
-    }).filter(Boolean) as Array<{ nombre: string; tag: string; jugadores: string[]; partidas: Array<{ partida: number; top: number; kills: number }> }>;
+      return { nombre, tag: String(t?.tag ?? slotInfo[slot]?.tag ?? "").trim(), jugadores: [], partidas };
+    }).filter(Boolean);
 
-    return {
-      equipos,
-      partidas_detectadas: maxP,
-      avisos: (Array.isArray(d?.avisos) ? d.avisos : []).map((x: unknown) => String(x)).filter(Boolean),
-    };
+    return { equipos, partidas_detectadas: maxP, avisos: avs(d.avisos) };
   }
 
-  // Formato viejo (compatibilidad con Gemini que puede devolver el esquema anterior)
+  // ── Formato legacy (Gemini viejo) ─────────────────────────────────────
   const ent = (v: unknown) => Math.max(0, Math.round(Number(v) || 0));
   const equipos = (Array.isArray(d?.equipos) ? d.equipos : []).map((e: any) => ({
     nombre: String(e?.nombre ?? "").trim(),
@@ -226,7 +275,7 @@ function normalizar(d: any) {
   return {
     equipos,
     partidas_detectadas: Math.max(ent(d?.partidas_detectadas), maxPartida),
-    avisos: (Array.isArray(d?.avisos) ? d.avisos : []).map((x: unknown) => String(x)).filter(Boolean),
+    avisos: avs(d.avisos),
   };
 }
 
@@ -438,7 +487,7 @@ Deno.serve(async (req) => {
   const autorizado = await permiso.json();
 
   try {
-    const pedido: Pedido = { slots, resultados, conocidos: (cuerpo.equipos ?? []).filter(Boolean).slice(0, 80), modo: cuerpo.modo || "top" };
+    const pedido: Pedido = { slots, resultados, conocidos: (cuerpo.equipos ?? []).filter(Boolean).slice(0, 80), modo: cuerpo.modo || "top", puntos_kill: Math.max(0, parseInt(String(cuerpo.puntos_kill ?? 1), 10) || 1) };
     const orden = [id, ...usables.map((m) => m.id).filter((x) => x !== id)];
     let ultimo: unknown = null;
     for (const mid of orden) {
