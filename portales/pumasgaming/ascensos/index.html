@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9HB0VRD5YF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9HB0VRD5YF');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Ascensos Pumas Gaming by PROYECTN · Resultados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../portal-kit/portal.css?v=20261023a">
+    <link rel="stylesheet" href="../../../ascensos/style.css?v=20261023a">
+    <link rel="icon" href="../../imagenes/LOGO PUMAS WEB.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../../portal-kit/portal.js?v=20261023a" data-portal="ascensospumasgaming" data-modo="publico"></script>
+</head>
+<body data-tema="corp">
+
+    <header class="site-header">
+        <a class="logo-container" href="./">
+            <img src="../../imagenes/LOGO PUMAS WEB.png" alt="Logo Pumas Gaming" class="logo-img">
+            <div class="logo"><span class="t-a">ASCENSOS</span> <span class="t-b">PUMAS GAMING</span><small>by PROYECTN</small></div>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menú" onclick="toggleMenu()">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <nav class="main-nav" id="mainNav">
+            <ul>
+                <li><a href="#portales" onclick="closeMenu()">Portales</a></li>
+                <li><a href="#jornadas" onclick="closeMenu()">Jornadas</a></li>
+                <li><a href="#calendario" onclick="closeMenu()">Calendario</a></li>
+                <li><a href="#equipos" onclick="closeMenu()">Ranking</a></li>
+                <li><a href="#baneados" onclick="closeMenu()">Baneados</a></li>
+                <li><a href="cupos.html"><i class="fa-solid fa-ticket"></i> Cupos</a></li>
+                <li><a href="../../"><i class="fa-solid fa-arrow-left"></i> Pumas Gaming</a></li>
+                <li><a href="admin.html"><i class="fa-solid fa-lock"></i> Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="portal-hero" data-marca="PG">
+        <div class="hero-copy">
+            <div class="eyebrow">Ascensos oficiales · Free Fire</div>
+            <h1><span class="t-a">Ascensos</span> <span class="t-b">Pumas Gaming</span><small>by <b>PROYECTN</b></small></h1>
+            <div class="asc-carrusel" id="ascCarrusel" aria-label="Equipos de los ascensos"></div>
+            <p>Resultados de cada jornada de ascensos de Pumas Gaming, en qué categoría jugó cada equipo, quiénes subieron y la lista de baneados.</p>
+            <div class="stat-row">
+                <div><b id="statJornadas">0</b><small>Jornadas</small></div>
+                <div><b id="statEquipos">0</b><small>Equipos</small></div>
+                <div><b id="statAscensos">0</b><small>Ascensos</small></div>
+                <div><b id="statCategorias">0</b><small>Categorías</small></div>
+            </div>
+            <div class="hero-actions">
+                <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Apartar cupo</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-mark" aria-hidden="true">
+                <img src="../../imagenes/LOGO PUMAS WEB.png" alt="">
+            </div>
+        </div>
+    </section>
+
+    <section id="portales" hidden>
+        <h2 class="section-title">Portales</h2>
+        <div class="asc-equipos-portales" id="portalesEquipos"></div>
+    </section>
+
+    <section id="jornadas">
+        <h2 class="section-title">Resultados</h2>
+        <div class="asc-filtro" id="ascFiltro" role="group" aria-label="Filtrar por evento"></div>
+        <div class="asc-jornadas-layout">
+            <aside class="card-box asc-cal" id="calendario" aria-label="Calendario de ascensos">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-calendar-days"></i> Calendario</h3>
+                <div id="ascCalendario"><p class="res-vacio">Cargando...</p></div>
+            </aside>
+            <div id="equipos" class="card-box asc-eq-card asc-eq-lateral">
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-trophy"></i> Equipos y eventos</h3>
+                <div class="asc-eq-top">
+                    <p class="leyenda-tabla">Equipos con sus ascensos 👑 y total de puntos. El filtro también aplica aquí.</p>
+                    <input type="search" id="ascBuscar" placeholder="Buscar equipo o tag" aria-label="Buscar equipo o tag" autocomplete="off">
+                </div>
+                <div class="asc-equipos" id="ascEquipos"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Calculando...</p></div>
+                <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerEquipos" hidden>Ver más</button></p>
+            </div>
+        </div>
+        <h3 class="subtitulo-bloque asc-jornadas-titulo"><i class="fa-solid fa-list"></i> Jornadas</h3>
+        <div class="asc-dia" id="ascDia" hidden></div>
+        <div class="jornadas-grid" id="ascJornadas"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando jornadas...</p></div>
+        <p class="asc-mas"><button class="btn-access btn-outline" id="ascVerMas" hidden>Ver más</button></p>
+    </section>
+
+    <section id="cupos">
+        <div class="card-box asc-cupos-cta">
+            <div>
+                <h3 class="subtitulo-bloque"><i class="fa-solid fa-ticket"></i> Cupos para la próxima jornada</h3>
+                <p id="ascCuposInfo">Revisa los cupos disponibles.</p>
+            </div>
+            <a href="cupos.html" class="btn-access"><i class="fa-solid fa-ticket"></i> Ver cupos</a>
+        </div>
+    </section>
+
+    <section id="baneados">
+        <h2 class="section-title">Equipos baneados</h2>
+        <div class="card-box" id="ascBaneados"><p class="res-vacio"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</p></div>
+    </section>
+
+    <div id="pgSorteo" hidden></div>
+
+    <footer>
+        <p>&copy; 2026 <b>ASCENSOS PUMAS GAMING</b> by PROYECTN. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('mainNav').classList.toggle('is-active'); }
+        function closeMenu() { document.getElementById('mainNav').classList.remove('is-active'); }
+    </script>
+    <script src="categorias.js?v=20261023a"></script>
+    <script src="../../../portal-kit/baneados.js?v=20261023a"></script>
+    <script src="../../../ascensos/logos.js?v=20261023a"></script>
+    <script src="../../../ascensos/publico.js?v=20261023a"></script>
+</body>
+</html>
